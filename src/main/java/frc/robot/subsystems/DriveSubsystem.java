@@ -53,6 +53,9 @@ public class DriveSubsystem extends SubsystemBase {
       DriveConstants.kRearRightDrivingMotorOnBottom,
       DriveConstants.kRearRightTurningMotorOnBottom);
 
+
+  private EasySwerveModule[] modules;
+
   // The gyro sensor
   private AHRS navx = new AHRS(NavXComType.kMXP_SPI);
 
@@ -70,8 +73,16 @@ public class DriveSubsystem extends SubsystemBase {
   /** Creates a new DriveSubsystem. */
   public DriveSubsystem() {
     // Usage reporting for EasySwerve template
-    HAL.report(tResourceType.kResourceType_RobotDrive, tInstances.kRobotDriveSwerve_MaxSwerve);
+    // HAL.report(tResourceType.kResourceType_RobotDrive, tInstances.kRobotDriveSwerve_MaxSwerve);
     //TODO (dave): add EasySwerve to tInstances???
+
+    modules = new EasySwerveModule[4];
+
+    modules[0] = m_frontLeft;
+    modules[1] = m_frontRight;
+    modules[2] = m_rearLeft;
+    modules[3] = m_rearRight;
+    
   }
 
   @Override
@@ -124,33 +135,16 @@ public class DriveSubsystem extends SubsystemBase {
    */
   public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
     // Convert the commanded speeds into the correct units for the drivetrain
-    double xSpeedDelivered = xSpeed * DriveConstants.kMaxSpeedMetersPerSecond;
-    double ySpeedDelivered = ySpeed * DriveConstants.kMaxSpeedMetersPerSecond;
-    double rotDelivered = rot * DriveConstants.kMaxAngularSpeed;
 
-    var swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(
-        fieldRelative
-            ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered,
+    ChassisSpeeds robotSpeeds = fieldRelative
+            ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot,
                 Rotation2d.fromDegrees(navx.getYaw()))
-            : new ChassisSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered));
-    SwerveDriveKinematics.desaturateWheelSpeeds(
-        swerveModuleStates, DriveConstants.kMaxSpeedMetersPerSecond);
-    m_frontLeft.setDesiredState(swerveModuleStates[0]);
-    m_frontRight.setDesiredState(swerveModuleStates[1]);
-    m_rearLeft.setDesiredState(swerveModuleStates[2]);
-    m_rearRight.setDesiredState(swerveModuleStates[3]);
-  }
+            : new ChassisSpeeds(xSpeed, ySpeed, rot);
 
-  /**
-   * Sets the wheels into an X formation to prevent movement.
-   */
-  public Command setX() {
-    return this.runOnce(()->{
-      m_frontLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
-      m_frontRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
-      m_rearLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
-      m_rearRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
-    });
+    SwerveModuleState[] swerveModuleStates = 
+      DriveConstants.kDriveKinematics.toSwerveModuleStates(robotSpeeds);
+    
+    setModuleStates(swerveModuleStates);
   }
 
   /**
@@ -161,18 +155,17 @@ public class DriveSubsystem extends SubsystemBase {
   public void setModuleStates(SwerveModuleState[] desiredStates) {
     SwerveDriveKinematics.desaturateWheelSpeeds(
         desiredStates, DriveConstants.kMaxSpeedMetersPerSecond);
-    m_frontLeft.setDesiredState(desiredStates[0]);
-    m_frontRight.setDesiredState(desiredStates[1]);
-    m_rearLeft.setDesiredState(desiredStates[2]);
-    m_rearRight.setDesiredState(desiredStates[3]);
+    
+    for (int i = 0; i < modules.length; i++) {
+      modules[i].setDesiredState(desiredStates[i]);
+    }
   }
 
   /** Resets the drive encoders to currently read a position of 0. */
   public void resetEncoders() {
-    m_frontLeft.resetEncoders();
-    m_rearLeft.resetEncoders();
-    m_frontRight.resetEncoders();
-    m_rearRight.resetEncoders();
+    for (int i = 0; i < modules.length; i++) {
+      modules[i].resetEncoders();
+    }
   }
 
   /** Zeroes the heading of the robot. */
@@ -180,6 +173,13 @@ public class DriveSubsystem extends SubsystemBase {
     return this.runOnce(()->{
       navx.reset();
     });
+  }
+
+  public void stopMotors() {
+    for (int i = 0; i < modules.length; i++) {
+      modules[i].setDriveVoltage(0);
+      modules[i].setTurnVoltage(0);
+    }
   }
 
   /**

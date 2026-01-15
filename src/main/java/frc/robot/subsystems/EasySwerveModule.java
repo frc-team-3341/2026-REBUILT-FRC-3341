@@ -79,6 +79,14 @@ public class EasySwerveModule {
         new Rotation2d(m_turningEncoder.getPosition() - m_chassisAngularOffset));
   }
 
+  public void setDriveVoltage(double voltage) {
+    m_drivingSpark.setVoltage(voltage);
+  }
+
+  public void setTurnVoltage(double voltage) {
+    m_turningSpark.setVoltage(voltage);
+  }
+
   /**
    * Returns the current position of the module.
    *

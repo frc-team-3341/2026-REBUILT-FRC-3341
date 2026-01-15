@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.PS4Controller.Button;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
+import frc.robot.commands.SwerveTeleop;
 import frc.robot.subsystems.DriveSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -37,11 +38,13 @@ import java.util.List;
 
 public class RobotContainer {
   // The robot's subsystems
-  private final DriveSubsystem m_robotDrive = new DriveSubsystem();
+  private final DriveSubsystem swerve = new DriveSubsystem();
 
   // The driver's controller
   CommandXboxController driver_controller = new CommandXboxController(OIConstants.kDriverControllerPort);
   CommandJoystick mech_joystick = new CommandJoystick(OIConstants.kMechJoystickPort);
+
+  private final SwerveTeleop swerveTeleop = new SwerveTeleop(swerve, driver_controller);
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -51,16 +54,7 @@ public class RobotContainer {
     configureButtonBindings();
 
     // Configure default commands
-    m_robotDrive.setDefaultCommand(
-        // The left stick controls translation of the robot.
-        // Turning is controlled by the X axis of the right stick.
-        new RunCommand(
-            () -> m_robotDrive.drive(
-                -MathUtil.applyDeadband(driver_controller.getLeftY(), OIConstants.kDriveDeadband),
-                -MathUtil.applyDeadband(driver_controller.getLeftX(), OIConstants.kDriveDeadband),
-                -MathUtil.applyDeadband(driver_controller.getRightX(), OIConstants.kDriveDeadband),
-                true),
-            m_robotDrive));
+    swerve.setDefaultCommand(swerveTeleop);
   }
 
   /**
@@ -73,8 +67,9 @@ public class RobotContainer {
    * {@link JoystickButton}.
    */
   private void configureButtonBindings() {
-    driver_controller.rightBumper().whileTrue(m_robotDrive.setX());
-    driver_controller.start().onTrue(m_robotDrive.zeroHeading());
+    
+    //change this based on what the driver wants for reset heading idk man
+    driver_controller.start().onTrue(swerve.zeroHeading());
   }
 
 
