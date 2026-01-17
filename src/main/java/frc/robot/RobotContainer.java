@@ -18,7 +18,7 @@ import edu.wpi.first.wpilibj.PS4Controller.Button;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
-import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.Intake;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -37,30 +37,18 @@ import java.util.List;
 
 public class RobotContainer {
   // The robot's subsystems
-  private final DriveSubsystem m_robotDrive = new DriveSubsystem();
+  private Intake robotIntake;
 
   // The driver's controller
-  CommandXboxController driver_controller = new CommandXboxController(OIConstants.kDriverControllerPort);
-  CommandJoystick mech_joystick = new CommandJoystick(OIConstants.kMechJoystickPort);
+  CommandXboxController driver_controller = new CommandXboxController(0);
+  //CommandJoystick mech_joystick = new CommandJoystick(OIConstants.kMechJoystickPort);
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
-    // Configure the button bindings
-    configureButtonBindings();
-
-    // Configure default commands
-    m_robotDrive.setDefaultCommand(
-        // The left stick controls translation of the robot.
-        // Turning is controlled by the X axis of the right stick.
-        new RunCommand(
-            () -> m_robotDrive.drive(
-                -MathUtil.applyDeadband(driver_controller.getLeftY(), OIConstants.kDriveDeadband),
-                -MathUtil.applyDeadband(driver_controller.getLeftX(), OIConstants.kDriveDeadband),
-                -MathUtil.applyDeadband(driver_controller.getRightX(), OIConstants.kDriveDeadband),
-                true),
-            m_robotDrive));
+    // Configure the button bindings     
+    createIntake();
   }
 
   /**
@@ -72,9 +60,10 @@ public class RobotContainer {
    * passing it to a
    * {@link JoystickButton}.
    */
-  private void configureButtonBindings() {
-    driver_controller.rightBumper().whileTrue(m_robotDrive.setX());
-    driver_controller.start().onTrue(m_robotDrive.zeroHeading());
+  
+  public void createIntake(){
+    robotIntake = new Intake();
+    driver_controller.button(0).onTrue(robotIntake.intakeBall()).onFalse(robotIntake.stopIntake());
   }
 
 
