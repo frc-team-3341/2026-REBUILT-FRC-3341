@@ -3,7 +3,6 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.subsystems;
-
 import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
 
@@ -17,8 +16,6 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.ADIS16470_IMU;
-import edu.wpi.first.wpilibj.ADIS16470_IMU.IMUAxis;
 import frc.robot.Constants.DriveConstants;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -53,7 +50,6 @@ public class DriveSubsystem extends SubsystemBase {
       DriveConstants.kRearRightDrivingMotorOnBottom,
       DriveConstants.kRearRightTurningMotorOnBottom);
 
-
   private EasySwerveModule[] modules;
 
   // The gyro sensor
@@ -74,7 +70,7 @@ public class DriveSubsystem extends SubsystemBase {
   public DriveSubsystem() {
     // Usage reporting for EasySwerve template
     // HAL.report(tResourceType.kResourceType_RobotDrive, tInstances.kRobotDriveSwerve_MaxSwerve);
-    //TODO (dave): add EasySwerve to tInstances???
+    //TODO (dave): add EasySwerve to tInstances??? 
 
     modules = new EasySwerveModule[4];
 
