@@ -4,117 +4,72 @@
 
 package frc.robot.subsystems;
 
-// Rev Robotics imports
+import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.ResetMode;
+import com.revrobotics.spark.ClosedLoopSlot;
+import com.revrobotics.spark.FeedbackSensor;
+import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkFlexConfig;
+import com.revrobotics.spark.config.SparkMaxConfig;
 
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-
-import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ShooterSubsystem extends SubsystemBase {
-
-  // initialize elements
-  private SparkMax shooterWheel;
-  private SparkClosedLoopController shooterWheelController;
+  private final int drivingCANId = 0; //NEED TO SET
+  private final SparkFlex shooter;
+  private final SparkFlexConfig shooterConfig;
+  private SparkClosedLoopController closedLoopController;
   private RelativeEncoder shooterEncoder;
-
-  // Constants
-  private final int shooterWheelCanId = 4;
-
-  // Variables
-  public double kP, kI, kD, kIz, kFF, kMaxOutput, kMinOutput, maxRPM;
-  public int setPoint; // In RPM
-
-  public ShooterSubsystem() {
-
-    // Initialize motor
-    shooterWheel = new CANSparkMax(shooterWheelCanId, MotorType.kBrushless);
-    shooterWheel.restoreFactoryDefaults();
-
-    // Initialize PID controller and encoder
-    shooterWheelController = shooterWheel.getPIDController();
-    shooterEncoder = shooterWheel.getEncoder();
-
-    // PID Constants
-    kP = 6e-5; 
-    kI = 0;
-    kD = 0; 
-    kIz = 0; 
-    kFF = 0.000015; 
-    kMaxOutput = 1; 
-    kMinOutput = -1;
-    maxRPM = 5700;
-
-    // set pid values
-    m_pidController.setP(kP);
-    m_pidController.setI(kI);
-    m_pidController.setD(kD);
-    m_pidController.setIZone(kIz);
-    m_pidController.setFF(kFF);
-    m_pidController.setOutputRange(kMinOutput, kMaxOutput);
-
-    // Shuffleboard
-    private ShuffleboardTab tab = Shuffleboard.getTab("Shooter")
-
-    tab.putNumber("P Gain", kP);
-    tab.putNumber("I Gain", kI);
-    tab.putNumber("D Gain", kD);
-    tab.putNumber("I Zone", kIz);
-    tab.putNumber("Feed Forward", kFF);
-    tab.putNumber("Max Output", kMaxOutput);
-    tab.putNumber("Min Output", kMinOutput);
-    tab.putNumber("Set Point", setPoint);
-
-
-  }
   
-  public double getRPM4Distance(double distance){
-        double Circumference = 12.5;
-        if(distance < 0.7){
-            return 0.0;
-        }
-        double linVelocity = 1.4101*distance + 5.3292;
-        double RPM = linVelocity/Circumference * 60;
-        return RPM;
-    }
-  public boolean exampleCondition() {
-    // Query some boolean state, such as a digital sensor.
-    return false;
+  /** Creates a new Shooter. */
+  public ShooterSubsystem() {
+    shooter = new SparkFlex(drivingCANId, MotorType.kBrushless);
+    shooterConfig = new SparkFlexConfig();
+    shooterConfig
+        .smartCurrentLimit(80)
+        .idleMode(IdleMode.kCoast);
+
+    // Persist parameters to retain configuration in the event of a power cycle
+    shooter.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+    closedLoopController = shooter.getClosedLoopController();
+    shooterEncoder = shooter.getEncoder();
+
+    /*
+     * Configure the closed loop controller. We want to make sure we set the
+     * feedback sensor as the primary encoder.
+     */
+    shooterConfig.closedLoop
+        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+        // Set PID values for position control. We don't need to pass a closed loop
+        // slot, as it will default to slot 0.
+        // .p(0.1)
+        // .i(0)
+        // .d(0)
+        // .outputRange(-1, 1)
+
+        // Set PID values for velocity control in slot 1
+        .p(0.0001, ClosedLoopSlot.kSlot1)
+        .i(0, ClosedLoopSlot.kSlot1)
+        .d(0, ClosedLoopSlot.kSlot1)
+        .outputRange(-1, 1, ClosedLoopSlot.kSlot1)
+        .feedForward
+          // kV is now in Volts, so we multiply by the nominal voltage (12V)
+          .kV(12.0 / 5767, ClosedLoopSlot.kSlot1);
+    
+    SmartDashboard.setDefaultNumber("Target Velocity", 0);
   }
 
   @Override
   public void periodic() {
-
-    double p = tab.getNumber("P Gain", 0);
-    double i = tab.getNumber("I Gain", 0);
-    double d = tab.getNumber("D Gain", 0);
-    double iz = tab.getNumber("I Zone", 0);
-    double ff = tab.getNumber("Feed Forward", 0);
-    double max = tab.getNumber("Max Output", 0);
-    double min = tab.getNumber("Min Output", 0);
-
-    // if PID coefficients on shuffleBoard have changed, write new values to controller
-    if((p != kP)) { m_pidController.setP(p); kP = p; }
-    if((i != kI)) { m_pidController.setI(i); kI = i; }
-    if((d != kD)) { m_pidController.setD(d); kD = d; }
-    if((iz != kIz)) { m_pidController.setIZone(iz); kIz = iz; }
-    if((ff != kFF)) { m_pidController.setFF(ff); kFF = ff; }
-    if((max != kMaxOutput) || (min != kMinOutput)) { 
-      m_pidController.setOutputRange(min, max); 
-      kMinOutput = min; kMaxOutput = max; 
-    }
-
-    setPoint = 3000;
-    shooterWheelController.setReference(setPoint, CANSparkMax.ControlType.kVelocity);
-  }
-
-  @Override
-  public void simulationPeriodic() {
-    // This method will be called once per scheduler run during simulation
+    // This method will be called once per scheduler run
+    double targetVelocity = SmartDashboard.getNumber("Target Velocity (RPM)", 0);
+    closedLoopController.setSetpoint(targetVelocity, ControlType.kVelocity, ClosedLoopSlot.kSlot1);
   }
 }
