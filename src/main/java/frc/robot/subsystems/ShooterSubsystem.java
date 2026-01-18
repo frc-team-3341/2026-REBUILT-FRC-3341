@@ -73,7 +73,15 @@ public class ShooterSubsystem extends SubsystemBase {
 
   }
   
-
+  public double getRPM4Distance(double distance){
+        double Circumference = 12.5;
+        if(distance < 0.7){
+            return -1.0;
+        }
+        double linVelocity = 1.4101*distance + 5.3292;
+        double RPM = linVelocity/Circumference * 60;
+        return RPM;
+    }
   public boolean exampleCondition() {
     // Query some boolean state, such as a digital sensor.
     return false;
