@@ -23,7 +23,7 @@ public class Climber extends SubsystemBase {
 
   public Command motorUp() {
     return this.runOnce(() -> {
-      motor1.set(0.1);
+      motor1.set(0.4);
   });
   }
 
@@ -35,10 +35,10 @@ public class Climber extends SubsystemBase {
 
   public Command motorDOwn() {
     return this.runOnce(() -> {
-      motor1.set(-0.1);
+      motor1.set(-0.4);
   });
   }
-  
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
