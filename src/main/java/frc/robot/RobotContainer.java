@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.PS4Controller.Button;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
+import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.DriveSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -40,8 +41,10 @@ public class RobotContainer {
   private final DriveSubsystem m_robotDrive = new DriveSubsystem();
 
   // The driver's controller
-  CommandXboxController driver_controller = new CommandXboxController(OIConstants.kDriverControllerPort);
-  CommandJoystick mech_joystick = new CommandJoystick(OIConstants.kMechJoystickPort);
+  private final CommandXboxController joy1 = new CommandXboxController(Constants.USBOrder.Zero);
+  private Climber climber = new Climber();
+
+
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -51,16 +54,16 @@ public class RobotContainer {
     configureButtonBindings();
 
     // Configure default commands
-    m_robotDrive.setDefaultCommand(
-        // The left stick controls translation of the robot.
-        // Turning is controlled by the X axis of the right stick.
-        new RunCommand(
-            () -> m_robotDrive.drive(
-                -MathUtil.applyDeadband(driver_controller.getLeftY(), OIConstants.kDriveDeadband),
-                -MathUtil.applyDeadband(driver_controller.getLeftX(), OIConstants.kDriveDeadband),
-                -MathUtil.applyDeadband(driver_controller.getRightX(), OIConstants.kDriveDeadband),
-                true),
-            m_robotDrive));
+    // m_robotDrive.setDefaultCommand(
+    //     // The left stick controls translation of the robot.
+    //     // Turning is controlled by the X axis of the right stick.
+    //     new RunCommand(
+    //         () -> m_robotDrive.drive(
+    //             -MathUtil.applyDeadband(driver_controller.getLeftY(), OIConstants.kDriveDeadband),
+    //             -MathUtil.applyDeadband(driver_controller.getLeftX(), OIConstants.kDriveDeadband),
+    //             -MathUtil.applyDeadband(driver_controller.getRightX(), OIConstants.kDriveDeadband),
+    //             true),
+    //         m_robotDrive));
   }
 
   /**
@@ -73,8 +76,8 @@ public class RobotContainer {
    * {@link JoystickButton}.
    */
   private void configureButtonBindings() {
-    driver_controller.rightBumper().whileTrue(m_robotDrive.setX());
-    driver_controller.start().onTrue(m_robotDrive.zeroHeading());
+    joy1.rightBumper().whileTrue(climber.motorUp()).onFalse(climber.motorStop());
+    joy1.leftBumper().whileTrue(climber.motorDown()).onFalse(climber.motorStop());
   }
 
 

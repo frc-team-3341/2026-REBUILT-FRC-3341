@@ -33,7 +33,7 @@ public class Climber extends SubsystemBase {
   });
   }
 
-  public Command motorDOwn() {
+  public Command motorDown() {
     return this.runOnce(() -> {
       motor1.set(-0.4);
   });

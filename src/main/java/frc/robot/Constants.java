@@ -98,6 +98,10 @@ public final class Constants {
     public static final int kMechJoystickPort = 1;
     public static final double kDriveDeadband = 0.1;
   }
+  public static final class USBOrder {
+    public static final int Zero = 0;
+    public static final int One = 1;
+}
 
   public static final class AutoConstants {
     public static final double kMaxSpeedMetersPerSecond = 3;
