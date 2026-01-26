@@ -6,9 +6,6 @@ package frc.robot.subsystems;
 import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
 
-import edu.wpi.first.hal.FRCNetComm.tInstances;
-import edu.wpi.first.hal.FRCNetComm.tResourceType;
-import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -136,6 +133,8 @@ public class DriveSubsystem extends SubsystemBase {
             ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot,
                 Rotation2d.fromDegrees(navx.getYaw()))
             : new ChassisSpeeds(xSpeed, ySpeed, rot);
+
+    robotSpeeds = ChassisSpeeds.discretize(robotSpeeds, 0.02);
 
     SwerveModuleState[] swerveModuleStates = 
       DriveConstants.kDriveKinematics.toSwerveModuleStates(robotSpeeds);
