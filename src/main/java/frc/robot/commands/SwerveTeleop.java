@@ -29,8 +29,8 @@ public class SwerveTeleop extends Command{
 
     @Override
     public void execute() {
-        xInput = -cont.getLeftX();
-        yInput = -cont.getLeftY();
+        xInput = -cont.getLeftY(); //Not a good practice, but this seems to be the way we've dont it with our old swerve code, looks to be a quirk of our controller mapping. Advantage scope sees the right direction of the modules, its just the controller thats werid.
+        yInput = -cont.getLeftX();
         rotInput = cont.getRightX();
 
         xInput = MathUtil.applyDeadband(xInput, Constants.OIConstants.kDriveDeadband);
