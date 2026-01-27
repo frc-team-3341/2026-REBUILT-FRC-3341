@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -72,6 +73,7 @@ public final class Constants {
     public static final int kRearRightTurningCanId = 8;
 
     public static final boolean kGyroReversed = false;
+    public static final Rotation2d navxOffset = Rotation2d.fromDegrees(0); //Offsets driving by 90 degrees clockwise
   }
 
   public static final class ModuleConstants {

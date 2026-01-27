@@ -13,6 +13,8 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
 import frc.robot.Constants.DriveConstants;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -48,6 +50,7 @@ public class DriveSubsystem extends SubsystemBase {
       DriveConstants.kRearRightTurningMotorOnBottom);
 
   private EasySwerveModule[] modules;
+  private final StructArrayPublisher<SwerveModuleState> statePublisher;
 
   // The gyro sensor
   private AHRS navx = new AHRS(NavXComType.kMXP_SPI);
@@ -76,6 +79,7 @@ public class DriveSubsystem extends SubsystemBase {
     modules[2] = m_rearLeft;
     modules[3] = m_rearRight;
     
+    statePublisher = NetworkTableInstance.getDefault().getStructArrayTopic("/SwerveStates", SwerveModuleState.struct).publish();
   }
 
   @Override
@@ -89,6 +93,9 @@ public class DriveSubsystem extends SubsystemBase {
             m_rearLeft.getPosition(),
             m_rearRight.getPosition()
         });
+
+
+    statePublisher.set(getStates());
   }
 
   /**
@@ -183,7 +190,7 @@ public class DriveSubsystem extends SubsystemBase {
    * @return the robot's heading in degrees, from -180 to 180
    */
   public double getHeading() {
-    return Rotation2d.fromDegrees(navx.getYaw()).getDegrees();
+    return Rotation2d.fromDegrees(navx.getYaw()).plus(DriveConstants.navxOffset).getDegrees();
   }
 
   /**
@@ -194,4 +201,13 @@ public class DriveSubsystem extends SubsystemBase {
   public double getTurnRate() {
     return navx.getRate() * (DriveConstants.kGyroReversed ? -1.0 : 1.0);
   }
+
+
+  public SwerveModuleState[] getStates() {
+    SwerveModuleState[] states = new SwerveModuleState[modules.length];
+    for (int i = 0; i < states.length; i++) {
+        states[i] = this.modules[i].getState();
+    }
+    return states;
+   }
 }
