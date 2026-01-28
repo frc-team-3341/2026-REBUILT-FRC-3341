@@ -42,18 +42,18 @@ public final class Constants {
 
     // Angular offsets of the modules relative to the chassis in radians
     private static final double kEasySwerveAngularOffsetCompensation = Math.PI / 4;
-    public static final double kFrontLeftChassisAngularOffset = (-Math.PI / 2) + kEasySwerveAngularOffsetCompensation;
-    public static final double kFrontRightChassisAngularOffset = 0 + kEasySwerveAngularOffsetCompensation;
-    public static final double kRearLeftChassisAngularOffset = Math.PI + kEasySwerveAngularOffsetCompensation;
-    public static final double kRearRightChassisAngularOffset = (Math.PI / 2) + kEasySwerveAngularOffsetCompensation;
+    public static final double kFrontLeftChassisAngularOffset = 0;
+    public static final double kFrontRightChassisAngularOffset = 0;
+    public static final double kRearLeftChassisAngularOffset = 0;
+    public static final double kRearRightChassisAngularOffset = 0;
 
     // The EasySwerve module allows installation of the motors either on top or bottom of the module.
     // These constants configure the location of the motors. The default configuration is with both
     // motors on the bottom of the module.
     public static final boolean kFrontLeftDrivingMotorOnBottom = false;
-    public static final boolean kRearLeftDrivingMotorOnBottom = false;
+    public static final boolean kRearLeftDrivingMotorOnBottom = true;
     public static final boolean kFrontRightDrivingMotorOnBottom = false;
-    public static final boolean kRearRightDrivingMotorOnBottom = false;
+    public static final boolean kRearRightDrivingMotorOnBottom = true;
 
     public static final boolean kFrontLeftTurningMotorOnBottom = false;
     public static final boolean kRearLeftTurningMotorOnBottom = false;

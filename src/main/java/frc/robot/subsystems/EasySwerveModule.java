@@ -8,6 +8,8 @@ package frc.robot.subsystems;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
@@ -21,7 +23,7 @@ import com.revrobotics.ResetMode;
 
 import frc.robot.Configs;
 
-public class EasySwerveModule {
+public class EasySwerveModule extends SubsystemBase{
   private final SparkFlex m_drivingSpark;
   private final SparkFlex m_turningSpark;
 
@@ -34,6 +36,7 @@ public class EasySwerveModule {
   private double m_chassisAngularOffset = 0;
   private SwerveModuleState m_desiredState = new SwerveModuleState(0.0, new Rotation2d());
 
+  int num;
   /**
    * Constructs an EasySwerveModule and configures the driving and turning motor,
    * encoder, and PID controller. This configuration is specific to the REV
@@ -44,6 +47,8 @@ public class EasySwerveModule {
       boolean drivingMotorOnBottom, boolean turningMotorOnBottom) {
     m_drivingSpark = new SparkFlex(drivingCANId, MotorType.kBrushless);
     m_turningSpark = new SparkFlex(turningCANId, MotorType.kBrushless);
+
+    num = turningCANId/2;
 
     m_drivingEncoder = m_drivingSpark.getEncoder();
     m_turningEncoder = m_turningSpark.getAbsoluteEncoder();
@@ -98,6 +103,11 @@ public class EasySwerveModule {
     return new SwerveModulePosition(
         m_drivingEncoder.getPosition(),
         new Rotation2d(m_turningEncoder.getPosition() - m_chassisAngularOffset));
+  }
+
+  @Override
+  public void periodic() {
+      SmartDashboard.putNumber("module " + num + " angle", new Rotation2d(m_turningEncoder.getPosition()).getDegrees());
   }
 
   /**
