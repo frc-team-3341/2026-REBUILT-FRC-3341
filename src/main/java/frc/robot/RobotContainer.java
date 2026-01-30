@@ -29,6 +29,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import java.util.List;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+
 /*
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
  * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
@@ -67,9 +69,17 @@ public class RobotContainer {
    * {@link JoystickButton}.
    */
   private void configureButtonBindings() {
-    
     //change this based on what the driver wants for reset heading idk man
     driver_controller.start().onTrue(swerve.zeroHeading());
+    
+    // Pathfind to a specific pose when A button is pressed
+    driver_controller.a().onTrue(
+        AutoBuilder.pathfindToPose(
+            new Pose2d(1.0, 1.0, Rotation2d.fromDegrees(0)),
+            swerve.getPathFindConstraints(), // constraints configurable in DriveSubsystem.java
+            0.0  // end velocity
+        )
+    );
   }
 
 

@@ -3,12 +3,14 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.subsystems;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.PathConstraints;
 import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
 
-import edu.wpi.first.hal.FRCNetComm.tInstances;
-import edu.wpi.first.hal.FRCNetComm.tResourceType;
-import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -16,9 +18,14 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import frc.robot.Constants.DriveConstants;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
+import frc.robot.Constants.DriveConstants;
 
 public class DriveSubsystem extends SubsystemBase {
   // Create EasySwerveModules
@@ -52,6 +59,9 @@ public class DriveSubsystem extends SubsystemBase {
 
   private EasySwerveModule[] modules;
 
+  // Create kinematics object
+   private SwerveDriveKinematics kinematics;
+
   // The gyro sensor
   private AHRS navx = new AHRS(NavXComType.kMXP_SPI);
 
@@ -65,6 +75,8 @@ public class DriveSubsystem extends SubsystemBase {
           m_rearLeft.getPosition(),
           m_rearRight.getPosition()
       });
+  
+  private SendableChooser<Command> autoChooser = new SendableChooser<>();
 
   /** Creates a new DriveSubsystem. */
   public DriveSubsystem() {
@@ -78,7 +90,64 @@ public class DriveSubsystem extends SubsystemBase {
     modules[1] = m_frontRight;
     modules[2] = m_rearLeft;
     modules[3] = m_rearRight;
+
+    this.kinematics = Constants.DriveConstants.kDriveKinematics;
+
+    createAuto();
+  }
+
+  private void createAuto()  {
+        try {
+          RobotConfig config = RobotConfig.fromGUISettings();
+
+          // Configure AutoBuilder last
+          AutoBuilder.configure(
+              this::getPose, // Robot pose supplier
+              this::resetOdometry, // Method to reset odometry (will be called if your auto has a starting pose)
+              this::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+              this::driveRobotRelative, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
+              new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
+                      new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
+                      new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
+              ),
+              config, // The robot configuration
+              () -> {
+                // Boolean supplier that controls when the path will be mirrored for the red alliance
+                // This will flip the path being followed to the red side of the field.
+                // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+
+                var alliance = DriverStation.getAlliance();
+                if (alliance.isPresent()) {
+                  return alliance.get() == DriverStation.Alliance.Red;
+                }
+                return false;
+              },
+              this); // Reference to this subsystem to set requirements        
+          
+          // Put in the name of the auto here
+          autoChooser = AutoBuilder.buildAutoChooser("S2_H1_C2_Auto");
+          SmartDashboard.putData(autoChooser);
+        } catch (Exception e) {
+          //If an exception is thrown here we are really in trouble
+          e.printStackTrace();
+          System.out.println("uh oh auto is really broken");
+        }  
+    }
+
+  public Command getAutonomousCommand() {
+      return autoChooser.getSelected();
+  }
+
+  public PathConstraints getPathFindConstraints(){
+    // Create path constraints
+    PathConstraints constraints = new PathConstraints(
+        0.3,   // maxVelocityMps
+        0.6,   // maxAccelerationMpsSq
+        Units.degreesToRadians(540.0),
+        Units.degreesToRadians(540.0)
+    );
     
+    return constraints;
   }
 
   @Override
@@ -94,30 +163,13 @@ public class DriveSubsystem extends SubsystemBase {
         });
   }
 
+  //---------------METHODS----------------
   /**
-   * Returns the currently-estimated pose of the robot.
-   *
-   * @return The pose.
+   * Drive the robot for PathPlannerLib using robot-relative chassis speeds
+   * @param speeds Robot-relative ChassisSpeeds
    */
-  public Pose2d getPose() {
-    return m_odometry.getPoseMeters();
-  }
-
-  /**
-   * Resets the odometry to the specified pose.
-   *
-   * @param pose The pose to which to set the odometry.
-   */
-  public void resetOdometry(Pose2d pose) {
-    m_odometry.resetPosition(
-        Rotation2d.fromDegrees(navx.getYaw()),
-        new SwerveModulePosition[] {
-            m_frontLeft.getPosition(),
-            m_frontRight.getPosition(),
-            m_rearLeft.getPosition(),
-            m_rearRight.getPosition()
-        },
-        pose);
+  public void driveRobotRelative(ChassisSpeeds speeds) {
+    drive(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond, false); //NOT field relative - it's robot relative
   }
 
   /**
@@ -141,6 +193,32 @@ public class DriveSubsystem extends SubsystemBase {
       DriveConstants.kDriveKinematics.toSwerveModuleStates(robotSpeeds);
     
     setModuleStates(swerveModuleStates);
+  }
+
+  /**
+   * Returns the currently-estimated pose of the robot.
+   *
+   * @return The pose.
+   */
+  public Pose2d getPose() {
+    return m_odometry.getPoseMeters();
+  }
+    
+  /**
+   * Resets the odometry to the specified pose.
+   *
+   * @param pose The pose to which to set the odometry.
+   */
+  public void resetOdometry(Pose2d pose) {
+    m_odometry.resetPosition(
+        Rotation2d.fromDegrees(navx.getYaw()),
+        new SwerveModulePosition[] {
+            m_frontLeft.getPosition(),
+            m_frontRight.getPosition(),
+            m_rearLeft.getPosition(),
+            m_rearRight.getPosition()
+        },
+        pose);
   }
 
   /**
@@ -178,6 +256,13 @@ public class DriveSubsystem extends SubsystemBase {
     }
   }
 
+  /** 
+    * Get Rotation2d of Navx. Positive value (CCW positive default).
+    */
+   public Rotation2d getRotation() {
+      return navx.getRotation2d();
+   }
+
   /**
    * Returns the heading of the robot.
    *
@@ -195,4 +280,24 @@ public class DriveSubsystem extends SubsystemBase {
   public double getTurnRate() {
     return navx.getRate() * (DriveConstants.kGyroReversed ? -1.0 : 1.0);
   }
+
+  /**
+    * Get chassis speeds for PathPlannerLib
+    */
+   public ChassisSpeeds getRobotRelativeSpeeds() {
+      return ChassisSpeeds.fromFieldRelativeSpeeds(kinematics.toChassisSpeeds(getActualStates()), getRotation());
+   }
+
+    /**
+    * Gets the actual SwerveModuleState[] for our use in code
+    */
+   public SwerveModuleState[] getActualStates() {
+
+      SwerveModuleState[] states = new SwerveModuleState[modules.length];
+      for (int i = 0; i < states.length; i++) {
+         states[i] = this.modules[i].getState();
+      }
+      return states;
+   }
+
 }
