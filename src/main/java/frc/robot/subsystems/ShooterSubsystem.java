@@ -21,7 +21,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ShooterSubsystem extends SubsystemBase {
-  private final int drivingCANId = 0; //NEED TO SET
+  private final int drivingCANId = 1; //NEED TO SET
   private final SparkFlex shooter;
   private final SparkFlexConfig shooterConfig;
   private SparkClosedLoopController closedLoopController;
