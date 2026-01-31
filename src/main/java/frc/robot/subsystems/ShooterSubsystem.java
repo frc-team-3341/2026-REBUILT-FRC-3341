@@ -22,7 +22,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ShooterSubsystem extends SubsystemBase {
   private final int drivingCANId = 1; //NEED TO SET
+  private final int diameter = 4; //NEED TO SET
   private final SparkFlex shooter;
+  private double targetVelocity;
+  private double targetRPM;
   private final SparkFlexConfig shooterConfig;
   private SparkClosedLoopController closedLoopController;
   private RelativeEncoder shooterEncoder;
@@ -78,7 +81,8 @@ public class ShooterSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    double targetVelocity = SmartDashboard.getNumber("Target Velocity (RPM)", 0);
-    closedLoopController.setSetpoint(targetVelocity, ControlType.kVelocity, ClosedLoopSlot.kSlot1);
+    targetVelocity = SmartDashboard.getNumber("Target RPM", 0);
+    targetRPM = targetVelocity*60.0/(2*Math.PI);
+    closedLoopController.setSetpoint(targetRPM, ControlType.kVelocity, ClosedLoopSlot.kSlot1);
   }
 }
