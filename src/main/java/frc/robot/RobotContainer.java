@@ -38,7 +38,7 @@ import java.util.List;
 
 public class RobotContainer {
   // The robot's subsystems
-  private final DriveSubsystem m_robotDrive = new DriveSubsystem();
+  //private final DriveSubsystem m_robotDrive = new DriveSubsystem();
   private final ShooterSubsystem shooter = new ShooterSubsystem();
   
 
@@ -54,16 +54,16 @@ public class RobotContainer {
     configureButtonBindings();
 
     // Configure default commands
-    m_robotDrive.setDefaultCommand(
+    //m_robotDrive.setDefaultCommand(
         // The left stick controls translation of the robot.
         // Turning is controlled by the X axis of the right stick.
-        new RunCommand(
-            () -> m_robotDrive.drive(
-                -MathUtil.applyDeadband(driver_controller.getLeftY(), OIConstants.kDriveDeadband),
-                -MathUtil.applyDeadband(driver_controller.getLeftX(), OIConstants.kDriveDeadband),
-                -MathUtil.applyDeadband(driver_controller.getRightX(), OIConstants.kDriveDeadband),
-                true),
-            m_robotDrive));
+    //    new RunCommand(
+    //        () -> m_robotDrive.drive(
+    //            -MathUtil.applyDeadband(driver_controller.getLeftY(), OIConstants.kDriveDeadband),
+    //            -MathUtil.applyDeadband(driver_controller.getLeftX(), OIConstants.kDriveDeadband),
+    //            -MathUtil.applyDeadband(driver_controller.getRightX(), OIConstants.kDriveDeadband),
+    //            true),
+    //        m_robotDrive));
   }
 
   /**
@@ -76,8 +76,8 @@ public class RobotContainer {
    * {@link JoystickButton}.
    */
   private void configureButtonBindings() {
-    driver_controller.rightBumper().whileTrue(m_robotDrive.setX());
-    driver_controller.start().onTrue(m_robotDrive.zeroHeading());
+    //driver_controller.rightBumper().whileTrue(m_robotDrive.setX());
+    //driver_controller.start().onTrue(m_robotDrive.zeroHeading());
     // driver_controller.a().onTrue()     make this to stop shooter whenever called
   }
 
