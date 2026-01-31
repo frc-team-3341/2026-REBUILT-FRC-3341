@@ -141,10 +141,10 @@ public class DriveSubsystem extends SubsystemBase {
 
     ChassisSpeeds robotSpeeds = fieldRelative
             ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot,
-                Rotation2d.fromDegrees(navx.getYaw()))
+                Rotation2d.fromDegrees(getHeading()))
             : new ChassisSpeeds(xSpeed, ySpeed, rot);
 
-    robotSpeeds = ChassisSpeeds.discretize(robotSpeeds, 0.02);
+    // robotSpeeds = ChassisSpeeds.discretize(robotSpeeds, 0.02);
 
     SwerveModuleState[] swerveModuleStates = 
       DriveConstants.kDriveKinematics.toSwerveModuleStates(robotSpeeds);

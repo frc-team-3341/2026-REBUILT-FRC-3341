@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.subsystems.DriveSubsystem;
-import frc.robot.util.JoystickUtil;
+import frc.util.JoystickUtil;
 
 public class SwerveTeleop extends Command{
     //TODO ADD ASYMMETERIC LIMITER PLEASE
@@ -29,8 +29,8 @@ public class SwerveTeleop extends Command{
 
     @Override
     public void execute() {
-        xInput = -cont.getLeftY(); //Not a good practice, but this seems to be the way we've dont it with our old swerve code, looks to be a quirk of our controller mapping. Advantage scope sees the right direction of the modules, its just the controller thats werid.
-        yInput = -cont.getLeftX();
+        xInput = cont.getLeftX();
+        yInput = -cont.getLeftY();
         rotInput = cont.getRightX();
 
         xInput = MathUtil.applyDeadband(xInput, Constants.OIConstants.kDriveDeadband);
