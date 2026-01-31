@@ -14,28 +14,50 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Climber extends SubsystemBase {
-    private final SparkMax motor1 = new SparkMax(20, MotorType.kBrushless); // creating motor object
+    private final SparkMax motorL = new SparkMax(20, MotorType.kBrushless);
+    private final SparkMax motorR = new SparkMax(20, MotorType.kBrushless); // creating motor object
 
   public Climber() {
-    SparkMaxConfig motorConfig1 = new SparkMaxConfig(); //configuring sparkmax 
-    motor1.configure(motorConfig1, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters); // configuring motor 1 
+    SparkMaxConfig motorConfigL = new SparkMaxConfig(); //configuring sparkmax 
+    motorL.configure(motorConfigL, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+    SparkMaxConfig motorConfigR = new SparkMaxConfig(); //configuring sparkmax 
+    motorR.configure(motorConfigR, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);  // configuring motor 1 
   }
 
-  public Command motorUp() {
+  public Command leftMotorUp() {
     return this.runOnce(() -> {
-      motor1.set(0.4);
+      motorL.set(0.4);
+  });
+
+  }
+
+  public Command rightMotorUp() {
+    return this.runOnce(() -> {
+      motorR.set(0.4);
+  });
+
+  }
+
+  public Command leftMotorStop() {
+    return this.runOnce(() -> {
+      motorL.set(0.0);
   });
   }
 
-  public Command motorStop() {
+  public Command rightMotorStop() {
     return this.runOnce(() -> {
-      motor1.set(0.0);
+      motorR.set(0.0);
   });
   }
 
-  public Command motorDown() {
+  public Command leftMotorDown() {
     return this.runOnce(() -> {
-      motor1.set(-0.4);
+      motorL.set(-0.4);
+  });
+  }
+  public Command rightMotorDown() {
+    return this.runOnce(() -> {
+      motorR.set(-0.4);
   });
   }
 
