@@ -8,7 +8,6 @@ import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.ClosedLoopSlot;
-import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
@@ -36,9 +35,6 @@ public class ShooterSubsystem extends SubsystemBase {
         .smartCurrentLimit(80)
         .idleMode(IdleMode.kCoast);
 
-    // Persist parameters to retain configuration in the event of a power cycle
-    shooter.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-
     closedLoopController = shooter.getClosedLoopController();
     shooterEncoder = shooter.getEncoder();
 
@@ -47,7 +43,6 @@ public class ShooterSubsystem extends SubsystemBase {
      * feedback sensor as the primary encoder.
      */
     shooterConfig.closedLoop
-        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         // Set PID values for position control. We don't need to pass a closed loop
         // slot, as it will default to slot 0.
         // .p(0.1)
@@ -63,16 +58,23 @@ public class ShooterSubsystem extends SubsystemBase {
         .feedForward
           // kV is now in Volts, so we multiply by the nominal voltage (12V)
           .kV(12.0 / 5767, ClosedLoopSlot.kSlot1);
+    // Persist parameters to retain configuration in the event of a power cycle
+    shooter.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     
     SmartDashboard.setDefaultNumber("Target Velocity", 0);
   }
 
-  public Command setSpeed(int rpm) {
-    return this.runOnce(() -> {
-      closedLoopController.setSetpoint(rpm, ControlType.kPosition);
+  public Command setSpeed(double rpm) {
+    return this.run(() -> {
+      closedLoopController.setSetpoint(rpm, ControlType.kVelocity, ClosedLoopSlot.kSlot1);
     });
   }
 
+  public Command stopMotor() {
+    return this.runOnce(() -> {
+        shooter.stopMotor();
+    });  
+  }
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
