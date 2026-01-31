@@ -8,15 +8,14 @@ import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.ClosedLoopSlot;
+import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
-import com.revrobotics.spark.config.SparkMaxConfig;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -24,65 +23,52 @@ public class ShooterSubsystem extends SubsystemBase {
   private final int drivingCANId = 1; //NEED TO SET
   private final int diameter = 4; //NEED TO SET
   private final SparkFlex shooter;
-  private double targetVelocity;
-  private double targetRPM;
+  private double targetRPM = 0;
   private final SparkFlexConfig shooterConfig;
   private SparkClosedLoopController closedLoopController;
-  private RelativeEncoder shooterEncoder;
-  
-  /** Creates a new Shooter. */
+  private RelativeEncoder relativeEncoder;
+
+
   public ShooterSubsystem() {
     shooter = new SparkFlex(drivingCANId, MotorType.kBrushless);
+    relativeEncoder = shooter.getEncoder();
     shooterConfig = new SparkFlexConfig();
     shooterConfig
         .smartCurrentLimit(80)
         .idleMode(IdleMode.kCoast);
 
     closedLoopController = shooter.getClosedLoopController();
-    shooterEncoder = shooter.getEncoder();
+    shooterConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder);
 
-    /*
-     * Configure the closed loop controller. We want to make sure we set the
-     * feedback sensor as the primary encoder.
-     */
     shooterConfig.closedLoop
-        // Set PID values for position control. We don't need to pass a closed loop
-        // slot, as it will default to slot 0.
-        // .p(0.1)
-        // .i(0)
-        // .d(0)
-        // .outputRange(-1, 1)
-
-        // Set PID values for velocity control in slot 1
-        .p(0.0001, ClosedLoopSlot.kSlot1)
-        .i(0, ClosedLoopSlot.kSlot1)
-        .d(0, ClosedLoopSlot.kSlot1)
-        .outputRange(-1, 1, ClosedLoopSlot.kSlot1)
+        .p(0.0001, ClosedLoopSlot.kSlot0)
+        .i(0, ClosedLoopSlot.kSlot0)
+        .d(0, ClosedLoopSlot.kSlot0)
+        .outputRange(-1, 1, ClosedLoopSlot.kSlot0)
         .feedForward
-          // kV is now in Volts, so we multiply by the nominal voltage (12V)
-          .kV(12.0 / 5767, ClosedLoopSlot.kSlot1);
-    // Persist parameters to retain configuration in the event of a power cycle
+          .kV(12.0 / 5767, ClosedLoopSlot.kSlot0);
+
     shooter.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    }
+
     
-    SmartDashboard.setDefaultNumber("Target Velocity", 0);
-  }
+  // public void setVelocity(double v) {
+  //   targetRPM =(v * 60.0) / (Math.PI * diameter);
+  // }
 
-  public Command setSpeed(double rpm) {
-    return this.run(() -> {
-      closedLoopController.setSetpoint(rpm, ControlType.kVelocity, ClosedLoopSlot.kSlot1);
-    });
+  public void setVelocity(double v) {
+    targetRPM = (v * 60.0) * 39.37/ (Math.PI * diameter);
   }
-
+  
   public Command stopMotor() {
     return this.runOnce(() -> {
         shooter.stopMotor();
     });  
   }
-  @Override
+
+
+ @Override
   public void periodic() {
-    // This method will be called once per scheduler run
-    targetVelocity = SmartDashboard.getNumber("Target RPM", 0);
-    targetRPM = targetVelocity*60.0/(2*Math.PI);
-    closedLoopController.setSetpoint(targetRPM, ControlType.kVelocity, ClosedLoopSlot.kSlot1);
+    closedLoopController.setSetpoint(targetRPM, ControlType.kVelocity, ClosedLoopSlot.kSlot0);
   }
 }
