@@ -63,7 +63,10 @@ public class RobotContainer {
   
   public void createIntake(){
     robotIntake = new Intake();
-    driver_controller.button(0).onTrue(robotIntake.intakeBall()).onFalse(robotIntake.stopIntake());
+    System.out.println(robotIntake.getBeamBreak());
+    //if(robotIntake.getBeamBreak() == true){
+      driver_controller.button(0).onTrue(robotIntake.intakeBall()).onFalse(robotIntake.stopIntake());
+    //}
   }
 
 
