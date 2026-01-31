@@ -18,6 +18,7 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ShooterSubsystem extends SubsystemBase {
@@ -64,6 +65,12 @@ public class ShooterSubsystem extends SubsystemBase {
           .kV(12.0 / 5767, ClosedLoopSlot.kSlot1);
     
     SmartDashboard.setDefaultNumber("Target Velocity", 0);
+  }
+
+  public Command setSpeed(int rpm) {
+    return this.runOnce(() -> {
+      closedLoopController.setSetpoint(rpm, ControlType.kPosition);
+    });
   }
 
   @Override
