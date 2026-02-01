@@ -16,6 +16,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -24,6 +25,8 @@ public class ShooterSubsystem extends SubsystemBase {
   private final int diameter = 4; //NEED TO SET
   private final SparkFlex shooter;
   private double targetRPM = 0;
+  private int velocity = 0;
+
   private final SparkFlexConfig shooterConfig;
   private SparkClosedLoopController closedLoopController;
   private RelativeEncoder relativeEncoder;
@@ -38,9 +41,10 @@ public class ShooterSubsystem extends SubsystemBase {
         .idleMode(IdleMode.kCoast);
 
     closedLoopController = shooter.getClosedLoopController();
-    shooterConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder);
+    // shooterConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder);
 
     shooterConfig.closedLoop
+        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         .p(0.0001, ClosedLoopSlot.kSlot0)
         .i(0, ClosedLoopSlot.kSlot0)
         .d(0, ClosedLoopSlot.kSlot0)
@@ -49,9 +53,10 @@ public class ShooterSubsystem extends SubsystemBase {
           .kV(12.0 / 5767, ClosedLoopSlot.kSlot0);
 
     shooter.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
     }
 
-    
+
   // public void setVelocity(double v) {
   //   targetRPM =(v * 60.0) / (Math.PI * diameter);
   // }
@@ -62,8 +67,16 @@ public class ShooterSubsystem extends SubsystemBase {
   
   public Command stopMotor() {
     return this.runOnce(() -> {
-        shooter.stopMotor();
+        velocity = 0;
+        setVelocity(velocity);
     });  
+  }
+
+  public Command incrementVel(){
+    return this.runOnce(() -> {
+      velocity++;
+      setVelocity(velocity);
+    });
   }
 
 
