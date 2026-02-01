@@ -4,7 +4,7 @@ public class JoystickUtil {
     
 
     public static double[] scaleJoystickInputs(double x, double y, double maxSpeed) {
-        double mag = Math.sqrt((x*x)+(y*y));
+        double mag = Math.hypot(x, y);
         
         double angle = Math.atan2(y, x);
 

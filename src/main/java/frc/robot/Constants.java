@@ -50,10 +50,10 @@ public final class Constants {
     // The EasySwerve module allows installation of the motors either on top or bottom of the module.
     // These constants configure the location of the motors. The default configuration is with both
     // motors on the bottom of the module.
-    public static final boolean kFrontLeftDrivingMotorOnBottom = false;
-    public static final boolean kRearLeftDrivingMotorOnBottom = true;
-    public static final boolean kFrontRightDrivingMotorOnBottom = false;
-    public static final boolean kRearRightDrivingMotorOnBottom = true;
+    public static final boolean kFrontLeftDrivingMotorOnBottom = true;
+    public static final boolean kRearLeftDrivingMotorOnBottom = false;
+    public static final boolean kFrontRightDrivingMotorOnBottom = true;
+    public static final boolean kRearRightDrivingMotorOnBottom = false;
 
     public static final boolean kFrontLeftTurningMotorOnBottom = false;
     public static final boolean kRearLeftTurningMotorOnBottom = false;
@@ -73,7 +73,7 @@ public final class Constants {
     public static final int kRearRightTurningCanId = 8;
 
     public static final boolean kGyroReversed = false;
-    public static final Rotation2d navxOffset = Rotation2d.fromDegrees(-90); //Offsets driving by 90 degrees clockwise
+    public static final Rotation2d navxOffset = Rotation2d.fromDegrees(0); //Offsets driving by 90 degrees clockwise
   }
 
   public static final class ModuleConstants {

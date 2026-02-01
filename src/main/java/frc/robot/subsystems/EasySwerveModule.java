@@ -35,6 +35,7 @@ public class EasySwerveModule extends SubsystemBase{
 
   private double m_chassisAngularOffset = 0;
   private SwerveModuleState m_desiredState = new SwerveModuleState(0.0, new Rotation2d());
+  SwerveModuleState desiredState = new SwerveModuleState();
 
   int num;
   /**
@@ -47,7 +48,7 @@ public class EasySwerveModule extends SubsystemBase{
       boolean drivingMotorOnBottom, boolean turningMotorOnBottom) {
     m_drivingSpark = new SparkFlex(drivingCANId, MotorType.kBrushless);
     m_turningSpark = new SparkFlex(turningCANId, MotorType.kBrushless);
-
+    
     num = turningCANId/2;
 
     m_drivingEncoder = m_drivingSpark.getEncoder();
@@ -107,7 +108,13 @@ public class EasySwerveModule extends SubsystemBase{
 
   @Override
   public void periodic() {
-      SmartDashboard.putNumber("module " + num + " angle", new Rotation2d(m_turningEncoder.getPosition()).getDegrees());
+      SmartDashboard.putNumber("module " + num + " current angle", new Rotation2d(m_turningEncoder.getPosition()).getDegrees());
+      SmartDashboard.putNumber("module " + num + " desired angle", desiredState.angle.getDegrees());
+
+      SmartDashboard.putNumber("module " + num + " cv", getState().speedMetersPerSecond);
+      SmartDashboard.putNumber("module " + num + " dv", desiredState.speedMetersPerSecond);
+
+      SmartDashboard.putNumber("module " + num + " current", m_turningSpark.getOutputCurrent());
   }
 
   /**
@@ -123,6 +130,8 @@ public class EasySwerveModule extends SubsystemBase{
 
     // Optimize the reference state to avoid spinning further than 90 degrees.
     correctedDesiredState.optimize(new Rotation2d(m_turningEncoder.getPosition()));
+
+    this.desiredState = correctedDesiredState;
 
     // Command driving and turning SPARKS towards their respective setpoints.
     m_drivingClosedLoopController.setSetpoint(correctedDesiredState.speedMetersPerSecond, ControlType.kVelocity);

@@ -1,6 +1,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants;
@@ -12,6 +13,10 @@ public class SwerveTeleop extends Command{
     //TODO ADD ASYMMETERIC LIMITER PLEASE
 
     CommandXboxController cont;
+
+    SlewRateLimiter translationRateLimiter = new SlewRateLimiter(5, 1000, 0);
+    SlewRateLimiter rotationalRateLimiter = new SlewRateLimiter(10, 10, 0);
+    
     DriveSubsystem swerve;
     
     double xInput;
@@ -29,17 +34,20 @@ public class SwerveTeleop extends Command{
 
     @Override
     public void execute() {
-        xInput = cont.getLeftX();
-        yInput = -cont.getLeftY();
-        rotInput = cont.getRightX();
+        xInput = -cont.getLeftY();
+        yInput = -cont.getLeftX();
+        rotInput = -cont.getRightX();
 
         xInput = MathUtil.applyDeadband(xInput, Constants.OIConstants.kDriveDeadband);
         yInput = MathUtil.applyDeadband(yInput, Constants.OIConstants.kDriveDeadband);
         rotInput = MathUtil.applyDeadband(rotInput, Constants.OIConstants.kDriveDeadband);
 
+        // double[] vals = 
+        //     JoystickUtil.scaleJoystickInputs(xInput, yInput, 
+        //         DriveConstants.kMaxSpeedMetersPerSecond);
         double[] vals = 
             JoystickUtil.scaleJoystickInputs(xInput, yInput, 
-                DriveConstants.kMaxSpeedMetersPerSecond);
+                1.0);
 
         //New scaled values for x and y
         xInput = vals[1]*Math.cos(vals[0]);
