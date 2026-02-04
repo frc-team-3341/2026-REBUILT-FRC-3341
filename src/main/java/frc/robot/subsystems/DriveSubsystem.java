@@ -141,9 +141,10 @@ public class DriveSubsystem extends SubsystemBase {
 
     ChassisSpeeds robotSpeeds = fieldRelative
             ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot,
-                Rotation2d.fromDegrees(getHeading()))
+                navx.getRotation2d())
             : new ChassisSpeeds(xSpeed, ySpeed, rot);
 
+    //Test with discretization asap
     // robotSpeeds = ChassisSpeeds.discretize(robotSpeeds, 0.02);
 
     SwerveModuleState[] swerveModuleStates = 
@@ -185,15 +186,6 @@ public class DriveSubsystem extends SubsystemBase {
       modules[i].setDriveVoltage(0);
       modules[i].setTurnVoltage(0);
     }
-  }
-
-  /**
-   * Returns the heading of the robot.
-   *
-   * @return the robot's heading in degrees, from -180 to 180
-   */
-  public double getHeading() {
-    return Rotation2d.fromDegrees(navx.getYaw()).plus(DriveConstants.navxOffset).getDegrees();
   }
 
   /**

@@ -42,12 +42,9 @@ public class SwerveTeleop extends Command{
         yInput = MathUtil.applyDeadband(yInput, Constants.OIConstants.kDriveDeadband);
         rotInput = MathUtil.applyDeadband(rotInput, Constants.OIConstants.kDriveDeadband);
 
-        // double[] vals = 
-        //     JoystickUtil.scaleJoystickInputs(xInput, yInput, 
-        //         DriveConstants.kMaxSpeedMetersPerSecond);
         double[] vals = 
             JoystickUtil.scaleJoystickInputs(xInput, yInput, 
-                1.0);
+                DriveConstants.kMaxSpeedMetersPerSecond);
 
         //New scaled values for x and y
         xInput = vals[1]*Math.cos(vals[0]);

@@ -69,7 +69,7 @@ public class RobotContainer {
   private void configureButtonBindings() {
     
     //change this based on what the driver wants for reset heading idk man
-    driver_controller.start().onTrue(swerve.zeroHeading());
+    driver_controller.y().onTrue(swerve.zeroHeading());
   }
 
 
