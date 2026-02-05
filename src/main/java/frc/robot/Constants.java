@@ -117,4 +117,21 @@ public final class Constants {
   public static final class NeoMotorConstants {
     public static final double kFreeSpeedRpm = 5676;
   }
+
+  public static final class ShooterConstants {
+
+    //TODO figure out this value
+    public static final double flywheelMomentofInertia = 0; 
+
+    //TODO figure out this value
+    public static final double flywheelMass = 0;
+
+    //TODO figure out this value
+    public static final double flywheelDiameter = 4;
+
+    public static final double launchAngle = 75;
+
+    //TODO figure out this value
+    public static final double shooterHeight = 0;
+  }
 }
