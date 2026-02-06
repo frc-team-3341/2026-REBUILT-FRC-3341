@@ -3,6 +3,15 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.subsystems;
+import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.drivesims.COTS;
+import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
+import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
+import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
+import static edu.wpi.first.units.Units.*;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
@@ -13,19 +22,24 @@ import com.studica.frc.AHRS.NavXComType;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.Constants.ModuleConstants;
+import frc.robot.Robot;
 
 public class DriveSubsystem extends SubsystemBase {
   // Create EasySwerveModules
@@ -60,7 +74,45 @@ public class DriveSubsystem extends SubsystemBase {
   private EasySwerveModule[] modules;
 
   // Create kinematics object
-   private SwerveDriveKinematics kinematics;
+  private SwerveDriveKinematics kinematics;
+  
+  private SwerveDriveSimulation mapleSimDrive;
+  private final Field2d field = new Field2d();
+
+
+// Add this method to DriveSubsystem
+private void createSimulationSwerve(Pose2d startingPose) {
+    DriveTrainSimulationConfig simulationConfig = DriveTrainSimulationConfig.Default()
+        .withBumperSize(
+            Meters.of(DriveConstants.kTrackWidth).plus(Inches.of(5)),
+            Meters.of(DriveConstants.kWheelBase).plus(Inches.of(5))
+        )
+        .withRobotMass(Kilograms.of(DriveConstants.kRobotMassKg)) // You'll need to add this constant
+        .withCustomModuleTranslations(new Translation2d[] {
+            new Translation2d(DriveConstants.kWheelBase / 2, DriveConstants.kTrackWidth / 2),
+            new Translation2d(DriveConstants.kWheelBase / 2, -DriveConstants.kTrackWidth / 2),
+            new Translation2d(-DriveConstants.kWheelBase / 2, DriveConstants.kTrackWidth / 2),
+            new Translation2d(-DriveConstants.kWheelBase / 2, -DriveConstants.kTrackWidth / 2)
+        })
+        .withGyro(COTS.ofNav2X())
+        .withSwerveModule(new SwerveModuleSimulationConfig(
+            DCMotor.getNEO(1),  // Driving motor
+            DCMotor.getNEO(1),  // Turning motor
+            ModuleConstants.kDrivingMotorReduction,
+            // For turning, EasySwerve uses through-bore encoder, gear ratio is 1:1
+            1.0,
+            Volts.of(0.02),
+            Volts.of(0.03),
+            Inches.of(ModuleConstants.kWheelDiameterMeters * 39.3701 / 2), // Convert meters to inches radius
+            KilogramSquareMeters.of(0.02),
+            DriveConstants.kWheelCOF // You'll need to add this constant
+        ));
+
+    mapleSimDrive = new SwerveDriveSimulation(simulationConfig, startingPose);
+
+    // Register the drivetrain simulation
+    SimulatedArena.getInstance().addDriveTrainSimulation(mapleSimDrive);
+}
 
   // The gyro sensor
   private AHRS navx = new AHRS(NavXComType.kMXP_SPI);
@@ -92,8 +144,15 @@ public class DriveSubsystem extends SubsystemBase {
     modules[3] = m_rearRight;
 
     this.kinematics = Constants.DriveConstants.kDriveKinematics;
+    SmartDashboard.putData("Field", field);
 
     createAuto();
+        
+    // Initialize simulation if in simulation mode
+    if (Robot.isSimulation()) {
+        createSimulationSwerve(new Pose2d()); // Or whatever starting pose you want
+    }
+
   }
 
   private void createAuto()  {
@@ -150,6 +209,12 @@ public class DriveSubsystem extends SubsystemBase {
     return constraints;
   }
 
+  public void simulationPeriodic() {
+    // The simulation handles everything automatically with Maple Sim
+    // No additional code needed here
+  }
+
+
   @Override
   public void periodic() {
     // Update the odometry in the periodic block
@@ -161,6 +226,9 @@ public class DriveSubsystem extends SubsystemBase {
             m_rearLeft.getPosition(),
             m_rearRight.getPosition()
         });
+        
+  field.setRobotPose(getPose());
+
   }
 
   //---------------METHODS----------------
@@ -219,6 +287,11 @@ public class DriveSubsystem extends SubsystemBase {
             m_rearRight.getPosition()
         },
         pose);
+
+    if (Robot.isSimulation() && mapleSimDrive != null) {
+      mapleSimDrive.setSimulationWorldPose(pose);
+    }
+
   }
 
   /**

@@ -61,17 +61,22 @@ public final class Constants {
 
     // SPARK MAX CAN IDs
     //TODO: WE NEED TO CHANGE THESE BEFORE TESTING!!!!!
-    public static final int kFrontLeftDrivingCanId = 0;
-    public static final int kRearLeftDrivingCanId = 0;
-    public static final int kFrontRightDrivingCanId = 0;
-    public static final int kRearRightDrivingCanId = 0;
+    public static final int kFrontLeftDrivingCanId = 1;
+    public static final int kRearLeftDrivingCanId = 5;
+    public static final int kFrontRightDrivingCanId = 3;
+    public static final int kRearRightDrivingCanId = 7;
 
-    public static final int kFrontLeftTurningCanId = 0;
-    public static final int kRearLeftTurningCanId = 0;
-    public static final int kFrontRightTurningCanId = 0;
-    public static final int kRearRightTurningCanId = 0;
+    public static final int kFrontLeftTurningCanId = 2;
+    public static final int kRearLeftTurningCanId = 6;
+    public static final int kFrontRightTurningCanId = 4;
+    public static final int kRearRightTurningCanId = 8;
+
 
     public static final boolean kGyroReversed = false;
+
+    public static final double kRobotMassKg = 54.43; // Adjust to your robot's mass
+    public static final double kWheelCOF = 1.2; // Coefficient of friction (from pathplanner settings)
+
   }
 
   public static final class ModuleConstants {
