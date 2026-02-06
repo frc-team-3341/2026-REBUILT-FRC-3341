@@ -28,6 +28,9 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -72,6 +75,7 @@ public class DriveSubsystem extends SubsystemBase {
       DriveConstants.kRearRightTurningMotorOnBottom);
 
   private EasySwerveModule[] modules;
+  private final StructArrayPublisher<SwerveModuleState> statePublisher;
 
   // Create kinematics object
   private SwerveDriveKinematics kinematics;
@@ -143,6 +147,7 @@ private void createSimulationSwerve(Pose2d startingPose) {
     modules[2] = m_rearLeft;
     modules[3] = m_rearRight;
 
+    statePublisher = NetworkTableInstance.getDefault().getStructArrayTopic("/SwerveStates", SwerveModuleState.struct).publish();
     this.kinematics = Constants.DriveConstants.kDriveKinematics;
     SmartDashboard.putData("Field", field);
 
@@ -226,6 +231,11 @@ private void createSimulationSwerve(Pose2d startingPose) {
             m_rearLeft.getPosition(),
             m_rearRight.getPosition()
         });
+    
+    SmartDashboard.putNumber("navx angle", navx.getAngle());
+      
+
+    statePublisher.set(getStates());
         
   field.setRobotPose(getPose());
 
@@ -254,8 +264,10 @@ private void createSimulationSwerve(Pose2d startingPose) {
 
     ChassisSpeeds robotSpeeds = fieldRelative
             ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot,
-                Rotation2d.fromDegrees(navx.getYaw()))
+                Rotation2d.fromDegrees(getHeading()))
             : new ChassisSpeeds(xSpeed, ySpeed, rot);
+
+    // robotSpeeds = ChassisSpeeds.discretize(robotSpeeds, 0.02);
 
     SwerveModuleState[] swerveModuleStates = 
       DriveConstants.kDriveKinematics.toSwerveModuleStates(robotSpeeds);
@@ -342,7 +354,7 @@ private void createSimulationSwerve(Pose2d startingPose) {
    * @return the robot's heading in degrees, from -180 to 180
    */
   public double getHeading() {
-    return Rotation2d.fromDegrees(navx.getYaw()).getDegrees();
+    return Rotation2d.fromDegrees(navx.getYaw()).plus(DriveConstants.navxOffset).getDegrees();
   }
 
   /**

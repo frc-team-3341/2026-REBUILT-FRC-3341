@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.subsystems.DriveSubsystem;
-import frc.robot.util.JoystickUtil;
+import frc.util.JoystickUtil;
 
 public class SwerveTeleop extends Command{
     //TODO ADD ASYMMETERIC LIMITER PLEASE
@@ -29,7 +29,7 @@ public class SwerveTeleop extends Command{
 
     @Override
     public void execute() {
-        xInput = -cont.getLeftX();
+        xInput = cont.getLeftX();
         yInput = -cont.getLeftY();
         rotInput = cont.getRightX();
 

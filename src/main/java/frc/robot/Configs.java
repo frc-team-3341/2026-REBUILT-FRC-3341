@@ -23,7 +23,7 @@ public final class Configs {
 
       drivingConfig
         .idleMode(IdleMode.kBrake)
-        .smartCurrentLimit(50);   // 70 for SparkFlex
+        .smartCurrentLimit(40);   // 70 for SparkFlex
       drivingConfig
         .encoder
           .positionConversionFactor(drivingFactor) // meters
