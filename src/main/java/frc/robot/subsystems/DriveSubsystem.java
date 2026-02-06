@@ -31,6 +31,9 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -233,10 +236,7 @@ private void createSimulationSwerve(Pose2d startingPose) {
         });
     
     SmartDashboard.putNumber("navx angle", navx.getAngle());
-      
-
-    statePublisher.set(getStates());
-        
+              
   field.setRobotPose(getPose());
 
   }

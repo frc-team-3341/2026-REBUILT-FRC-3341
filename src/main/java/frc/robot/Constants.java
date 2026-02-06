@@ -66,10 +66,6 @@ public final class Constants {
     public static final int kRearLeftDrivingCanId = 5;
     public static final int kFrontRightDrivingCanId = 3;
     public static final int kRearRightDrivingCanId = 7;
-    public static final int kFrontLeftDrivingCanId = 1;
-    public static final int kRearLeftDrivingCanId = 5;
-    public static final int kFrontRightDrivingCanId = 3;
-    public static final int kRearRightDrivingCanId = 7;
 
     public static final int kFrontLeftTurningCanId = 2;
     public static final int kRearLeftTurningCanId = 6;
@@ -80,8 +76,8 @@ public final class Constants {
     public static final boolean kGyroReversed = false;
     public static final Rotation2d navxOffset = Rotation2d.fromDegrees(-90); //Offsets driving by 90 degrees clockwise
 
-    public static final double kRobotMassKg = 54.43; // Adjust to your robot's mass
-    public static final double kWheelCOF = 1.2; // Coefficient of friction (from pathplanner settings)
+    public static final double kRobotMassKg = 54.43; // TODO: Adjust to your robot's mass
+    public static final double kWheelCOF = 1.2; // TODO: Coefficient of friction (from pathplanner settings)
 
   }
 
