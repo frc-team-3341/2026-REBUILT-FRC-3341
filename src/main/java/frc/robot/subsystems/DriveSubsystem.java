@@ -94,7 +94,7 @@ private void createSimulationSwerve(Pose2d startingPose) {
             Meters.of(DriveConstants.kTrackWidth).plus(Inches.of(5)),
             Meters.of(DriveConstants.kWheelBase).plus(Inches.of(5))
         )
-        .withRobotMass(Kilograms.of(DriveConstants.kRobotMassKg)) // You'll need to add this constant
+        .withRobotMass(Kilograms.of(DriveConstants.kRobotMassKg)) 
         .withCustomModuleTranslations(new Translation2d[] {
             new Translation2d(DriveConstants.kWheelBase / 2, DriveConstants.kTrackWidth / 2),
             new Translation2d(DriveConstants.kWheelBase / 2, -DriveConstants.kTrackWidth / 2),
@@ -112,7 +112,7 @@ private void createSimulationSwerve(Pose2d startingPose) {
             Volts.of(0.03),
             Inches.of(ModuleConstants.kWheelDiameterMeters * 39.3701 / 2), // Convert meters to inches radius
             KilogramSquareMeters.of(0.02),
-            DriveConstants.kWheelCOF // You'll need to add this constant
+            DriveConstants.kWheelCOF 
         ));
 
     mapleSimDrive = new SwerveDriveSimulation(simulationConfig, startingPose);
@@ -139,10 +139,6 @@ private void createSimulationSwerve(Pose2d startingPose) {
 
   /** Creates a new DriveSubsystem. */
   public DriveSubsystem() {
-    // Usage reporting for EasySwerve template
-    // HAL.report(tResourceType.kResourceType_RobotDrive, tInstances.kRobotDriveSwerve_MaxSwerve);
-    //TODO (dave): add EasySwerve to tInstances??? 
-
     modules = new EasySwerveModule[4];
 
     modules[0] = m_frontLeft;
@@ -219,7 +215,6 @@ private void createSimulationSwerve(Pose2d startingPose) {
 
   public void simulationPeriodic() {
     // The simulation handles everything automatically with Maple Sim
-    // No additional code needed here
   }
 
 

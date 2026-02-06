@@ -13,6 +13,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.PS4Controller.Button;
 import frc.robot.Constants.AutoConstants;
@@ -30,6 +31,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import java.util.List;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.path.PathConstraints;
 
 /*
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -84,6 +86,16 @@ public class RobotContainer {
 
 
   public Command getAutonomousCommand() {
-    return null;
+PathConstraints constraints = new PathConstraints(
+        1.4, 1.2,
+        Units.degreesToRadians(540.0),
+        Units.degreesToRadians(540.0)
+    );
+    
+    return AutoBuilder.pathfindToPose(
+        new Pose2d(5.0, 4.0, Rotation2d.fromDegrees(0)),
+        constraints,
+        0.0
+    );
   }
 }
