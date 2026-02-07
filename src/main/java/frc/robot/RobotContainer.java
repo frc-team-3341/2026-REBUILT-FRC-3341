@@ -75,6 +75,7 @@ public class RobotContainer {
     driver_controller.start().onTrue(swerve.zeroHeading());
     
     // Pathfind to a specific pose when A button is pressed
+    swerve.resetOdometry(new Pose2d(0, 0, new Rotation2d(0)));
     driver_controller.a().onTrue(
         AutoBuilder.pathfindToPose(
             new Pose2d(1.0, 1.0, Rotation2d.fromDegrees(0)),
