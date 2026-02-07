@@ -20,6 +20,7 @@ import com.pathplanner.lib.path.PathConstraints;
 import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
 
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -82,10 +83,26 @@ public class DriveSubsystem extends SubsystemBase {
 
   // Create kinematics object
   private SwerveDriveKinematics kinematics;
+  private SwerveDrivePoseEstimator poseEstimator;
+
   
   private SwerveDriveSimulation mapleSimDrive;
   private final Field2d field = new Field2d();
 
+  private SendableChooser<Command> autoChooser = new SendableChooser<>();
+  // The gyro sensor
+  private AHRS navx = new AHRS(NavXComType.kMXP_SPI);
+
+ // Odometry class for tracking robot pose
+ SwerveDriveOdometry m_odometry = new SwerveDriveOdometry(
+     DriveConstants.kDriveKinematics,
+     Rotation2d.fromDegrees(navx.getYaw()),
+     new SwerveModulePosition[] {
+         m_frontLeft.getPosition(),
+         m_frontRight.getPosition(),
+         m_rearLeft.getPosition(),
+         m_rearRight.getPosition()
+     });
 
 // Add this method to DriveSubsystem
 private void createSimulationSwerve(Pose2d startingPose) {
@@ -121,21 +138,6 @@ private void createSimulationSwerve(Pose2d startingPose) {
     SimulatedArena.getInstance().addDriveTrainSimulation(mapleSimDrive);
 }
 
-  // The gyro sensor
-  private AHRS navx = new AHRS(NavXComType.kMXP_SPI);
-
-  // Odometry class for tracking robot pose
-  SwerveDriveOdometry m_odometry = new SwerveDriveOdometry(
-      DriveConstants.kDriveKinematics,
-      Rotation2d.fromDegrees(navx.getYaw()),
-      new SwerveModulePosition[] {
-          m_frontLeft.getPosition(),
-          m_frontRight.getPosition(),
-          m_rearLeft.getPosition(),
-          m_rearRight.getPosition()
-      });
-  
-  private SendableChooser<Command> autoChooser = new SendableChooser<>();
 
   /** Creates a new DriveSubsystem. */
   public DriveSubsystem() {
@@ -148,6 +150,17 @@ private void createSimulationSwerve(Pose2d startingPose) {
 
     statePublisher = NetworkTableInstance.getDefault().getStructArrayTopic("/SwerveStates", SwerveModuleState.struct).publish();
     this.kinematics = Constants.DriveConstants.kDriveKinematics;
+    this.poseEstimator = new SwerveDrivePoseEstimator(
+        kinematics,
+        Rotation2d.fromDegrees(navx.getYaw()),
+        new SwerveModulePosition[] {
+            m_frontLeft.getPosition(),
+            m_frontRight.getPosition(),
+            m_rearLeft.getPosition(),
+            m_rearRight.getPosition()
+        },
+        new Pose2d()
+    );
     SmartDashboard.putData("Field", field);
 
     createAuto();

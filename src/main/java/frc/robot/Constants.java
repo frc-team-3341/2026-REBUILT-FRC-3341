@@ -90,23 +90,19 @@ public final class Constants {
 
   }
       public static final class VisionConstants {
-        public static final String kBottomCameraName = "bob";
-        public static final String kRightCameraName = "TopCamera";
+        public static final String frontCamera = "pterodactyl";
         // See https://docs.wpilib.org/en/stable/docs/software/basic-programming/coordinate-system.html#robot-coordinate-system
         // for why these values the way they are. In short x is positive towards the front, y is positive to left, z is positive to the sky
-        public static final Transform3d kBottomRobotToCam =
-                new Transform3d(new Translation3d(Units.inchesToMeters(12.75), Units.inchesToMeters(0), Units.inchesToMeters(12.5)), new Rotation3d(0, 0, 0));
+        private static final double frontCamPitch = Units.degreesToRadians(25.0); //TODO: for testing, check what the camera pitch is
+        public static final Transform3d robotToFrontCam =
+                new Transform3d(new Translation3d(Units.inchesToMeters(12.75), Units.inchesToMeters(0), Units.inchesToMeters(12.5)), new Rotation3d(0, frontCamPitch, 0));
 
-        private static final double topCamPitch = Units.degreesToRadians(25.0);
-        public static final Transform3d kTopRobotToCam =
-                new Transform3d(new Translation3d(Units.inchesToMeters(9), Units.inchesToMeters(9.75), Units.inchesToMeters(35.5)),
-                new Rotation3d(0, -topCamPitch, 0));
         // The layout of the AprilTags on the field
         public static final AprilTagFieldLayout kTagLayout =
                 AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 
         // The standard deviations of our vision estimated poses, which affect correction rate
-        // (Fake values. Experiment and determine estimation noise on an actual robot.)
+        // TODO: (Fake values. Experiment and determine estimation noise on an actual robot.)
         public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(4, 4, 8);
         public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
 
