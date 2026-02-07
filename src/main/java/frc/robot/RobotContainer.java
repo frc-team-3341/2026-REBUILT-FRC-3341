@@ -25,6 +25,7 @@ public class RobotContainer {
   public RobotContainer() {
     driver_controller.a().onTrue(shooter.incrementVel());
     driver_controller.b().onTrue(shooter.stopMotor());
+    driver_controller.x().onTrue(shooter.decrementVel());
 
   }
 
