@@ -2,7 +2,6 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
  
-//TODO Everything, fix the target rpm value, 
 package frc.robot.subsystems;
 
 import com.revrobotics.PersistMode;
@@ -26,12 +25,11 @@ public class ShooterSubsystem extends SubsystemBase {
   private final int drivingCANId = 1; //NEED TO SET
   private final SparkFlex shooter;
   private double targetRPM = 0;
-  private double velocity = 0.1;
+  private double velocity = 0;
 
   private final SparkFlexConfig shooterConfig;
   private SparkClosedLoopController closedLoopController;
   private RelativeEncoder relativeEncoder;
-
 
   public ShooterSubsystem() {
     shooter = new SparkFlex(drivingCANId, MotorType.kBrushless);
@@ -42,27 +40,30 @@ public class ShooterSubsystem extends SubsystemBase {
         .idleMode(IdleMode.kCoast);
 
     closedLoopController = shooter.getClosedLoopController();
-    // shooterConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder);
 
     shooterConfig.closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         .p(0.0001, ClosedLoopSlot.kSlot0)
-        .i(0, ClosedLoopSlot.kSlot0)
+        .i(0.0000001, ClosedLoopSlot.kSlot0)
         .d(0, ClosedLoopSlot.kSlot0)
         .outputRange(-1, 1, ClosedLoopSlot.kSlot0)
         .feedForward
-          .kV(12.0 / 5767, ClosedLoopSlot.kSlot0);
+          .kV(0.00016, ClosedLoopSlot.kSlot0);// found through trial and error <a href="https://docs.google.com/spreadsheets/d/1mUxeWXwDsTIuaJu80DP9HOvX7ygvbocv1wcLSLS03-A/edit?gid=0#gid=0"> 
 
     shooter.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-
-    }
+  }
 
 
 
   public void setVelocity(double v) {
     targetRPM = (v * 60.0)/ (Math.PI * ShooterConstants.flywheelDiameter);
+    //shooter.setVoltage(2.0);
+    closedLoopController.setSetpoint(targetRPM, ControlType.kVelocity, ClosedLoopSlot.kSlot0);
   }
-  
+public void setRPM(double rpm) {
+  targetRPM = rpm;
+  closedLoopController.setSetpoint(rpm,ControlType.kVelocity,ClosedLoopSlot.kSlot0);
+}
 /**
  * Uses conservation of angular momentum to calculate the required
  * RPM to launch the ball out at the desired velocity
@@ -115,7 +116,20 @@ public class ShooterSubsystem extends SubsystemBase {
       
       return velocity;
   }
+  public Command slowMotor() {
+    return this.runOnce(() -> {
+        while (velocity != 0) {
+          if (velocity > 0) {
+            velocity = velocity - 0.2;
+          }
+          if (velocity < 0) {
+            velocity = 0;
+          }
+          setVelocity(velocity);
+      }
 
+    });
+  }
   public Command stopMotor() {
     return this.runOnce(() -> {
         velocity = 0;
@@ -124,13 +138,13 @@ public class ShooterSubsystem extends SubsystemBase {
   }
   public Command decrementVel() {
     return this.runOnce(() -> {
-        velocity -= 0.1;
+        velocity -= 0.5;
         setVelocity(velocity);
     });  
   }
   public Command incrementVel(){
     return this.runOnce(() -> {
-      velocity += 0.1;
+      velocity += 0.5;
       setVelocity(velocity);
     });
   }
@@ -138,10 +152,10 @@ public class ShooterSubsystem extends SubsystemBase {
 
  @Override
   public void periodic() {
-    closedLoopController.setSetpoint(targetRPM, ControlType.kVelocity, ClosedLoopSlot.kSlot0);
-    SmartDashboard.putNumber("Target Velocity", velocity);
-    SmartDashboard.putNumber("Encoder RPM", relativeEncoder.getVelocity());
-    SmartDashboard.putNumber("Target RPM", targetRPM);
+  SmartDashboard.putNumber("Target Velocity", velocity);
+  SmartDashboard.putNumber("Encoder RPM", relativeEncoder.getVelocity());
+  SmartDashboard.putNumber("Target RPM", targetRPM);
+    }
   }
-}
+
 

@@ -24,8 +24,9 @@ public class RobotContainer {
   private final ShooterSubsystem shooter = new ShooterSubsystem();
   public RobotContainer() {
     driver_controller.a().onTrue(shooter.incrementVel());
-    driver_controller.b().onTrue(shooter.stopMotor());
+    driver_controller.b().onTrue(shooter.slowMotor());
     driver_controller.x().onTrue(shooter.decrementVel());
+    driver_controller.leftTrigger().onTrue(shooter.stopMotor());
 
   }
 

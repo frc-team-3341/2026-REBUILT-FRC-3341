@@ -120,14 +120,11 @@ public final class Constants {
 
   public static final class ShooterConstants {
 
-    //TODO figure out this value
-    public static final double flywheelMomentofInertia = 1.50940645; 
+    public static final double flywheelMomentofInertia = 1.50940645; //Needs to be verified
 
-    //TODO figure out this value
-    public static final double flywheelMass = 0.576834118;
+    public static final double flywheelMass = 0.576834118;//Needs to be verified
 
-    //TODO figure out this value
-    public static final double flywheelDiameter = 0.08;
+    public static final double flywheelDiameter = 0.09;
 
     public static final double launchAngle = 75;
 
