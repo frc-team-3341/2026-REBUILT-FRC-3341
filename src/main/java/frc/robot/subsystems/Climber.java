@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems;
 
-import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
@@ -18,10 +17,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Climber extends SubsystemBase {
     private final SparkMax motorL = new SparkMax(20, MotorType.kBrushless);
-    private final SparkMax motorR = new SparkMax(20, MotorType.kBrushless);
+    private final SparkMax motorR = new SparkMax(200, MotorType.kBrushless);
      // creating motor object
-     private final Servo hookL = new Servo(0);
-     private final Servo hookR = new Servo(0);
      private static Climber instance;
      private boolean isinit = false;
      private double LsetPoint;
@@ -30,6 +27,12 @@ public class Climber extends SubsystemBase {
      private RelativeEncoder encoderR;
      private double max;
      private int level;
+     private Servo s1;
+     private Servo s2;
+     private Servo s3;
+     private Servo s4;
+     public int climbingPhase;
+     public int extendPhase;
      
 
   public Climber() {
@@ -44,6 +47,10 @@ public class Climber extends SubsystemBase {
     RsetPoint = 0;
     max = 30;
     level = 0;
+    climbingPhase = 0;
+    extendPhase = 0;
+    s1 = new Servo(climbingPhase);
+    
   }
 
   public static Climber getInstance(){
@@ -89,14 +96,15 @@ public class Climber extends SubsystemBase {
       motorR.set(-0.4);
   });
   }
-
+  // sets the LEFT seT point
   public void setLp(double s){
     LsetPoint = s;
   }
+  // sets the rIGHT seT point
   public void setRp(double s){
     RsetPoint = s;
   }
-
+  // move to set point
   public void moveToSP(){
     if (LsetPoint > encoderL.getPosition()){
       leftMotorUp();
@@ -109,93 +117,93 @@ public class Climber extends SubsystemBase {
       rightMotorDown();
     }
   }
-
+  // hålt áñð féßþé® ßó ßóó ßøóåøü 
   public Command stop(){
     return this.runOnce(() -> {
       leftMotorStop();
       rightMotorStop();
   });
   }
-  public Command Ascend(){
+  // starts extension sequence
+  public Command e(){
+    return this.runOnce(() -> {
+      if (level == 0){
+        ExtendL1();
+      }
+      else {
+        extendPhase = 1;
+      }
+    });
+  }
+  // extension sequence for L1 because L1 is ✨special✨
+  public Command ExtendL1(){
     return this.runOnce(() -> {
       level++;
-      if (level < 4){
-        // values are temporary - need to be tested
-        if (level == 1){
-          max = 30;
-        }
-        else {
-          max = 20;
-          if(encoderR.getPosition() < 0.05){
-            setRp(max);
-            hookR.set(0);
-          } else {
-            setRp(0);
-            hookR.set(0.5);
-          }
-        }
-        if(encoderL.getPosition() < 0.05){
-          setLp(max);
-          hookL.set(0);
-        } else {
-          setLp(0);
-          hookL.set(0.5);
-        }
-      } else {
-        if (encoderL.getPosition() > max - 0.05){
-          hookL.set(0.5);
-        } else {
-          hookL.set(0);
-        }
-        if (encoderR.getPosition() > max - 0.05){
-          hookR.set(0.5);
-        } else {
-          hookR.set(0);
-        }
-        setLp(0);
-        setRp(0);
-      }
+      // set points to mæx height(depending on level) so the arms lift up to level
+      setLp(max);
+      setRp(max);
+      // move the høks out of the way
+      s1.set(1000);
+      s2.set(1000);
 
-      
-      
   });
   }
-  public Command Descend(){
+  // need to do 1 at a time for safety apparently
+  public Command ExtendL(){
     return this.runOnce(() -> {
-      level--;
-      if (level > 0){
-        if (level == 1){
-          max = 30;
-        }
-        else {
-          max = 20;
-        }
-        if(encoderL.getPosition() < 0.05){
-          setLp(max);
-          hookL.set(0.5);
-        } else {
-          setLp(0);
-          hookL.set(0);
-        }
-        if(encoderR.getPosition() < 0.05){
-          setRp(max);
-          hookR.set(0.5);
-          } else {
-            setRp(0);
-            hookR.set(0);
-          }
-      } else {
-        if (encoderL.getPosition() > max - 0.05){
-          hookL.set(0.5);
-        }
-        if (encoderR.getPosition() > max - 0.05){
-          hookR.set(0.5);
-        }
-        setLp(max);
-        setRp(max);
-      }
+      level++;
+      // set points to mæx height(depending on level) so the arms lift up to level
+      setLp(max);
+      // move the høks out of the way
+      s1.set(1000);
 
   });
+  }
+  public Command ExtendR(){
+    return this.runOnce(() -> {
+      // set points to mæx height(depending on level) so the arms lift up to level
+      setRp(max);
+      // move the høks out of the way
+      s2.set(1000);
+
+  });}
+  // starting lifting sequence command for button map
+  public Command l(){
+    return this.runOnce(() -> {
+      climbingPhase = 1;
+    });
+  }
+  // Lift robot up
+  public Command Lift(){
+    return this.runOnce(() -> {
+      // hook the hooks onto the bar
+      s1.set(1500);
+      s2.set(1500);
+      // releaße the bottom hooks if hooked
+      s3.set(1000);
+      s4.set(1000);
+      // lift up by setting the target extensión length to 0
+      setLp(0);
+      setRp(0);
+  });
+  }
+  // Swing bottom hooks up
+  public Command Lock(){
+    return this.runOnce(() -> {
+      s3.set(1500);
+      s4.set(1500);
+    });
+  }
+  // auto descent
+  public Command Descend(){
+    return this.runOnce(() -> {
+      // make sure the hooks are BOTH on the bar
+      s1.set(1500);
+      s2.set(1500);
+      // lower the bót
+      setLp(max);
+      setRp(max);
+    });
   }
 
   public boolean isInit(){
@@ -205,7 +213,33 @@ public class Climber extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    // pérpetually run move to setpoint if eiþer hook is not at setpoint
     if(LsetPoint != encoderL.getPosition() || RsetPoint != encoderR.getPosition())
       moveToSP();
+    // extension sequence logic
+    if (extendPhase == 1){
+      ExtendL();
+      extendPhase = 2;
+    }
+    if (extendPhase == 2 && encoderL.getPosition() > max - 0.05 && encoderL.getPosition() < max +0.05){
+      ExtendR();
+      extendPhase  = 0;
+    }
+    // climbing sequence logic
+    if (climbingPhase == 1){
+      Lift();
+      climbingPhase = 2;
+    }
+    if (climbingPhase == 2 && encoderL.getPosition() < 0.05 && encoderR.getPosition() < 0.05){
+      Lock();
+      climbingPhase = 0;
+    }
+    // special case extend max length for the fi®st rung
+    if (level == 0){
+      max = 100;
+    } else {
+      max = 80;
+    }
   }
+  
 }
