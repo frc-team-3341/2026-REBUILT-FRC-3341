@@ -26,6 +26,8 @@ import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+
 import java.util.List;
 
 /*
@@ -39,6 +41,7 @@ public class RobotContainer {
   // The robot's subsystems
   private Intake robotIntake;
 
+
   // The driver's controller
   CommandXboxController driver_controller = new CommandXboxController(0);
   //CommandJoystick mech_joystick = new CommandJoystick(OIConstants.kMechJoystickPort);
@@ -47,8 +50,9 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
-    // Configure the button bindings     
+    // Configure the button bindings
     createIntake();
+
   }
 
   /**
@@ -63,12 +67,15 @@ public class RobotContainer {
   
   public void createIntake(){
     robotIntake = new Intake();
-    System.out.println(robotIntake.getBeamBreak());
-    //if(robotIntake.getBeamBreak() == true){
-      driver_controller.button(0).onTrue(robotIntake.intakeBall()).onFalse(robotIntake.stopIntake());
-    //}
-  }
+    
+    driver_controller.a().onTrue(robotIntake.intakeBall()).onFalse(robotIntake.stopIntake());
+    
+    Trigger beamBreakIntake = new Trigger(() ->{
+      return robotIntake.getBeamBreak();
+    });
 
+    beamBreakIntake.onTrue(robotIntake.stopIntake());
+  }
 
   public Command getAutonomousCommand() {
     return null;
