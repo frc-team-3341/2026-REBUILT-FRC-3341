@@ -62,7 +62,7 @@ public final class Constants {
     public static final boolean kFrontLeftDrivingMotorOnBottom = false;
     public static final boolean kRearLeftDrivingMotorOnBottom = true;
     public static final boolean kFrontRightDrivingMotorOnBottom = false;
-    public static final boolean kRearRightDrivingMotorOnBottom = true;
+    public static final boolean kRearRightDrivingMotorOnBottom = false;
 
     public static final boolean kFrontLeftTurningMotorOnBottom = false;
     public static final boolean kRearLeftTurningMotorOnBottom = false;
@@ -90,7 +90,7 @@ public final class Constants {
 
   }
       public static final class VisionConstants {
-        public static final String frontCamera = "pterodactyl";
+        public static final String frontCameraName = "pterodactyl";
         // See https://docs.wpilib.org/en/stable/docs/software/basic-programming/coordinate-system.html#robot-coordinate-system
         // for why these values the way they are. In short x is positive towards the front, y is positive to left, z is positive to the sky
         private static final double frontCamPitch = Units.degreesToRadians(25.0); //TODO: for testing, check what the camera pitch is

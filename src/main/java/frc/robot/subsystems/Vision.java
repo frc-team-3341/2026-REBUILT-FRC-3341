@@ -21,10 +21,10 @@ import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 public class Vision {
-    private final PhotonCamera camera;
-    private final PhotonPoseEstimator photonEstimator;
+    private final PhotonCamera frontCamera;
+    private final PhotonPoseEstimator frontCamPhotonEstimator;
     private Matrix<N3, N1> curStdDevs;
-    private final EstimateConsumer estConsumer;
+    // private final EstimateConsumer estConsumer;
 
     // Simulation
     private PhotonCameraSim cameraSim;
@@ -34,10 +34,10 @@ public class Vision {
      * @param estConsumer Lamba that will accept a pose estimate and pass it to your desired {@link
     *     edu.wpi.first.math.estimator.SwerveDrivePoseEstimator}
     */
-    public Vision(EstimateConsumer estConsumer) {
-        this.estConsumer = estConsumer;
-        camera = new PhotonCamera(frontCamera);
-        photonEstimator = new PhotonPoseEstimator(kTagLayout, robotToFrontCam);
+    public Vision() { //EstimateConsumer estConsumer
+        // this.estConsumer = estConsumer;
+        frontCamera = new PhotonCamera(frontCameraName);
+        frontCamPhotonEstimator = new PhotonPoseEstimator(kTagLayout, robotToFrontCam);
 
         // ----- Simulation ------
         if (Robot.isSimulation()) {
@@ -54,7 +54,7 @@ public class Vision {
             cameraProp.setLatencyStdDevMs(15);
             // Create a PhotonCameraSim which will update the linked PhotonCamera's values with visible
             // targets.
-            cameraSim = new PhotonCameraSim(camera, cameraProp);
+            cameraSim = new PhotonCameraSim(frontCamera, cameraProp);
             // Add the simulated camera to view the targets on this simulated field.
             visionSim.addCamera(cameraSim, robotToFrontCam);
 
@@ -62,14 +62,26 @@ public class Vision {
         }
     }
 
+    public Optional<EstimatedRobotPose> getFrontCameraEstimatedGlobalPose() {
+        Optional<EstimatedRobotPose> visionEst = Optional.empty();
+        for (var change : frontCamera.getAllUnreadResults()) {
+            visionEst = frontCamPhotonEstimator.update(change);
+            this.updateEstimationStdDevs(visionEst, change.getTargets(), frontCamPhotonEstimator);
+        }
+        return visionEst;
+    }        
+
     public void periodic() {
         Optional<EstimatedRobotPose> visionEst = Optional.empty();
-        for (var result : camera.getAllUnreadResults()) {
-            visionEst = photonEstimator.estimateCoprocMultiTagPose(result);
+
+        for (var result : frontCamera.getAllUnreadResults()) {
+            visionEst = frontCamPhotonEstimator.estimateCoprocMultiTagPose(result);
+            
             if (visionEst.isEmpty()) {
-                visionEst = photonEstimator.estimateLowestAmbiguityPose(result);
+                visionEst = frontCamPhotonEstimator.estimateLowestAmbiguityPose(result);
             }
-            updateEstimationStdDevs(visionEst, result.getTargets());
+
+            this.updateEstimationStdDevs(visionEst, result.getTargets(), frontCamPhotonEstimator);
 
             if (Robot.isSimulation()) {
                 visionEst.ifPresentOrElse(
@@ -82,13 +94,13 @@ public class Vision {
                         });
             }
 
-            visionEst.ifPresent(
-                    est -> {
-                        // Change our trust in the measurement based on the tags we can see
-                        var estStdDevs = getEstimationStdDevs();
+            // visionEst.ifPresent(
+            //         est -> {
+            //             // Change our trust in the measurement based on the tags we can see
+            //             var estStdDevs = getEstimationStdDevs();
 
-                        estConsumer.accept(est.estimatedPose.toPose2d(), est.timestampSeconds, estStdDevs);
-                    });
+            //             estConsumer.accept(est.estimatedPose.toPose2d(), est.timestampSeconds, estStdDevs);
+            //         });
         }
     }
 
@@ -100,7 +112,7 @@ public class Vision {
     * @param targets All targets in this camera frame
     */
     private void updateEstimationStdDevs(
-            Optional<EstimatedRobotPose> estimatedPose, List<PhotonTrackedTarget> targets) {
+            Optional<EstimatedRobotPose> estimatedPose, List<PhotonTrackedTarget> targets, PhotonPoseEstimator poseEstimator) {
         if (estimatedPose.isEmpty()) {
             // No pose input. Default to single-tag std devs
             curStdDevs = kSingleTagStdDevs;
@@ -113,7 +125,7 @@ public class Vision {
 
             // Precalculation - see how many tags we found, and calculate an average-distance metric
             for (var tgt : targets) {
-                var tagPose = photonEstimator.getFieldTags().getTagPose(tgt.getFiducialId());
+                var tagPose = frontCamPhotonEstimator.getFieldTags().getTagPose(tgt.getFiducialId());
                 if (tagPose.isEmpty()) continue;
                 numTags++;
                 avgDist +=
@@ -151,7 +163,7 @@ public class Vision {
         return curStdDevs;
     }
 
-    // ----- Simulation
+    // ----- Simulation -----
 
     public void simulationPeriodic(Pose2d robotSimPose) {
         visionSim.update(robotSimPose);

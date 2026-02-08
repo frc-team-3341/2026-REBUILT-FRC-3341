@@ -84,7 +84,7 @@ public class DriveSubsystem extends SubsystemBase {
   // Create kinematics object
   private SwerveDriveKinematics kinematics;
   private SwerveDrivePoseEstimator poseEstimator;
-
+  private Vision vision;
   
   private SwerveDriveSimulation mapleSimDrive;
   private final Field2d field = new Field2d();
@@ -140,7 +140,7 @@ private void createSimulationSwerve(Pose2d startingPose) {
 
 
   /** Creates a new DriveSubsystem. */
-  public DriveSubsystem() {
+  public DriveSubsystem(Vision vision) {
     modules = new EasySwerveModule[4];
 
     modules[0] = m_frontLeft;
@@ -150,6 +150,7 @@ private void createSimulationSwerve(Pose2d startingPose) {
 
     statePublisher = NetworkTableInstance.getDefault().getStructArrayTopic("/SwerveStates", SwerveModuleState.struct).publish();
     this.kinematics = Constants.DriveConstants.kDriveKinematics;
+    this.vision = vision;
     this.poseEstimator = new SwerveDrivePoseEstimator(
         kinematics,
         Rotation2d.fromDegrees(navx.getYaw()),
@@ -159,7 +160,7 @@ private void createSimulationSwerve(Pose2d startingPose) {
             m_rearLeft.getPosition(),
             m_rearRight.getPosition()
         },
-        new Pose2d()
+        new Pose2d() // STARTING POSE 
     );
     SmartDashboard.putData("Field", field);
 
@@ -169,7 +170,6 @@ private void createSimulationSwerve(Pose2d startingPose) {
     if (Robot.isSimulation()) {
         createSimulationSwerve(new Pose2d()); // Or whatever starting pose you want
     }
-
   }
 
   private void createAuto()  {
@@ -230,7 +230,6 @@ private void createSimulationSwerve(Pose2d startingPose) {
     // The simulation handles everything automatically with Maple Sim
   }
 
-
   @Override
   public void periodic() {
     // Update the odometry in the periodic block
@@ -242,11 +241,22 @@ private void createSimulationSwerve(Pose2d startingPose) {
             m_rearLeft.getPosition(),
             m_rearRight.getPosition()
         });
-    
-    SmartDashboard.putNumber("navx angle", navx.getAngle());
-              
-  field.setRobotPose(getPose());
 
+    // Correct pose estimate with vision measurements
+    var visionEst = vision.getFrontCameraEstimatedGlobalPose();
+    
+    visionEst.ifPresent(
+        est -> {
+            // Change our trust in the measurement based on the tags we can see
+            var estStdDevs = vision.getEstimationStdDevs();
+            if (estStdDevs != null){
+              poseEstimator.addVisionMeasurement(
+                  est.estimatedPose.toPose2d(), est.timestampSeconds, estStdDevs);
+            }
+        });
+    SmartDashboard.putNumber("navx angle", navx.getAngle());
+    
+    field.setRobotPose(getPose());
   }
 
   //---------------METHODS----------------
@@ -347,6 +357,11 @@ private void createSimulationSwerve(Pose2d startingPose) {
       modules[i].setDriveVoltage(0);
       modules[i].setTurnVoltage(0);
     }
+  }
+
+  // Returns the current yaw value (in degrees, from -180 to 180)
+  public double getYaw() {
+    return navx.getYaw();
   }
 
   /** 
