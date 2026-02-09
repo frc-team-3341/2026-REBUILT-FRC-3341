@@ -64,31 +64,6 @@ public void setRPM(double rpm) {
   targetRPM = rpm;
   closedLoopController.setSetpoint(rpm,ControlType.kVelocity,ClosedLoopSlot.kSlot0);
 }
-/**
- * Uses conservation of angular momentum to calculate the required
- * RPM to launch the ball out at the desired velocity
- * 
- * Might need to update this method to account for loss of energy
- * 
- * @param velocity
- * 
- * Represents the desired launch velocity in m/s
- * 
- * @see <a href="https://drive.google.com/file/d/1pNwEd03rzBCn8M5KGe_-abfVvG_O993O/view?usp=sharing">Derivation for the formula used</a>
-
- */
-
-  public void calculateLaunchRPM(double velocity) {
-
-    double flywheelRadius = ShooterConstants.flywheelDiameter/2;
-
-    double finalAngularVelocity = (velocity/flywheelRadius);
-
-    double initialAngularVelocity = finalAngularVelocity + 
-      (ShooterConstants.flywheelMass*velocity*flywheelRadius)/(ShooterConstants.flywheelMomentofInertia);
-    
-    targetRPM = (initialAngularVelocity*60)/(2*Math.PI); 
-  } 
 
   /**
    * Uses basic projectile motion to calculate the linear launch velocity necessary to shoot a
@@ -112,7 +87,7 @@ public void setRPM(double rpm) {
 
       double velocity = ((distance)/(Math.cos(angle))) * 
           Math.sqrt(9.81/
-              (2*(distance*Math.tan(angle)+initialHeight)));
+              (2*(distance*Math.tan(angle)+(initialHeight-ShooterConstants.hubHeight))));
       
       return velocity;
   }

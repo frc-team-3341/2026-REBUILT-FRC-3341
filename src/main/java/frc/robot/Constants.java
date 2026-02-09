@@ -124,11 +124,15 @@ public final class Constants {
 
     public static final double flywheelMass = 0.576834118;//Needs to be verified
 
+    //meters
     public static final double flywheelDiameter = 0.09;
 
     public static final double launchAngle = 75;
 
     //TODO figure out this value
     public static final double shooterHeight = 0;
+
+    //this is most likely correct, measured in meters from the ground
+    public static final double hubHeight = 1.43;
   }
 }
