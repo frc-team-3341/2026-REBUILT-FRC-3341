@@ -121,25 +121,21 @@ public double getRPM4Vel(double velocity){
       return velocity;
   }
   public Command slowMotor() {
-    return this.runOnce(() -> {
-        while (velocity != 0) {
-          if (velocity > 0) {
-            velocity = velocity - 0.2;
-          }
-          if (velocity < 0) {
-            velocity = 0;
-          }
-          setRPM(velocity*50);
+    return this.run(() -> {
+      if (velocity > 0) {
+        velocity = Math.max(0, velocity - 0.2);
       }
-
-    });
+      setRPM(velocity * 50);
+    }).until(() -> velocity <= 0);
   }
+  
   public Command stopMotor() {
     return this.runOnce(() -> {
         velocity = 0;
         setRPM(velocity*100);
     });  
   }
+  
   public Command decrementVel() {
     return this.runOnce(() -> {
         targetRPM -= 100;
