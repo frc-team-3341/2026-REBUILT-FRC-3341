@@ -23,7 +23,7 @@ public final class Configs {
 
       drivingConfig
         .idleMode(IdleMode.kBrake)
-        .smartCurrentLimit(50);   // 70 for SparkFlex
+        .smartCurrentLimit(40);   // 70 for SparkFlex
       drivingConfig
         .encoder
           .positionConversionFactor(drivingFactor) // meters
@@ -39,7 +39,7 @@ public final class Configs {
 
       turningConfig
         .idleMode(IdleMode.kBrake)
-        .smartCurrentLimit(20);   // 70 for SparkFlex
+        .smartCurrentLimit(40);   // 70 for SparkFlex
       turningConfig
         .absoluteEncoder
           // Do not invert the turning encoder, since the output shaft rotates in the same

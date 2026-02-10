@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -41,37 +42,38 @@ public final class Constants {
 
     // Angular offsets of the modules relative to the chassis in radians
     private static final double kEasySwerveAngularOffsetCompensation = Math.PI / 4;
-    public static final double kFrontLeftChassisAngularOffset = (-Math.PI / 2) + kEasySwerveAngularOffsetCompensation;
-    public static final double kFrontRightChassisAngularOffset = 0 + kEasySwerveAngularOffsetCompensation;
-    public static final double kRearLeftChassisAngularOffset = Math.PI + kEasySwerveAngularOffsetCompensation;
-    public static final double kRearRightChassisAngularOffset = (Math.PI / 2) + kEasySwerveAngularOffsetCompensation;
+    public static final double kFrontLeftChassisAngularOffset = 0;
+    public static final double kFrontRightChassisAngularOffset = 0;
+    public static final double kRearLeftChassisAngularOffset = 0;
+    public static final double kRearRightChassisAngularOffset = 0;
 
     // The EasySwerve module allows installation of the motors either on top or bottom of the module.
     // These constants configure the location of the motors. The default configuration is with both
     // motors on the bottom of the module.
     public static final boolean kFrontLeftDrivingMotorOnBottom = true;
-    public static final boolean kRearLeftDrivingMotorOnBottom = true;
+    public static final boolean kRearLeftDrivingMotorOnBottom = false;
     public static final boolean kFrontRightDrivingMotorOnBottom = true;
     public static final boolean kRearRightDrivingMotorOnBottom = true;
 
-    public static final boolean kFrontLeftTurningMotorOnBottom = true;
-    public static final boolean kRearLeftTurningMotorOnBottom = true;
-    public static final boolean kFrontRightTurningMotorOnBottom = true;
-    public static final boolean kRearRightTurningMotorOnBottom = true;
+    public static final boolean kFrontLeftTurningMotorOnBottom = false;
+    public static final boolean kRearLeftTurningMotorOnBottom = false;
+    public static final boolean kFrontRightTurningMotorOnBottom = false;
+    public static final boolean kRearRightTurningMotorOnBottom = false;
 
     // SPARK MAX CAN IDs
     //TODO: WE NEED TO CHANGE THESE BEFORE TESTING!!!!!
-    public static final int kFrontLeftDrivingCanId = 0;
-    public static final int kRearLeftDrivingCanId = 0;
-    public static final int kFrontRightDrivingCanId = 0;
-    public static final int kRearRightDrivingCanId = 0;
+    public static final int kFrontLeftDrivingCanId = 1;
+    public static final int kRearLeftDrivingCanId = 5;
+    public static final int kFrontRightDrivingCanId = 3;
+    public static final int kRearRightDrivingCanId = 7;
 
-    public static final int kFrontLeftTurningCanId = 0;
-    public static final int kRearLeftTurningCanId = 0;
-    public static final int kFrontRightTurningCanId = 0;
-    public static final int kRearRightTurningCanId = 0;
+    public static final int kFrontLeftTurningCanId = 2;
+    public static final int kRearLeftTurningCanId = 6;
+    public static final int kFrontRightTurningCanId = 4;
+    public static final int kRearRightTurningCanId = 8;
 
     public static final boolean kGyroReversed = false;
+    public static final Rotation2d navxOffset = Rotation2d.fromDegrees(0); //Offsets driving by 90 degrees clockwise
   }
 
   public static final class ModuleConstants {

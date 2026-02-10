@@ -8,9 +8,11 @@ package frc.robot.subsystems;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import com.revrobotics.spark.SparkClosedLoopController;
-import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -21,9 +23,9 @@ import com.revrobotics.ResetMode;
 
 import frc.robot.Configs;
 
-public class EasySwerveModule {
-  private final SparkMax m_drivingSpark;
-  private final SparkMax m_turningSpark;
+public class EasySwerveModule extends SubsystemBase{
+  private final SparkFlex m_drivingSpark;
+  private final SparkFlex m_turningSpark;
 
   private final RelativeEncoder m_drivingEncoder;
   private final AbsoluteEncoder m_turningEncoder;
@@ -33,7 +35,9 @@ public class EasySwerveModule {
 
   private double m_chassisAngularOffset = 0;
   private SwerveModuleState m_desiredState = new SwerveModuleState(0.0, new Rotation2d());
+  SwerveModuleState desiredState = new SwerveModuleState();
 
+  int num;
   /**
    * Constructs an EasySwerveModule and configures the driving and turning motor,
    * encoder, and PID controller. This configuration is specific to the REV
@@ -42,8 +46,10 @@ public class EasySwerveModule {
    */
   public EasySwerveModule(int drivingCANId, int turningCANId, double chassisAngularOffset,
       boolean drivingMotorOnBottom, boolean turningMotorOnBottom) {
-    m_drivingSpark = new SparkMax(drivingCANId, MotorType.kBrushless);
-    m_turningSpark = new SparkMax(turningCANId, MotorType.kBrushless);
+    m_drivingSpark = new SparkFlex(drivingCANId, MotorType.kBrushless);
+    m_turningSpark = new SparkFlex(turningCANId, MotorType.kBrushless);
+    
+    num = turningCANId/2;
 
     m_drivingEncoder = m_drivingSpark.getEncoder();
     m_turningEncoder = m_turningSpark.getAbsoluteEncoder();
@@ -79,6 +85,14 @@ public class EasySwerveModule {
         new Rotation2d(m_turningEncoder.getPosition() - m_chassisAngularOffset));
   }
 
+  public void setDriveVoltage(double voltage) {
+    m_drivingSpark.setVoltage(voltage);
+  }
+
+  public void setTurnVoltage(double voltage) {
+    m_turningSpark.setVoltage(voltage);
+  }
+
   /**
    * Returns the current position of the module.
    *
@@ -90,6 +104,17 @@ public class EasySwerveModule {
     return new SwerveModulePosition(
         m_drivingEncoder.getPosition(),
         new Rotation2d(m_turningEncoder.getPosition() - m_chassisAngularOffset));
+  }
+
+  @Override
+  public void periodic() {
+      SmartDashboard.putNumber("module " + num + " current angle", new Rotation2d(m_turningEncoder.getPosition()).getDegrees());
+      SmartDashboard.putNumber("module " + num + " desired angle", desiredState.angle.getDegrees());
+
+      SmartDashboard.putNumber("module " + num + " cv", getState().speedMetersPerSecond);
+      SmartDashboard.putNumber("module " + num + " dv", desiredState.speedMetersPerSecond);
+
+      SmartDashboard.putNumber("module " + num + " current", m_turningSpark.getOutputCurrent());
   }
 
   /**
@@ -105,6 +130,8 @@ public class EasySwerveModule {
 
     // Optimize the reference state to avoid spinning further than 90 degrees.
     correctedDesiredState.optimize(new Rotation2d(m_turningEncoder.getPosition()));
+
+    this.desiredState = correctedDesiredState;
 
     // Command driving and turning SPARKS towards their respective setpoints.
     m_drivingClosedLoopController.setSetpoint(correctedDesiredState.speedMetersPerSecond, ControlType.kVelocity);
