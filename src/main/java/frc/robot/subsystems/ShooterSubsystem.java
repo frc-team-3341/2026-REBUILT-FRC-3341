@@ -24,7 +24,7 @@ import frc.robot.Constants.ShooterConstants;
 public class ShooterSubsystem extends SubsystemBase {
   private final int drivingCANId = 1; //NEED TO SET
   private final SparkFlex shooter;
-  private double targetRPM = 0;
+  private double targetRPM = 1000;
   private double velocity = 0;
 
   private final SparkFlexConfig shooterConfig;
@@ -64,6 +64,35 @@ public void setRPM(double rpm) {
   targetRPM = rpm;
   closedLoopController.setSetpoint(rpm,ControlType.kVelocity,ClosedLoopSlot.kSlot0);
 }
+public double getRPM4Vel(double velocity){
+  double rpm = 13.50721*(velocity)*velocity -53.50619*(velocity)+2026.24903;
+  return rpm;
+}
+/**
+ * Uses conservation of angular momentum to calculate the required
+ * RPM to launch the ball out at the desired velocity
+ * 
+ * Might need to update this method to account for loss of energy
+ * 
+ * @param velocity
+ * 
+ * Represents the desired launch velocity in m/s
+ * 
+ * @see <a href="https://drive.google.com/file/d/1pNwEd03rzBCn8M5KGe_-abfVvG_O993O/view?usp=sharing">Derivation for the formula used</a>
+
+ */
+
+  public void calculateLaunchRPM(double velocity) {
+
+    double flywheelRadius = ShooterConstants.flywheelDiameter/2;
+
+    double finalAngularVelocity = (velocity/flywheelRadius);
+
+    double initialAngularVelocity = finalAngularVelocity + 
+      (ShooterConstants.flywheelMass*velocity*flywheelRadius)/(ShooterConstants.flywheelMomentofInertia);
+    
+    targetRPM = (initialAngularVelocity*60)/(2*Math.PI); 
+  } 
 
   /**
    * Uses basic projectile motion to calculate the linear launch velocity necessary to shoot a
@@ -87,7 +116,7 @@ public void setRPM(double rpm) {
 
       double velocity = ((distance)/(Math.cos(angle))) * 
           Math.sqrt(9.81/
-              (2*(distance*Math.tan(angle)+(initialHeight-ShooterConstants.hubHeight))));
+              (2*(distance*Math.tan(angle)+initialHeight)));
       
       return velocity;
   }
@@ -100,7 +129,7 @@ public void setRPM(double rpm) {
           if (velocity < 0) {
             velocity = 0;
           }
-          setVelocity(velocity);
+          setRPM(velocity*50);
       }
 
     });
@@ -108,19 +137,19 @@ public void setRPM(double rpm) {
   public Command stopMotor() {
     return this.runOnce(() -> {
         velocity = 0;
-        setVelocity(velocity);
+        setRPM(velocity*100);
     });  
   }
   public Command decrementVel() {
     return this.runOnce(() -> {
-        velocity -= 0.5;
-        setVelocity(velocity);
+        targetRPM -= 100;
+      setRPM(targetRPM);
     });  
   }
   public Command incrementVel(){
     return this.runOnce(() -> {
-      velocity += 0.5;
-      setVelocity(velocity);
+      targetRPM += 100;
+      setRPM(targetRPM);
     });
   }
 
