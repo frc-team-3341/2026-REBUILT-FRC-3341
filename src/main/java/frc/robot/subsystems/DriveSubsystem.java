@@ -31,6 +31,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
@@ -80,6 +81,7 @@ public class DriveSubsystem extends SubsystemBase {
 
   private EasySwerveModule[] modules;
   private final StructArrayPublisher<SwerveModuleState> statePublisher;
+  private final StructPublisher<Pose2d> poseEstimatorPublisher;
 
   // Create kinematics object
   private SwerveDriveKinematics kinematics;
@@ -149,6 +151,8 @@ private void createSimulationSwerve(Pose2d startingPose) {
     modules[3] = m_rearRight;
 
     statePublisher = NetworkTableInstance.getDefault().getStructArrayTopic("/SwerveStates", SwerveModuleState.struct).publish();
+    poseEstimatorPublisher = NetworkTableInstance.getDefault().getStructTopic("/EstimatedPose", Pose2d.struct).publish();
+
     this.kinematics = Constants.DriveConstants.kDriveKinematics;
     this.vision = vision;
     this.poseEstimator = new SwerveDrivePoseEstimator(
@@ -257,6 +261,13 @@ private void createSimulationSwerve(Pose2d startingPose) {
     SmartDashboard.putNumber("navx angle", navx.getAngle());
     
     field.setRobotPose(getPose());
+    poseEstimator.update(navx.getRotation2d(), new SwerveModulePosition[] {
+            m_frontLeft.getPosition(),
+            m_frontRight.getPosition(),
+            m_rearLeft.getPosition(),
+            m_rearRight.getPosition()
+    });
+    poseEstimatorPublisher.set(poseEstimator.getEstimatedPosition());
   }
 
   //---------------METHODS----------------
