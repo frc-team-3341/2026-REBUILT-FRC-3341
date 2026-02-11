@@ -182,22 +182,30 @@ public class DriveSubsystem extends SubsystemBase {
 
       Optional<Alliance> alliance = DriverStation.getAlliance(); 
 
+      int offset = 1;
+
       if (alliance.isPresent()) { 
-        hubCenterPose = alliance.get() == Alliance.Blue 
-          ? FieldConstants.blueHubCenterPose : 
-            FieldConstants.redHubCenterPose; 
+        if (alliance.get() == Alliance.Blue) {
+          hubCenterPose = FieldConstants.blueHubCenterPose;
+          offset = 0;
+
+        }
+        else {
+          hubCenterPose = FieldConstants.redHubCenterPose;
+          offset = 180;
+        }
       } 
       
       double theta;
 
-      double xDisplacement = hubCenterPose.getX() - currentPose.getX(); 
-      double yDisplacement = hubCenterPose.getY() - currentPose.getY();
+      double xDisplacement = (hubCenterPose.getX() - currentPose.getX()); 
+      double yDisplacement = (hubCenterPose.getY() - currentPose.getY());
 
       if (xDisplacement != 0) { 
-        theta = Math.toDegrees(Math.atan(yDisplacement/xDisplacement)); 
+        theta = offset+Math.toDegrees(Math.atan(yDisplacement/xDisplacement)); 
       } 
       else {
-        theta = 0;
+        theta = offset;
       }
 
       SmartDashboard.putNumber("theta offset", theta);
