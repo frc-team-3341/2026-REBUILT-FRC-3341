@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.PS4Controller.Button;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
+import frc.robot.commands.AimDrive;
 import frc.robot.commands.SwerveTeleop;
 import frc.robot.subsystems.DriveSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -45,6 +46,7 @@ public class RobotContainer {
   CommandJoystick mech_joystick = new CommandJoystick(OIConstants.kMechJoystickPort);
 
   private final SwerveTeleop swerveTeleop = new SwerveTeleop(swerve, driver_controller);
+  private final AimDrive aimDrive = new AimDrive(swerve, driver_controller);
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -70,8 +72,12 @@ public class RobotContainer {
     
     //change this based on what the driver wants for reset heading idk man
     driver_controller.y().onTrue(swerve.zeroHeading());
-    driver_controller.x().whileTrue(swerve.run(()->swerve.drive(1, 0, 0, false))  );
 
+    driver_controller.a().onTrue(swerve.run(() -> swerve.resetOdometry(new Pose2d(0, 0, swerve.getRotation2d()))));
+
+    driver_controller.x().onTrue(swerve.runOnce(() -> swerve.setDefaultCommand(aimDrive)));
+
+    driver_controller.b().onTrue(swerve.runOnce(() -> swerve.setDefaultCommand(swerveTeleop)));
   }
 
 
