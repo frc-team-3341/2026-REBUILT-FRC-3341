@@ -173,7 +173,7 @@ public class DriveSubsystem extends SubsystemBase {
     setModuleStates(swerveModuleStates);
   }
 
-  //arc drive with poses idk if this works lool
+  //WORKS (only for blue alliance for now)
   public void aimDrive(double xSpeed, double ySpeed) { 
 
       Pose2d currentPose = getPose();
@@ -182,18 +182,21 @@ public class DriveSubsystem extends SubsystemBase {
 
       Optional<Alliance> alliance = DriverStation.getAlliance(); 
 
-      int offset = 1;
+      int offset = 0;
 
-      if (alliance.isPresent()) { 
-        if (alliance.get() == Alliance.Blue) {
-          hubCenterPose = FieldConstants.blueHubCenterPose;
-          offset = 0;
+      //end method if there is no alliance selected cuz this should only be used on the field
+      if(!alliance.isPresent()) {
+        return;
+      }
 
-        }
-        else {
+      if (alliance.get() == Alliance.Blue) {
+        hubCenterPose = FieldConstants.blueHubCenterPose;
+        offset = 0;
+      }
+      
+      else {
           hubCenterPose = FieldConstants.redHubCenterPose;
           offset = 180;
-        }
       } 
       
       double theta;
@@ -204,15 +207,18 @@ public class DriveSubsystem extends SubsystemBase {
       if (xDisplacement != 0) { 
         theta = offset+Math.toDegrees(Math.atan(yDisplacement/xDisplacement)); 
       } 
+
+      //this is incorrect currently cuz there are two places where x is 0, which means the angle
+      //can either be 90 or 270
       else {
-        theta = offset;
+        theta = offset+90;
       }
 
       SmartDashboard.putNumber("theta offset", theta);
       SmartDashboard.putNumber("x displacement", xDisplacement);
       SmartDashboard.putNumber("y displacement", yDisplacement);
       
-      double rotOutput = arcDriveController.calculate(-navx.getYaw(), theta); 
+      double rotOutput = arcDriveController.calculate(getYaw(), theta); 
 
       drive(xSpeed, ySpeed, rotOutput, true);
   }
