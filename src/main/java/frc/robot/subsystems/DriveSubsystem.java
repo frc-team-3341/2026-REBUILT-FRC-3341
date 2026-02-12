@@ -32,16 +32,10 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructArrayPublisher;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -82,6 +76,7 @@ public class DriveSubsystem extends SubsystemBase {
   private EasySwerveModule[] modules;
   private final StructArrayPublisher<SwerveModuleState> statePublisher;
   private final StructPublisher<Pose2d> poseEstimatorPublisher;
+  private final StructPublisher<Pose2d> odometryPublisher;
 
   // Create kinematics object
   private SwerveDriveKinematics kinematics;
@@ -95,7 +90,7 @@ public class DriveSubsystem extends SubsystemBase {
   // The gyro sensor
   private AHRS navx = new AHRS(NavXComType.kMXP_SPI);
 
- // Odometry class for tracking robot pose
+ // Odometry class for tracking robot pose (wheel odometry only, no vision)
  SwerveDriveOdometry m_odometry = new SwerveDriveOdometry(
      DriveConstants.kDriveKinematics,
      Rotation2d.fromDegrees(navx.getYaw()),
@@ -125,7 +120,6 @@ private void createSimulationSwerve(Pose2d startingPose) {
             DCMotor.getNEO(1),  // Driving motor
             DCMotor.getNEO(1),  // Turning motor
             ModuleConstants.kDrivingMotorReduction,
-            // For turning, EasySwerve uses through-bore encoder, gear ratio is 1:1
             1.0,
             Volts.of(0.02),
             Volts.of(0.03),
@@ -150,11 +144,17 @@ private void createSimulationSwerve(Pose2d startingPose) {
     modules[2] = m_rearLeft;
     modules[3] = m_rearRight;
 
-    statePublisher = NetworkTableInstance.getDefault().getStructArrayTopic("/SwerveStates", SwerveModuleState.struct).publish();
-    poseEstimatorPublisher = NetworkTableInstance.getDefault().getStructTopic("/EstimatedPose", Pose2d.struct).publish();
+    statePublisher = NetworkTableInstance.getDefault()
+        .getStructArrayTopic("/SwerveStates", SwerveModuleState.struct).publish();
+    poseEstimatorPublisher = NetworkTableInstance.getDefault()
+        .getStructTopic("/PoseEstimator/EstimatedPose", Pose2d.struct).publish();
+    odometryPublisher = NetworkTableInstance.getDefault()
+        .getStructTopic("/PoseEstimator/OdometryPose", Pose2d.struct).publish();
 
     this.kinematics = Constants.DriveConstants.kDriveKinematics;
     this.vision = vision;
+    
+    // Initialize pose estimator with starting position
     this.poseEstimator = new SwerveDrivePoseEstimator(
         kinematics,
         Rotation2d.fromDegrees(navx.getYaw()),
@@ -166,6 +166,7 @@ private void createSimulationSwerve(Pose2d startingPose) {
         },
         new Pose2d() // STARTING POSE 
     );
+    
     SmartDashboard.putData("Field", field);
 
     createAuto();
@@ -179,7 +180,6 @@ private void createSimulationSwerve(Pose2d startingPose) {
   private void createAuto()  {
         try {
           RobotConfig config = RobotConfig.fromGUISettings();
-
           // Configure AutoBuilder last
           AutoBuilder.configure(
               this::getPose, // Robot pose supplier
@@ -205,7 +205,7 @@ private void createSimulationSwerve(Pose2d startingPose) {
               this); // Reference to this subsystem to set requirements        
           
           // Put in the name of the auto here
-          autoChooser = AutoBuilder.buildAutoChooser("S2_H1_C2_Auto");
+          autoChooser = AutoBuilder.buildAutoChooser("name"); //TODO: put name of auto - use as parameter (String)
           SmartDashboard.putData(autoChooser);
         } catch (Exception e) {
           //If an exception is thrown here we are really in trouble
@@ -221,7 +221,7 @@ private void createSimulationSwerve(Pose2d startingPose) {
   public PathConstraints getPathFindConstraints(){
     // Create path constraints
     PathConstraints constraints = new PathConstraints(
-        0.3,   // maxVelocityMps
+        0.7,   // maxVelocityMps
         0.6,   // maxAccelerationMpsSq
         Units.degreesToRadians(540.0),
         Units.degreesToRadians(540.0)
@@ -230,13 +230,17 @@ private void createSimulationSwerve(Pose2d startingPose) {
     return constraints;
   }
 
+  @Override
   public void simulationPeriodic() {
-    // The simulation handles everything automatically with Maple Sim
+    // Update vision simulation with current pose
+    if (Robot.isSimulation()) {
+      vision.simulationPeriodic(getPose());
+    }
   }
 
   @Override
   public void periodic() {
-    // Update the odometry in the periodic block
+    // Update the odometry (wheel encoders + gyro only, no vision)
     m_odometry.update(
         Rotation2d.fromDegrees(navx.getYaw()),
         new SwerveModulePosition[] {
@@ -246,28 +250,84 @@ private void createSimulationSwerve(Pose2d startingPose) {
             m_rearRight.getPosition()
         });
 
-    // Correct pose estimate with vision measurements
-    var visionEst = vision.getFrontCameraEstimatedGlobalPose();
-    
-    visionEst.ifPresent(
-        est -> {
-            // Change our trust in the measurement based on the tags we can see
-            var estStdDevs = vision.getEstimationStdDevs();
-            if (estStdDevs != null){
-              poseEstimator.addVisionMeasurement(
-                  est.estimatedPose.toPose2d(), est.timestampSeconds, estStdDevs);
-            }
-        });
-    SmartDashboard.putNumber("navx angle", navx.getAngle());
-    
-    field.setRobotPose(getPose());
-    poseEstimator.update(navx.getRotation2d(), new SwerveModulePosition[] {
+    // Update the pose estimator with wheel odometry
+    poseEstimator.update(
+        Rotation2d.fromDegrees(navx.getYaw()),
+        new SwerveModulePosition[] {
             m_frontLeft.getPosition(),
             m_frontRight.getPosition(),
             m_rearLeft.getPosition(),
             m_rearRight.getPosition()
-    });
-    poseEstimatorPublisher.set(poseEstimator.getEstimatedPosition());
+        }
+    );
+
+    // // Add vision measurements to pose estimator
+    // var visionEst = vision.getEstimatedGlobalPose();
+    
+    // visionEst.ifPresent(est -> {
+    //     // Get the standard deviations based on the quality of the vision estimate
+    //     var estStdDevs = vision.getEstimationStdDevs();
+        
+    //     // Only add the measurement if std devs are not maxed out (which means rejected)
+    //     if (estStdDevs.get(0, 0) < Double.MAX_VALUE) {
+    //         poseEstimator.addVisionMeasurement(
+    //             est.estimatedPose.toPose2d(), 
+    //             est.timestampSeconds, 
+    //             estStdDevs
+    //         );
+            
+    //         // Debug: Vision measurement was accepted
+    //         SmartDashboard.putBoolean("Vision/MeasurementAccepted", true);
+    //     } else {
+    //         // Debug: Vision measurement was rejected
+    //         SmartDashboard.putBoolean("Vision/MeasurementAccepted", false);
+    //     }
+    // });
+    
+    // // If no vision estimate, mark as not accepted
+    // if (visionEst.isEmpty()) {
+    //     SmartDashboard.putBoolean("Vision/MeasurementAccepted", false);
+    // }
+    
+    // Odometry pose (wheel encoders + gyro only)
+    Pose2d odometryPose = m_odometry.getPoseMeters();
+    SmartDashboard.putString("Odometry/Pose", 
+        String.format("(%.2f, %.2f, %.2f°)", 
+            odometryPose.getX(),
+            odometryPose.getY(),
+            odometryPose.getRotation().getDegrees()));
+    SmartDashboard.putNumber("Odometry/X", odometryPose.getX());
+    SmartDashboard.putNumber("Odometry/Y", odometryPose.getY());
+    SmartDashboard.putNumber("Odometry/Rotation", odometryPose.getRotation().getDegrees());
+    
+    // Combined pose (odometry + vision)
+    Pose2d estimatedPose = poseEstimator.getEstimatedPosition();
+    SmartDashboard.putString("PoseEstimator/CombinedPose", 
+        String.format("(%.2f, %.2f, %.2f°)", 
+            estimatedPose.getX(),
+            estimatedPose.getY(),
+            estimatedPose.getRotation().getDegrees()));
+    SmartDashboard.putNumber("PoseEstimator/X", estimatedPose.getX());
+    SmartDashboard.putNumber("PoseEstimator/Y", estimatedPose.getY());
+    SmartDashboard.putNumber("PoseEstimator/Rotation", estimatedPose.getRotation().getDegrees());
+    
+    // Error between odometry and combined estimate
+    double xError = estimatedPose.getX() - odometryPose.getX();
+    double yError = estimatedPose.getY() - odometryPose.getY();
+    double totalError = Math.sqrt(xError * xError + yError * yError);
+    SmartDashboard.putNumber("PoseEstimator/ErrorFromOdometry", totalError);
+    
+    // NavX data
+    SmartDashboard.putNumber("NavX/Yaw", navx.getYaw());
+    SmartDashboard.putNumber("NavX/Angle", navx.getAngle());
+    SmartDashboard.putNumber("NavX/Heading", getHeading());
+    
+    // Update field widget
+    field.setRobotPose(estimatedPose);
+    
+    // Publish to NetworkTables for AdvantageScope or other tools
+    // poseEstimatorPublisher.set(estimatedPose);
+    odometryPublisher.set(odometryPose);
   }
 
   //---------------METHODS----------------
@@ -305,11 +365,20 @@ private void createSimulationSwerve(Pose2d startingPose) {
   }
 
   /**
-   * Returns the currently-estimated pose of the robot.
+   * Returns the currently-estimated pose of the robot (combined odometry + vision).
    *
    * @return The pose.
    */
   public Pose2d getPose() {
+    return poseEstimator.getEstimatedPosition();
+  }
+  
+  /**
+   * Returns the odometry-only pose of the robot (no vision fusion).
+   *
+   * @return The odometry pose.
+   */
+  public Pose2d getOdometryPose() {
     return m_odometry.getPoseMeters();
   }
     
@@ -328,11 +397,21 @@ private void createSimulationSwerve(Pose2d startingPose) {
             m_rearRight.getPosition()
         },
         pose);
+    
+    poseEstimator.resetPosition(
+        Rotation2d.fromDegrees(navx.getYaw()),
+        new SwerveModulePosition[] {
+            m_frontLeft.getPosition(),
+            m_frontRight.getPosition(),
+            m_rearLeft.getPosition(),
+            m_rearRight.getPosition()
+        },
+        pose);
 
     if (Robot.isSimulation() && mapleSimDrive != null) {
       mapleSimDrive.setSimulationWorldPose(pose);
+      vision.resetSimPose(pose);
     }
-
   }
 
   /**
@@ -347,6 +426,8 @@ private void createSimulationSwerve(Pose2d startingPose) {
     for (int i = 0; i < modules.length; i++) {
       modules[i].setDesiredState(desiredStates[i]);
     }
+
+    mapleSimDrive.setSimulationWorldPose(new Pose2d(2, 2, new Rotation2d()));
   }
 
   /** Resets the drive encoders to currently read a position of 0. */
@@ -360,6 +441,12 @@ private void createSimulationSwerve(Pose2d startingPose) {
   public Command zeroHeading() {
     return this.runOnce(()->{
       navx.reset();
+    });
+  }
+
+  public Command resetOdo(){
+    return this.runOnce(()->{
+      this.resetOdometry(new Pose2d(0, 0, new Rotation2d(0)));
     });
   }
 
@@ -411,12 +498,10 @@ private void createSimulationSwerve(Pose2d startingPose) {
     * Gets the actual SwerveModuleState[] for our use in code
     */
    public SwerveModuleState[] getActualStates() {
-
       SwerveModuleState[] states = new SwerveModuleState[modules.length];
       for (int i = 0; i < states.length; i++) {
          states[i] = this.modules[i].getState();
       }
       return states;
    }
-
 }
