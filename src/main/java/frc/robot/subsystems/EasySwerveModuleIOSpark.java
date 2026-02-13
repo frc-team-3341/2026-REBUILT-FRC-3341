@@ -15,7 +15,6 @@ package frc.robot.subsystems;
 
 import frc.robot.Constants.DriveConstants;
 import static frc.util.SparkUtil.*;
-import frc.robot.Constants.DriveConstants;
 
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.RelativeEncoder;
@@ -175,7 +174,7 @@ public class EasySwerveModuleIOSpark implements EasySwerveModuleIO {
     @Override
     public void setDriveVelocity(double velocityRadPerSec) {
         double ffVolts = driveKs * Math.signum(velocityRadPerSec) + driveKv * velocityRadPerSec;
-        driveController.setReference(
+        driveController.setSetpoint(
                 velocityRadPerSec, ControlType.kVelocity, ClosedLoopSlot.kSlot0, ffVolts, ArbFFUnits.kVoltage);
     }
 
@@ -183,6 +182,6 @@ public class EasySwerveModuleIOSpark implements EasySwerveModuleIO {
     public void setTurnPosition(Rotation2d rotation) {
         double setpoint =
                 MathUtil.inputModulus(rotation.plus(zeroRotation).getRadians(), turnPIDMinInput, turnPIDMaxInput);
-        turnController.setReference(setpoint, ControlType.kPosition);
+        turnController.setSetpoint(setpoint, ControlType.kPosition);
     }
 }
