@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
+import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 import static edu.wpi.first.units.Units.*;
@@ -32,6 +33,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -40,40 +42,39 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.DriveConstants;
-import frc.robot.Constants.ModuleConstants;
 import frc.robot.Robot;
 
 public class DriveSubsystem extends SubsystemBase {
   // Create EasySwerveModules
-  private final EasySwerveModule m_frontLeft = new EasySwerveModule(
+  private final old m_frontLeft = new old(
       DriveConstants.kFrontLeftDrivingCanId,
       DriveConstants.kFrontLeftTurningCanId,
       DriveConstants.kFrontLeftChassisAngularOffset,
       DriveConstants.kFrontLeftDrivingMotorOnBottom,
       DriveConstants.kFrontLeftTurningMotorOnBottom);
 
-  private final EasySwerveModule m_frontRight = new EasySwerveModule(
+  private final old m_frontRight = new old(
       DriveConstants.kFrontRightDrivingCanId,
       DriveConstants.kFrontRightTurningCanId,
       DriveConstants.kFrontRightChassisAngularOffset,
       DriveConstants.kFrontRightDrivingMotorOnBottom,
       DriveConstants.kFrontRightTurningMotorOnBottom);
 
-  private final EasySwerveModule m_rearLeft = new EasySwerveModule(
+  private final old m_rearLeft = new old(
       DriveConstants.kRearLeftDrivingCanId,
       DriveConstants.kRearLeftTurningCanId,
       DriveConstants.kRearLeftChassisAngularOffset,
       DriveConstants.kRearLeftDrivingMotorOnBottom,
       DriveConstants.kRearLeftTurningMotorOnBottom);
 
-  private final EasySwerveModule m_rearRight = new EasySwerveModule(
+  private final old m_rearRight = new old(
       DriveConstants.kRearRightDrivingCanId,
       DriveConstants.kRearRightTurningCanId,
       DriveConstants.kRearRightChassisAngularOffset,
       DriveConstants.kRearRightDrivingMotorOnBottom,
       DriveConstants.kRearRightTurningMotorOnBottom);
 
-  private EasySwerveModule[] modules;
+  private old[] modules;
   private final StructArrayPublisher<SwerveModuleState> statePublisher;
   private final StructPublisher<Pose2d> poseEstimatorPublisher;
   private final StructPublisher<Pose2d> odometryPublisher;
@@ -103,32 +104,22 @@ public class DriveSubsystem extends SubsystemBase {
 
 // Add this method to DriveSubsystem
 private void createSimulationSwerve(Pose2d startingPose) {
-    DriveTrainSimulationConfig simulationConfig = DriveTrainSimulationConfig.Default()
-        .withBumperSize(
-            Meters.of(DriveConstants.kTrackWidth).plus(Inches.of(5)),
-            Meters.of(DriveConstants.kWheelBase).plus(Inches.of(5))
-        )
-        .withRobotMass(Kilograms.of(DriveConstants.kRobotMassKg)) 
-        .withCustomModuleTranslations(new Translation2d[] {
-            new Translation2d(DriveConstants.kWheelBase / 2, DriveConstants.kTrackWidth / 2),
-            new Translation2d(DriveConstants.kWheelBase / 2, -DriveConstants.kTrackWidth / 2),
-            new Translation2d(-DriveConstants.kWheelBase / 2, DriveConstants.kTrackWidth / 2),
-            new Translation2d(-DriveConstants.kWheelBase / 2, -DriveConstants.kTrackWidth / 2)
-        })
+      
+    final DriveTrainSimulationConfig driveTrainSimulationConfig = DriveTrainSimulationConfig.Default()
+        // Specify gyro type (for realistic gyro drifting and error simulation)
         .withGyro(COTS.ofNav2X())
-        .withSwerveModule(new SwerveModuleSimulationConfig(
-            DCMotor.getNEO(1),  // Driving motor
-            DCMotor.getNEO(1),  // Turning motor
-            ModuleConstants.kDrivingMotorReduction,
-            1.0,
-            Volts.of(0.02),
-            Volts.of(0.03),
-            Inches.of(ModuleConstants.kWheelDiameterMeters * 39.3701 / 2), // Convert meters to inches radius
-            KilogramSquareMeters.of(0.02),
-            DriveConstants.kWheelCOF 
-        ));
+        // Specify swerve module (for realistic swerve dynamics)
+        .withSwerveModule(COTS.ofMAXSwerve(
+                DCMotor.getNEO(1), // Drive motor is a Kraken X60
+                DCMotor.getNEO(1), // Steer motor is a Falcon 500
+                COTS.WHEELS.COLSONS.cof, // Use the COF for Colson Wheels
+                3)) // L3 Gear ratio
+        // Configures the track length and track width (spacing between swerve modules)
+        .withTrackLengthTrackWidth(Inches.of(24), Inches.of(24))
+        // Configures the bumper size (dimensions of the robot bumper)
+        .withBumperSize(Inches.of(27), Inches.of(27));
 
-    mapleSimDrive = new SwerveDriveSimulation(simulationConfig, startingPose);
+    this.mapleSimDrive = new SwerveDriveSimulation(driveTrainSimulationConfig, startingPose);
 
     // Register the drivetrain simulation
     SimulatedArena.getInstance().addDriveTrainSimulation(mapleSimDrive);
@@ -137,15 +128,15 @@ private void createSimulationSwerve(Pose2d startingPose) {
 
   /** Creates a new DriveSubsystem. */
   public DriveSubsystem(Vision vision) {
-    modules = new EasySwerveModule[4];
+    modules = new old[4];
 
     modules[0] = m_frontLeft;
     modules[1] = m_frontRight;
     modules[2] = m_rearLeft;
     modules[3] = m_rearRight;
-
     statePublisher = NetworkTableInstance.getDefault()
         .getStructArrayTopic("/SwerveStates", SwerveModuleState.struct).publish();
+  
     poseEstimatorPublisher = NetworkTableInstance.getDefault()
         .getStructTopic("/PoseEstimator/EstimatedPose", Pose2d.struct).publish();
     odometryPublisher = NetworkTableInstance.getDefault()
@@ -361,6 +352,7 @@ private void createSimulationSwerve(Pose2d startingPose) {
     SwerveModuleState[] swerveModuleStates = 
       DriveConstants.kDriveKinematics.toSwerveModuleStates(robotSpeeds);
     
+    mapleSimDrive.setRobotSpeeds(robotSpeeds);
     setModuleStates(swerveModuleStates);
   }
 
@@ -427,7 +419,7 @@ private void createSimulationSwerve(Pose2d startingPose) {
       modules[i].setDesiredState(desiredStates[i]);
     }
 
-    mapleSimDrive.setSimulationWorldPose(new Pose2d(2, 2, new Rotation2d()));
+    // mapleSimDrive.setSimulationWorldPose(new Pose2d(2, 2, new Rotation2d()));
   }
 
   /** Resets the drive encoders to currently read a position of 0. */

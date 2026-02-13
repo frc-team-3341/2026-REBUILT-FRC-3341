@@ -1,138 +1,126 @@
-
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
+// Copyright 2021-2025 FRC 6328
+// http://github.com/Mechanical-Advantage
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// version 3 as published by the Free Software Foundation or
+// available in the root directory of this project.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
 
 package frc.robot.subsystems;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
+import org.littletonrobotics.junction.Logger;
 
-import com.revrobotics.spark.SparkClosedLoopController;
-import com.revrobotics.spark.SparkFlex;
-import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.SparkMaxConfig;
-import com.revrobotics.AbsoluteEncoder;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.PersistMode;
-import com.revrobotics.ResetMode;
+public class EasySwerveModule {
+    private final EasySwerveModuleIO io;
+    private final int index;
+    private final EasySwerveModuleIOInputsAutoLogged inputs = new EasySwerveModuleIOInputsAutoLogged();
 
-import frc.robot.Configs;
+    private final Alert driveDisconnectedAlert;
+    private final Alert turnDisconnectedAlert;
+    private SwerveModulePosition[] odometryPositions = new SwerveModulePosition[] {};
 
-public class EasySwerveModule extends SubsystemBase{
-  private final SparkFlex m_drivingSpark;
-  private final SparkFlex m_turningSpark;
+    public EasySwerveModule(EasySwerveModuleIO io, int index) {
+        this.io = io;
+        this.index = index;
+        driveDisconnectedAlert =
+                new Alert("Disconnected drive motor on module " + Integer.toString(index) + ".", AlertType.kError);
+        turnDisconnectedAlert =
+                new Alert("Disconnected turn motor on module " + Integer.toString(index) + ".", AlertType.kError);
+    }
 
-  private final RelativeEncoder m_drivingEncoder;
-  private final AbsoluteEncoder m_turningEncoder;
+    public void periodic() {
+        io.updateInputs(inputs);
+        Logger.processInputs("Drive/Module" + Integer.toString(index), inputs);
 
-  private final SparkClosedLoopController m_drivingClosedLoopController;
-  private final SparkClosedLoopController m_turningClosedLoopController;
+        // Calculate positions for odometry
+        int sampleCount = inputs.odometryTimestamps.length; // All signals are sampled together
+        odometryPositions = new SwerveModulePosition[sampleCount];
+        for (int i = 0; i < sampleCount; i++) {
+            double positionMeters = inputs.odometryDrivePositionsRad[i] * wheelRadiusMeters;
+            Rotation2d angle = inputs.odometryTurnPositions[i];
+            odometryPositions[i] = new SwerveModulePosition(positionMeters, angle);
+        }
 
-  private double m_chassisAngularOffset = 0;
-  private SwerveModuleState m_desiredState = new SwerveModuleState(0.0, new Rotation2d());
+        // Update alerts
+        driveDisconnectedAlert.set(!inputs.driveConnected);
+        turnDisconnectedAlert.set(!inputs.turnConnected);
+    }
 
-  int num;
-  /**
-   * Constructs an EasySwerveModule and configures the driving and turning motor,
-   * encoder, and PID controller. This configuration is specific to the REV
-   * EasySwerve Module built with NEOs, SPARK MAXs, and a Through Bore
-   * Encoder V2.
-   */
-  public EasySwerveModule(int drivingCANId, int turningCANId, double chassisAngularOffset,
-      boolean drivingMotorOnBottom, boolean turningMotorOnBottom) {
-    m_drivingSpark = new SparkFlex(drivingCANId, MotorType.kBrushless);
-    m_turningSpark = new SparkFlex(turningCANId, MotorType.kBrushless);
+    /** Runs the module with the specified setpoint state. Mutates the state to optimize it. */
+    public void runSetpoint(SwerveModuleState state) {
+        // Optimize velocity setpoint
+        state.optimize(getAngle());
+        state.cosineScale(inputs.turnPosition);
 
-    num = turningCANId/2;
+        // Apply setpoints
+        io.setDriveVelocity(state.speedMetersPerSecond / wheelRadiusMeters);
+        io.setTurnPosition(state.angle);
+    }
 
-    m_drivingEncoder = m_drivingSpark.getEncoder();
-    m_turningEncoder = m_turningSpark.getAbsoluteEncoder();
+    /** Runs the module with the specified output while controlling to zero degrees. */
+    public void runCharacterization(double output) {
+        io.setDriveOpenLoop(output);
+        io.setTurnPosition(new Rotation2d());
+    }
 
-    m_drivingClosedLoopController = m_drivingSpark.getClosedLoopController();
-    m_turningClosedLoopController = m_turningSpark.getClosedLoopController();
+    /** Disables all outputs to motors. */
+    public void stop() {
+        io.setDriveOpenLoop(0.0);
+        io.setTurnOpenLoop(0.0);
+    }
 
-    // Apply the respective configurations to the SPARKS. Reset parameters before
-    // applying the configuration to bring the SPARK to a known good state. Persist
-    // the settings to the SPARK to avoid losing them on a power cycle.
-    SparkMaxConfig drivingConfig = Configs.EasySwerveModule.drivingConfig;
-    drivingConfig.inverted(drivingMotorOnBottom);
-    m_drivingSpark.configure(drivingConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    /** Returns the current turn angle of the module. */
+    public Rotation2d getAngle() {
+        return inputs.turnPosition;
+    }
 
-    SparkMaxConfig turningConfig = Configs.EasySwerveModule.turningConfig;
-    turningConfig.inverted(!turningMotorOnBottom);
-    m_turningSpark.configure(turningConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    /** Returns the current drive position of the module in meters. */
+    public double getPositionMeters() {
+        return inputs.drivePositionRad * wheelRadiusMeters;
+    }
 
-    m_chassisAngularOffset = chassisAngularOffset;
-    m_desiredState.angle = new Rotation2d(m_turningEncoder.getPosition());
-    m_drivingEncoder.setPosition(0);
-  }
+    /** Returns the current drive velocity of the module in meters per second. */
+    public double getVelocityMetersPerSec() {
+        return inputs.driveVelocityRadPerSec * wheelRadiusMeters;
+    }
 
-  /**
-   * Returns the current state of the module.
-   *
-   * @return The current state of the module.
-   */
-  public SwerveModuleState getState() {
-    // Apply chassis angular offset to the encoder position to get the position
-    // relative to the chassis.
-    return new SwerveModuleState(m_drivingEncoder.getVelocity(),
-        new Rotation2d(m_turningEncoder.getPosition() - m_chassisAngularOffset));
-  }
+    /** Returns the module position (turn angle and drive position). */
+    public SwerveModulePosition getPosition() {
+        return new SwerveModulePosition(getPositionMeters(), getAngle());
+    }
 
-  public void setDriveVoltage(double voltage) {
-    m_drivingSpark.setVoltage(voltage);
-  }
+    /** Returns the module state (turn angle and drive velocity). */
+    public SwerveModuleState getState() {
+        return new SwerveModuleState(getVelocityMetersPerSec(), getAngle());
+    }
 
-  public void setTurnVoltage(double voltage) {
-    m_turningSpark.setVoltage(voltage);
-  }
+    /** Returns the module positions received this cycle. */
+    public SwerveModulePosition[] getOdometryPositions() {
+        return odometryPositions;
+    }
 
-  /**
-   * Returns the current position of the module.
-   *
-   * @return The current position of the module.
-   */
-  public SwerveModulePosition getPosition() {
-    // Apply chassis angular offset to the encoder position to get the position
-    // relative to the chassis.
-    return new SwerveModulePosition(
-        m_drivingEncoder.getPosition(),
-        new Rotation2d(m_turningEncoder.getPosition() - m_chassisAngularOffset));
-  }
+    /** Returns the timestamps of the samples received this cycle. */
+    public double[] getOdometryTimestamps() {
+        return inputs.odometryTimestamps;
+    }
 
-  @Override
-  public void periodic() {
-      SmartDashboard.putNumber("module " + num + " angle", new Rotation2d(m_turningEncoder.getPosition()).getDegrees());
-  }
+    /** Returns the module position in radians. */
+    public double getWheelRadiusCharacterizationPosition() {
+        return inputs.drivePositionRad;
+    }
 
-  /**
-   * Sets the desired state for the module.
-   *
-   * @param desiredState Desired state with speed and angle.
-   */
-  public void setDesiredState(SwerveModuleState desiredState) {
-    // Apply chassis angular offset to the desired state.
-    SwerveModuleState correctedDesiredState = new SwerveModuleState();
-    correctedDesiredState.speedMetersPerSecond = desiredState.speedMetersPerSecond;
-    correctedDesiredState.angle = desiredState.angle.plus(Rotation2d.fromRadians(m_chassisAngularOffset));
-
-    // Optimize the reference state to avoid spinning further than 90 degrees.
-    correctedDesiredState.optimize(new Rotation2d(m_turningEncoder.getPosition()));
-
-    // Command driving and turning SPARKS towards their respective setpoints.
-    m_drivingClosedLoopController.setSetpoint(correctedDesiredState.speedMetersPerSecond, ControlType.kVelocity);
-    m_turningClosedLoopController.setSetpoint(correctedDesiredState.angle.getRadians(), ControlType.kPosition);
-
-    m_desiredState = desiredState;
-  }
-
-  /** Zeroes all the SwerveModule encoders. */
-  public void resetEncoders() {
-    m_drivingEncoder.setPosition(0);
-  }
+    /** Returns the module velocity in rad/sec. */
+    public double getFFCharacterizationVelocity() {
+        return inputs.driveVelocityRadPerSec;
+    }
 }

@@ -70,7 +70,6 @@ public final class Constants {
     public static final boolean kRearRightTurningMotorOnBottom = false;
 
     // SPARK MAX CAN IDs
-    //TODO: WE NEED TO CHANGE THESE BEFORE TESTING!!!!!
     public static final int kFrontLeftDrivingCanId = 1;
     public static final int kRearLeftDrivingCanId = 5;
     public static final int kFrontRightDrivingCanId = 3;
