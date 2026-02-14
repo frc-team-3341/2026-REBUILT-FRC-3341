@@ -83,6 +83,7 @@ public class DriveSubsystem extends SubsystemBase {
   private SwerveDriveKinematics kinematics;
   private SwerveDrivePoseEstimator poseEstimator;
   private Vision vision;
+  private ChassisSpeeds currSpeeds;
   
   private SwerveDriveSimulation mapleSimDrive;
   private final Field2d field = new Field2d();
@@ -311,7 +312,6 @@ private void createSimulationSwerve(Pose2d startingPose) {
     // NavX data
     SmartDashboard.putNumber("NavX/Yaw", navx.getYaw());
     SmartDashboard.putNumber("NavX/Angle", navx.getAngle());
-    SmartDashboard.putNumber("NavX/Heading", getHeading());
     
     // Update field widget
     field.setRobotPose(estimatedPose);
@@ -346,6 +346,7 @@ private void createSimulationSwerve(Pose2d startingPose) {
             ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot,
                 navx.getRotation2d())
             : new ChassisSpeeds(xSpeed, ySpeed, rot);
+    
 
     //Test with discretization asap
     // robotSpeeds = ChassisSpeeds.discretize(robotSpeeds, 0.02);
@@ -354,6 +355,8 @@ private void createSimulationSwerve(Pose2d startingPose) {
       DriveConstants.kDriveKinematics.toSwerveModuleStates(robotSpeeds);
     
     mapleSimDrive.setRobotSpeeds(robotSpeeds);
+
+    currSpeeds = robotSpeeds;
     setModuleStates(swerveModuleStates);
   }
 
@@ -364,6 +367,10 @@ private void createSimulationSwerve(Pose2d startingPose) {
    */
   public Pose2d getPose() {
     return poseEstimator.getEstimatedPosition();
+  }
+
+  public ChassisSpeeds getFieldSpeeds() {
+    return currSpeeds;
   }
   
   /**
