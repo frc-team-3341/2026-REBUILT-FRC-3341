@@ -27,6 +27,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -40,12 +41,18 @@ import frc.robot.subsystems.Modules.EasySwerveModuleIO;
 import frc.robot.subsystems.Modules.EasySwerveModuleIOSim;
 import frc.robot.subsystems.Modules.EasySwerveModuleIOSpark;
 import frc.robot.subsystems.vision.*;
+import frc.util.FuelSim;
+
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
+import frc.robot.Constants.Dimensions;
+import frc.robot.Constants.Dimensions;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.Constants.VisionConstants;
+
 import static frc.robot.Constants.ModeConstants.*;
 import static frc.robot.Constants.VisionConstants;
 
@@ -60,6 +67,7 @@ public class RobotContainer {
     private final Drive drive;
     private final Vision vision;
     private SwerveDriveSimulation driveSimulation = null;
+    public FuelSim fuelsim;
 
     // Controller
     private final CommandXboxController controller = new CommandXboxController(0);
@@ -89,7 +97,7 @@ public class RobotContainer {
             case SIM:
                 // create a maple-sim swerve drive simulation instance
                 this.driveSimulation =
-                        new SwerveDriveSimulation(DriveConstants.mapleSimConfig, new Pose2d(3, 3, new Rotation2d()));
+                        new SwerveDriveSimulation(Dimensions.mapleSimConfig, new Pose2d(3, 3, new Rotation2d()));
                 // add the simulated drivetrain to the simulation field
         
                 SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
@@ -137,6 +145,7 @@ public class RobotContainer {
 
         // Configure the button bindings
         configureButtonBindings();
+        configureFuelSim();
     }
 
     /**
@@ -176,6 +185,28 @@ public class RobotContainer {
     public Command getAutonomousCommand() {
         return autoChooser.get();
     }
+
+    private void configureFuelSim() {
+    fuelsim = new FuelSim();
+
+    fuelsim.spawnStartingFuel();
+
+    fuelsim.start();
+    
+    fuelsim.enableAirResistance(); // an additional drag force will be applied to fuel in physics update step
+  
+
+
+    SmartDashboard.putData(Commands.runOnce(() -> {
+            fuelsim.clearFuel();
+            fuelsim.spawnStartingFuel();
+
+    })
+    .withName("Reset Fuel")
+    .ignoringDisable(true));
+
+
+  }
 
     public void resetSimulationField() {
         if (Constants.ModeConstants.currentMode != Constants.ModeConstants.Mode.SIM) return;
