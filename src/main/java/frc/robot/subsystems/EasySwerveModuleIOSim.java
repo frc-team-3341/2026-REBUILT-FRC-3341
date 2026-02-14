@@ -16,16 +16,13 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.measure.Current;
-import frc.robot.Constants.DriveConstants;
 import frc.util.SparkUtil;
-import frc.robot.Constants;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Volts;
+import static frc.robot.Constants.DriveConstants.*;
 
 // import frc.robot.util.SparkUtil;
 import java.util.Arrays;
@@ -41,8 +38,8 @@ public class EasySwerveModuleIOSim implements EasySwerveModuleIO {
     private boolean driveClosedLoop = false;
     private boolean turnClosedLoop = false;
     
-    private final PIDController driveController = new PIDController(driveSimP, 0, driveSimD);
-    private final PIDController turnController = new PIDController(turnSimP, 0, turnSimD);
+    private final PIDController driveController = new PIDController(drivingPID.kP, drivingPID.kI, drivingPID.kD);
+    private final PIDController turnController = new PIDController(turningPID.kP, turningPID.kI, turningPID.kD);
     private double driveFFVolts = 0.0;
     private double driveAppliedVolts = 0.0;
     private double turnAppliedVolts = 0.0;
@@ -50,9 +47,9 @@ public class EasySwerveModuleIOSim implements EasySwerveModuleIO {
     public EasySwerveModuleIOSim(SwerveModuleSimulation moduleSimulation) {
         this.moduleSimulation = moduleSimulation;
         this.driveMotor =
-                moduleSimulation.useGenericMotorControllerForDrive().withCurrentLimit(Amps.of(40));
+                moduleSimulation.useGenericMotorControllerForDrive().withCurrentLimit(Amps.of(drivingCurrentLimit));
         this.turnMotor =
-                moduleSimulation.useGenericControllerForSteer().withCurrentLimit(Amps.of(20));
+                moduleSimulation.useGenericControllerForSteer().withCurrentLimit(Amps.of(turningCurrentLimit));
         
 
         // Enable wrapping for turn PID

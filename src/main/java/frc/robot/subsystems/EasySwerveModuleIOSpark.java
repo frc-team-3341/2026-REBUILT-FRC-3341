@@ -13,7 +13,7 @@
 
 package frc.robot.subsystems;
 
-import frc.robot.Constants.DriveConstants;
+import static frc.robot.Constants.DriveConstants.*;
 import static frc.util.SparkUtil.*;
 
 import com.revrobotics.AbsoluteEncoder;
@@ -76,10 +76,10 @@ public class EasySwerveModuleIOSpark implements EasySwerveModuleIO {
         //TODO: Check the module order is correct
         driveSpark = new SparkFlex(
                 switch (module) {
-                    case 0 -> DriveConstants.kFrontLeftDrivingCanId;
-                    case 1 -> DriveConstants.kFrontRightDrivingCanId;
-                    case 2 -> DriveConstants.kRearLeftDrivingCanId;
-                    case 3 -> DriveConstants.kRearRightDrivingCanId;
+                    case 0 -> kFrontLeftDrivingCanId;
+                    case 1 -> kFrontRightDrivingCanId;
+                    case 2 -> kRearLeftDrivingCanId;
+                    case 3 -> kRearRightDrivingCanId;
                     default -> 0;
                 },
                 MotorType.kBrushless);
@@ -87,10 +87,10 @@ public class EasySwerveModuleIOSpark implements EasySwerveModuleIO {
 
         turnSpark = new SparkMax(
                 switch (module) {
-                    case 0 -> DriveConstants.kFrontLeftTurningCanId;
-                    case 1 -> DriveConstants.kFrontRightTurningCanId;
-                    case 2 -> DriveConstants.kRearLeftTurningCanId;
-                    case 3 -> DriveConstants.kRearRightTurningCanId;
+                    case 0 -> kFrontLeftTurningCanId;
+                    case 1 -> kFrontRightTurningCanId;
+                    case 2 -> kRearLeftTurningCanId;
+                    case 3 -> kRearRightTurningCanId;
                     default -> 0;
                 },
                 MotorType.kBrushless);
