@@ -67,14 +67,60 @@ public class RobotContainer {
   
   public void createIntake(){
     robotIntake = new Intake();
-    
+
+    /*
     driver_controller.a().onTrue(robotIntake.intakeBall()).onFalse(robotIntake.stopIntake());
-    
+
     Trigger beamBreakIntake = new Trigger(() ->{
+      return !robotIntake.getBeamBreak();
+    });
+    */
+
+    Trigger beamBreakInput = new Trigger(() -> {
+      
       return robotIntake.getBeamBreak();
     });
+    
 
-    beamBreakIntake.onTrue(robotIntake.stopIntake());
+    Trigger timer = new Trigger(() -> {
+      if(!robotIntake.getBeamBreak()){
+        robotIntake.addCounter(10);
+      }
+      else{
+        robotIntake.setCounter(0);
+      }
+
+      if(robotIntake.getCounter() >= 1000){
+        return false;
+      }
+      else{
+        return true;
+      }
+    });
+
+    Trigger controllerInput = driver_controller.a();
+    
+    Trigger motorOutputOn = (controllerInput).and(timer);
+    motorOutputOn.onTrue(robotIntake.intakeBall());
+
+   // motorOutputOn.toggleOnTrue(robotIntake.intakeBall());
+
+    Trigger keepOn = new Trigger(() -> {
+      if(controllerInput.getAsBoolean()){
+        
+        if(robotIntake.getMotorOn() == true){
+          robotIntake.setMotorOn(false);
+        }
+        else{
+          robotIntake.setMotorOn(true);
+        }
+      }
+      return robotIntake.getMotorOn();
+    });
+
+    timer.onFalse(robotIntake.stopIntake());
+    keepOn.toggleOnFalse(robotIntake.stopIntake());
+    
   }
 
   public Command getAutonomousCommand() {

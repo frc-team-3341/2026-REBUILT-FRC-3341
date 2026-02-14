@@ -16,12 +16,13 @@ public class Intake extends SubsystemBase{
     private SparkFlexConfig intakeConfig;
     private DigitalInput beamBreak;
     private int counter;
-    
+    private boolean motorIsOn;
+
     public Intake(){
         //The motor we're using for the kitbot is kBrushed
         intakeWheel = new SparkFlex(Constants.DriveConstants.intakeMotorCanId, MotorType.kBrushless);
         intakeConfig = new SparkFlexConfig();
-
+        motorIsOn = false;
         //This is the beambreak sensor that senses whether the beam is hitting it or not
         beamBreak = new DigitalInput(3);
         counter = 0;
@@ -40,12 +41,30 @@ public class Intake extends SubsystemBase{
     public void periodic() {
         //counter++;
         SmartDashboard.putBoolean("beambreak state", getBeamBreak());
-        System.out.println(getBeamBreak());
+        // System.out.println(motorIsOn);
+
+    }
+    public int getCounter(){
+        return counter;
+    }
+    public void addCounter(int x){
+        System.out.println(getCounter());
+        counter += x;
+    }
+    public void setCounter(int x){
+        counter = x;
+    }
+    public void setMotorOn(boolean val){
+        motorIsOn = val; 
+    }
+    public boolean getMotorOn(){
+        return motorIsOn;
     }
 
     public Command intakeBall() {
         return runOnce(
             () -> {
+                
                 intakeWheel.set(0.25);
         });
     }
