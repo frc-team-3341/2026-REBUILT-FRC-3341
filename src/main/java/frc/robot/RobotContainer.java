@@ -37,7 +37,6 @@ import frc.robot.subsystems.Modules.EasySwerveModuleIOSpark;
 import frc.robot.subsystems.vision.*;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
-import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnFly;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -65,6 +64,7 @@ public class RobotContainer {
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
+        System.out.println(currentMode);
         switch (currentMode) {
             case REAL:
                 // Real robot, instantiate hardware IO implementations
@@ -86,6 +86,7 @@ public class RobotContainer {
                 this.driveSimulation =
                         new SwerveDriveSimulation(DriveConstants.mapleSimConfig, new Pose2d(3, 3, new Rotation2d()));
                 // add the simulated drivetrain to the simulation field
+        
                 SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
                 // Sim robot, instantiate physics sim IO implementations
                 drive = new Drive(
