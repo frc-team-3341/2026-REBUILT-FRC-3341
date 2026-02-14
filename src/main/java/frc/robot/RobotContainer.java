@@ -26,7 +26,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.commands.SwerveTeleOpCommand;
+import frc.robot.commands.SwerveTeleopCommand;
 import frc.robot.subsystems.Drive;
 import frc.robot.subsystems.Gyro.GyroIO;
 import frc.robot.subsystems.Gyro.GyroIONavX;
@@ -121,8 +121,8 @@ public class RobotContainer {
         autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
         // Set up SysId routines
-        autoChooser.addOption("Drive Wheel Radius Characterization", SwerveTeleOpCommand.wheelRadiusCharacterization(drive));
-        autoChooser.addOption("Drive Simple FF Characterization", SwerveTeleOpCommand.feedforwardCharacterization(drive));
+        autoChooser.addOption("Drive Wheel Radius Characterization", SwerveTeleopCommand.wheelRadiusCharacterization(drive));
+        autoChooser.addOption("Drive Simple FF Characterization", SwerveTeleopCommand.feedforwardCharacterization(drive));
         autoChooser.addOption(
                 "Drive SysId (Quasistatic Forward)", drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
         autoChooser.addOption(
@@ -141,13 +141,13 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
         // Default command, normal field-relative drive
-        drive.setDefaultCommand(SwerveTeleOpCommand.joystickDrive(
+        drive.setDefaultCommand(SwerveTeleopCommand.joystickDrive(
                 drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()));
 
         // Lock to 0° when A button is held
         controller
                 .a()
-                .whileTrue(SwerveTeleOpCommand.joystickDriveAtAngle(
+                .whileTrue(SwerveTeleopCommand.joystickDriveAtAngle(
                         drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> new Rotation2d()));
 
         // Switch to X pattern when X button is pressed
