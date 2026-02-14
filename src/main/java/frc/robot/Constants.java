@@ -111,26 +111,47 @@ public final class Constants {
     //I think these two above are the same as the outputrange lines in config.java
 
   }
-  public static final class VisionConstants {
-    public static final String frontCameraName = "pterodactyl";
-    // See https://docs.wpilib.org/en/stable/docs/software/basic-programming/coordinate-system.html#robot-coordinate-system
-    // for why these values the way they are. In short x is positive towards the front, y is positive to left, z is positive to the sky
-    private static final double frontCamPitch = Units.degreesToRadians(25.0); //TODO: for testing, check what the camera pitch is
-    public static final Transform3d robotToFrontCam =
-            new Transform3d(new Translation3d(Units.inchesToMeters(12.75), Units.inchesToMeters(0), Units.inchesToMeters(12.5)), new Rotation3d(0, frontCamPitch, 0));
+  // public static final class VisionConstants {
+  //   public static final String frontCameraName = "pterodactyl";
+  //   // See https://docs.wpilib.org/en/stable/docs/software/basic-programming/coordinate-system.html#robot-coordinate-system
+  //   // for why these values the way they are. In short x is positive towards the front, y is positive to left, z is positive to the sky
+  //   private static final double frontCamPitch = Units.degreesToRadians(25.0); //TODO: for testing, check what the camera pitch is
+  //   public static final Transform3d robotToFrontCam =
+  //           new Transform3d(new Translation3d(Units.inchesToMeters(12.75), Units.inchesToMeters(0), Units.inchesToMeters(12.5)), new Rotation3d(0, frontCamPitch, 0));
 
-    // The layout of the AprilTags on the field
-    public static final AprilTagFieldLayout kTagLayout =
-            AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+  //   // The layout of the AprilTags on the field
+  //   public static final AprilTagFieldLayout kTagLayout =
+  //           AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 
-    // The standard deviations of our vision estimated poses, which affect correction rate
-    // TODO: (Fake values. Experiment and determine estimation noise on an actual robot.)
-    public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(4, 4, 8);
-    public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
+  //   // The standard deviations of our vision estimated poses, which affect correction rate
+  //   // TODO: (Fake values. Experiment and determine estimation noise on an actual robot.)
+  //   public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(4, 4, 8);
+  //   public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
 
-  }
+  // }
 
-  public static final class ModuleConstants {
+  public static class VisionConstants {
+        // Standard deviation baselines for 1 meter distance to single tag
+        public static final double LINEAR_STD_DEV_BASELINE = 0.08; // Meters
+        public static final double ANGULAR_STD_DEV_BASELINE = 1.0; // Radians
+
+        public static final String[] CAMERA_NAMES = {
+            "pterodactyl"
+        };
+
+        public static final double MAX_AMBIGUITY = 0.3;
+
+        public static final AprilTagFieldLayout APRIL_TAGS =
+                AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+
+        // Transforms from robot to cameras, (x forward, y left, z up), (roll, pitch,
+        // yaw)
+        //TODO: Add vision constants for position and rotation (each camera has its own)
+        public static final Transform3d[] CAMERA_TRANSFORMS = {
+            new Transform3d(new Translation3d(), new Rotation3d())
+        };
+    }
+ class ModuleConstants {
     // The EasySwerve module can only be configured with one pinion gears: 12T.
     public static final int kDrivingMotorPinionTeeth = 12;
 
