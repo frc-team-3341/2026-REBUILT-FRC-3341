@@ -82,12 +82,14 @@ public class Climber extends SubsystemBase {
 
   public Command leftMotorStop() {
     return this.runOnce(() -> {
+      System.out.println("e");
       motorL.set(0.0);
   });
   }
 
   public Command rightMotorStop() {
     return this.runOnce(() -> {
+      System.out.println("e");
       motorR.set(0.0);
   });
   }
@@ -113,21 +115,18 @@ public class Climber extends SubsystemBase {
   // move to set point
   public void moveToSP(){
     if (LsetPoint > encoderL.getPosition() +2){
-      System.out.println("lup");
       motorL.set(0.1);
     } else if ((LsetPoint < encoderL.getPosition() - 2)){
-      System.out.println("ldown");
       motorL.set(-0.1);
     } else {
-      System.out.println("stop");
-      stop();
+      motorL.set(0);
     }
     if (RsetPoint > encoderR.getPosition() + 2){
       motorR.set(0.1);
     } else if (RsetPoint < encoderR.getPosition() - 2){
       motorR.set(-0.1);
     } else {
-      stop();
+      motorR.set(0);
     }
   }
   // hålt áñð féßþé® ßó ßóó ßøóåøü 
@@ -229,11 +228,6 @@ public class Climber extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     // pérpetually run move to setpoint if eiþer hook is not at setpoint
-    //System.out.println("level "+level);
-    //System.out.println("phase "+extendPhase);
-    System.out.println(LsetPoint);
-    System.out.println(encoderL.getPosition());
-
     this.moveToSP();
     // extension sequence logic
     if (extendPhase == 1){
@@ -241,17 +235,19 @@ public class Climber extends SubsystemBase {
       this.ExtendL();
       extendPhase = 2;
     }
-    if (extendPhase == 2 && encoderL.getPosition() > max - 2 && encoderL.getPosition() < max +2){
+    if (extendPhase == 2 && encoderL.getPosition() < max + 2 && encoderL.getPosition() > max -2){
       System.out.println("asdfghj");
       this.ExtendR();
       extendPhase  = 0;
     }
     // climbing sequence logic
     if (climbingPhase == 1){
+      System.out.println("efeaf");
       this.Lift();
       climbingPhase = 2;
     }
-    if (climbingPhase == 2 && encoderL.getPosition() < 0.05 && encoderR.getPosition() < 0.05){
+    if (climbingPhase == 2 && encoderL.getPosition() < 2 && encoderR.getPosition() < 2){
+      System.out.println("ihohiohi");
       this.Lock();
       climbingPhase = 0;
     }

@@ -77,10 +77,10 @@ public class RobotContainer {
    * {@link JoystickButton}.
    */
   private void configureButtonBindings() {
-    new Trigger(() -> joy1.getLeftX() > 0.05).whileTrue(climber.leftMotorUp()).onFalse(climber.leftMotorStop());
-    new Trigger(() -> joy1.getLeftX() < -0.05).whileTrue(climber.leftMotorDown()).onFalse(climber.leftMotorStop());
-    new Trigger(() -> joy1.getRightX() > 0.05).whileTrue(climber.rightMotorUp()).onFalse(climber.rightMotorStop());
-    new Trigger(() -> joy1.getRightX() < -0.05).whileTrue(climber.rightMotorUp()).onFalse(climber.rightMotorStop());
+    // new Trigger(() -> joy1.getLeftX() > 0.05).whileTrue(climber.leftMotorUp()).onFalse(climber.leftMotorStop());
+    // new Trigger(() -> joy1.getLeftX() < -0.05).whileTrue(climber.leftMotorDown()).onFalse(climber.leftMotorStop());
+    // new Trigger(() -> joy1.getRightX() > 0.05).whileTrue(climber.rightMotorUp()).onFalse(climber.rightMotorStop());
+    // new Trigger(() -> joy1.getRightX() < -0.05).whileTrue(climber.rightMotorUp()).onFalse(climber.rightMotorStop());
     joy1.povUp().onTrue(climber.e());
     joy1.povDown().onTrue(climber.l());
   }
