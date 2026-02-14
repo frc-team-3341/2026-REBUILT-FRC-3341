@@ -6,6 +6,9 @@ package frc.robot;
 import edu.wpi.first.wpilibj.RobotBase;
 import com.pathplanner.lib.config.PIDConstants;
 
+import static edu.wpi.first.units.Units.*;
+
+
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
@@ -20,7 +23,7 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
-//imports for driveconstants(cause AYAAN DONT WANNA MAKE A DRIVE FOLDER :>D)
+import edu.wpi.first.units.measure.Distance;//imports for driveconstants(cause AYAAN DONT WANNA MAKE A DRIVE FOLDER :>D)
 import static edu.wpi.first.units.Units.*;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
@@ -133,7 +136,16 @@ public final class Constants {
     public static final double turnPIDMaxInput = 2 * Math.PI; // Radians
     //I think these two above are the same as the outputrange lines in config.java
 
-    //Currently in pathplanner settings can change later
+  }
+  public static class Dimensions {
+        public static final Distance BUMPER_THICKNESS = Inches.of(3); // frame to edge of bumper
+        public static final Distance BUMPER_HEIGHT = Inches.of(7); // height from floor to top of bumper
+        public static final Distance FRAME_SIZE_Y = Inches.of(26.25); // left to right (y-axis)
+        public static final Distance FRAME_SIZE_X = Inches.of(28.75); // front to back (x-axis)
+
+        public static final Distance FULL_WIDTH = FRAME_SIZE_Y.plus(BUMPER_THICKNESS.times(2));
+        public static final Distance FULL_LENGTH = FRAME_SIZE_X.plus(BUMPER_THICKNESS.times(2));
+      //Currently in pathplanner settings can change later
     // public static final RobotConfig ppConfig = new RobotConfig(
     //     kRobotMassKg,
     //     robotMOI,
