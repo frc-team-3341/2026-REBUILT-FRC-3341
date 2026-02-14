@@ -6,7 +6,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.SwerveTeleop;
-import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.Drive;
 import frc.robot.subsystems.Vision;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -21,7 +21,7 @@ import com.pathplanner.lib.path.PathConstraints;
 
 public class RobotContainer {
   private final Vision vision = new Vision();
-  private final DriveSubsystem swerve = new DriveSubsystem(vision);
+  private final Drive swerve = new Drive(vision);
   
   CommandXboxController driver_controller = new CommandXboxController(OIConstants.kDriverControllerPort);
   CommandJoystick mech_joystick = new CommandJoystick(OIConstants.kMechJoystickPort);

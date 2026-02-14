@@ -20,7 +20,17 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
-
+//imports for driveconstants(cause AYAAN DONT WANNA MAKE A DRIVE FOLDER :>D)
+import static edu.wpi.first.units.Units.*;
+import com.pathplanner.lib.config.ModuleConfig;
+import com.pathplanner.lib.config.RobotConfig;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.util.Units;
+import org.ironmaple.simulation.drivesims.COTS;
+import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
+import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
  * numerical or boolean
@@ -39,7 +49,7 @@ public final class Constants {
     // the robot, rather the allowed maximum speeds
     public static final double kMaxSpeedMetersPerSecond = 4.8;
     public static final double kMaxAngularSpeed = 2 * Math.PI; // radians per second
-
+    public static final double odometryFrequency = 100.0; // Hz
     // Chassis configuration
     public static final double kTrackWidth = Units.inchesToMeters(27.0);
     // Distance between centers of right and left wheels on robot
@@ -50,6 +60,7 @@ public final class Constants {
         new Translation2d(kWheelBase / 2, -kTrackWidth / 2),
         new Translation2d(-kWheelBase / 2, kTrackWidth / 2),
         new Translation2d(-kWheelBase / 2, -kTrackWidth / 2));
+    public static final double driveBaseRadius = Math.hypot(kTrackWidth / 2.0, kWheelBase / 2.0);
 
     // Angular offsets of the modules relative to the chassis in radians
     private static final double kEasySwerveAngularOffsetCompensation = Math.PI / 4;
@@ -109,6 +120,19 @@ public final class Constants {
     public static final double turnPIDMinInput = 0; // Radians
     public static final double turnPIDMaxInput = 2 * Math.PI; // Radians
     //I think these two above are the same as the outputrange lines in config.java
+
+    //Currently in pathplanner settings can change later
+    // public static final RobotConfig ppConfig = new RobotConfig(
+    //     kRobotMassKg,
+    //     robotMOI,
+    //     new ModuleConfig(
+    //             wheelRadiusMeters,
+    //             maxSpeedMetersPerSec,
+    //             wheelCOF,
+    //             driveGearbox.withReduction(driveMotorReduction),
+    //             driveMotorCurrentLimit,
+    //             1),
+    //     kDriveKinematics);
 
   }
   public static final class VisionConstants {

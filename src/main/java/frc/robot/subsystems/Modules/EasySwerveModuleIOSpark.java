@@ -11,7 +11,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 
-package frc.robot.subsystems;
+package frc.robot.subsystems.Modules;
 
 import static frc.robot.Constants.DriveConstants.*;
 import static frc.util.SparkUtil.*;
@@ -28,7 +28,6 @@ import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -36,6 +35,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.Configs;
+import frc.robot.subsystems.SparkOdometryThread;
 
 import java.util.Queue;
 import java.util.function.DoubleSupplier;
@@ -67,13 +67,8 @@ public class EasySwerveModuleIOSpark implements EasySwerveModuleIO {
     private final Debouncer turnConnectedDebounce = new Debouncer(0.5);
 
     public EasySwerveModuleIOSpark(int module) {
-        // zeroRotation = switch (module) {
-        //     case 0 -> frontLeftZeroRotation;
-        //     case 1 -> frontRightZeroRotation;
-        //     case 2 -> backLeftZeroRotation;
-        //     case 3 -> backRightZeroRotation;
-        //     default -> new Rotation2d();};
-        //TODO: Check the module order is correct
+        zeroRotation = new Rotation2d();
+        
         driveSpark = new SparkFlex(
                 switch (module) {
                     case 0 -> kFrontLeftDrivingCanId;
@@ -85,7 +80,7 @@ public class EasySwerveModuleIOSpark implements EasySwerveModuleIO {
                 MotorType.kBrushless);
 
 
-        turnSpark = new SparkMax(
+        turnSpark = new SparkFlex(
                 switch (module) {
                     case 0 -> kFrontLeftTurningCanId;
                     case 1 -> kFrontRightTurningCanId;
