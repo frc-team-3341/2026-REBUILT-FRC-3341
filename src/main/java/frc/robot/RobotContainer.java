@@ -42,7 +42,7 @@ public class RobotContainer {
   }
 
   private void configureFuelSim() {
-    fuelsim = new FuelSim("/Shuffleboard");
+    fuelsim = new FuelSim();
 
     fuelsim.spawnStartingFuel();
 
