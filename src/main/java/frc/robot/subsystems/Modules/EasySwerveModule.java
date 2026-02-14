@@ -19,11 +19,10 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 
-import frc.robot.Constants.ModuleConstants;
+import static frc.robot.Constants.ModuleConstants.*;
 import frc.robot.subsystems.Modules.EasySwerveModuleIOInputsAutoLogged;
 
 import org.littletonrobotics.junction.Logger;
-
 
 public class EasySwerveModule {
     private final EasySwerveModuleIO io;
@@ -51,7 +50,7 @@ public class EasySwerveModule {
         int sampleCount = inputs.odometryTimestamps.length; // All signals are sampled together
         odometryPositions = new SwerveModulePosition[sampleCount];
         for (int i = 0; i < sampleCount; i++) {
-            double positionMeters = inputs.odometryDrivePositionsRad[i] * (ModuleConstants.kWheelDiameterMeters/2);
+            double positionMeters = inputs.odometryDrivePositionsRad[i] * (kWheelDiameterMeters/2);
             Rotation2d angle = inputs.odometryTurnPositions[i];
             odometryPositions[i] = new SwerveModulePosition(positionMeters, angle);
         }
@@ -68,7 +67,7 @@ public class EasySwerveModule {
         state.cosineScale(inputs.turnPosition);
 
         // Apply setpoints
-        io.setDriveVelocity(state.speedMetersPerSecond / (ModuleConstants.kWheelDiameterMeters/2));
+        io.setDriveVelocity(state.speedMetersPerSecond / (kWheelDiameterMeters/2));
         io.setTurnPosition(state.angle);
     }
 
@@ -91,12 +90,12 @@ public class EasySwerveModule {
 
     /** Returns the current drive position of the module in meters. */
     public double getPositionMeters() {
-        return inputs.drivePositionRad * (ModuleConstants.kWheelDiameterMeters/2);
+        return inputs.drivePositionRad * (kWheelDiameterMeters/2);
     }
 
     /** Returns the current drive velocity of the module in meters per second. */
     public double getVelocityMetersPerSec() {
-        return inputs.driveVelocityRadPerSec * (ModuleConstants.kWheelDiameterMeters/2);
+        return inputs.driveVelocityRadPerSec * (kWheelDiameterMeters/2);
     }
 
     /** Returns the module position (turn angle and drive position). */

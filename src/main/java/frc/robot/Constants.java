@@ -3,7 +3,7 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
-
+import edu.wpi.first.wpilibj.RobotBase;
 import com.pathplanner.lib.config.PIDConstants;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -44,6 +44,16 @@ import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+  public static final class ModeConstants{
+    public static final Mode simMode = Mode.SIM;
+    public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
+
+      public static enum Mode {
+        REAL, 
+        SIM, //physics sim
+        REPLAY //replaying fro log files
+      }
+  }
   public static final class DriveConstants {
     // Driving Parameters - Note that these are not the maximum capable speeds of
     // the robot, rather the allowed maximum speeds
@@ -60,7 +70,9 @@ public final class Constants {
         new Translation2d(kWheelBase / 2, -kTrackWidth / 2),
         new Translation2d(-kWheelBase / 2, kTrackWidth / 2),
         new Translation2d(-kWheelBase / 2, -kTrackWidth / 2));
+    
     public static final double driveBaseRadius = Math.hypot(kTrackWidth / 2.0, kWheelBase / 2.0);
+    
 
     // Angular offsets of the modules relative to the chassis in radians
     private static final double kEasySwerveAngularOffsetCompensation = Math.PI / 4;
@@ -133,7 +145,20 @@ public final class Constants {
     //             driveMotorCurrentLimit,
     //             1),
     //     kDriveKinematics);
-
+     public static final DriveTrainSimulationConfig mapleSimConfig = DriveTrainSimulationConfig.Default()
+            .withCustomModuleTranslations(kDriveKinematics.getModules())
+            .withRobotMass(Kilogram.of(kRobotMassKg))
+            .withGyro(COTS.ofPigeon2())
+            .withSwerveModule(new SwerveModuleSimulationConfig(
+                    DCMotor.getNeoVortex(1),
+                    DCMotor.getNeoVortex(1),
+                    ModuleConstants.kDrivingMotorReduction,
+                    ModuleConstants.kDrivingMotorReduction,
+                    Volts.of(0.1),
+                    Volts.of(0.1),
+                    Meters.of(ModuleConstants.kWheelDiameterMeters/2),
+                    KilogramSquareMeters.of(0.02),
+                    kWheelCOF));
   }
   // public static final class VisionConstants {
   //   public static final String frontCameraName = "pterodactyl";
@@ -175,7 +200,7 @@ public final class Constants {
             new Transform3d(new Translation3d(), new Rotation3d())
         };
     }
- class ModuleConstants {
+ public static class ModuleConstants {
     // The EasySwerve module can only be configured with one pinion gears: 12T.
     public static final int kDrivingMotorPinionTeeth = 12;
 

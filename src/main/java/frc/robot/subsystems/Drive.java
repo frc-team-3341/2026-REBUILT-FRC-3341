@@ -15,6 +15,8 @@ package frc.robot.subsystems;
 import frc.robot.subsystems.Modules.*;
 import static edu.wpi.first.units.Units.*;
 import static frc.robot.Constants.*;
+import frc.robot.Constants.DriveConstants;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
@@ -44,12 +46,13 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.Constants.DriveConstants;
-import frc.robot.Constants.Mode;
-import frc.robot.subsystems.Vision;
+import frc.robot.Constants.ModeConstants.*;
+import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.Gyro.GyroIO;
 import frc.util.LocalADStarAK;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
@@ -60,8 +63,8 @@ import org.littletonrobotics.junction.Logger;
 
 import frc.robot.subsystems.Gyro.GyroIOInputsAutoLogged;
 
-//implements Vision.VisionConsumer
-public class Drive extends SubsystemBase {
+
+public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     static final Lock odometryLock = new ReentrantLock();
     private final GyroIO gyroIO;
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
@@ -102,31 +105,36 @@ public class Drive extends SubsystemBase {
 
         // Start odometry thread
         SparkOdometryThread.getInstance().start();
-        
-        // Configure AutoBuilder for PathPlanner
-        AutoBuilder.configure(
-                this::getPose,
-                this::resetOdometry,
-                this::getChassisSpeeds,
-                this::runVelocity,
-                new PPHolonomicDriveController(new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
-                config,
-                () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
-                this);
-        Pathfinding.setPathfinder(new LocalADStarAK());
-        PathPlannerLogging.setLogActivePathCallback((activePath) -> {
-            Logger.recordOutput("Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()]));
-        });
-        PathPlannerLogging.setLogTargetPoseCallback((targetPose) -> {
-            Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
-        });
+        try {
+            RobotConfig config = RobotConfig.fromGUISettings();
+            // Configure AutoBuilder for PathPlanner
+            AutoBuilder.configure(
+                    this::getPose,
+                    this::resetOdometry,
+                    this::getChassisSpeeds,
+                    this::runVelocity,
+                    new PPHolonomicDriveController(new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
+                    config,
+                    () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
+                    this);
+            Pathfinding.setPathfinder(new LocalADStarAK());
+            PathPlannerLogging.setLogActivePathCallback((activePath) -> {
+                Logger.recordOutput("Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()]));
+            });
+            PathPlannerLogging.setLogTargetPoseCallback((targetPose) -> {
+                Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
+            });
 
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("uh oh auto is broken!!");
+        }
+        
         // Configure SysId
         sysId = new SysIdRoutine(
                 new SysIdRoutine.Config(
                         null, null, null, (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
                 new SysIdRoutine.Mechanism((voltage) -> runCharacterization(voltage.in(Volts)), null, this));
-        
     }
 
     @Override
@@ -173,7 +181,7 @@ public class Drive extends SubsystemBase {
                 rawGyroRotation = gyroInputs.odometryYawPositions[i];
             } else {
                 // Use the angle delta from the kinematics and module deltas
-                Twist2d twist = kinematics.toTwist2d(moduleDeltas);
+                Twist2d twist = DriveConstants.kDriveKinematics.toTwist2d(moduleDeltas);
                 rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
             }
 
@@ -182,7 +190,7 @@ public class Drive extends SubsystemBase {
         }
 
         // Update gyro alert
-        gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
+        gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.ModeConstants.currentMode != ModeConstants.Mode.SIM);
     }
 
     /**
@@ -193,8 +201,8 @@ public class Drive extends SubsystemBase {
     public void runVelocity(ChassisSpeeds speeds) {
         // Calculate module setpoints
         speeds = ChassisSpeeds.discretize(speeds, 0.02);
-        SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(speeds);
-        SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, maxSpeedMetersPerSec);
+        SwerveModuleState[] setpointStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(speeds);
+        SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, DriveConstants.kMaxSpeedMetersPerSecond);
 
         // Log unoptimized setpoints
         Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
@@ -228,9 +236,9 @@ public class Drive extends SubsystemBase {
     public void stopWithX() {
         Rotation2d[] headings = new Rotation2d[4];
         for (int i = 0; i < 4; i++) {
-            headings[i] = moduleTranslations[i].getAngle();
+            headings[i] = DriveConstants.kDriveKinematics.getModules()[i].getAngle();
         }
-        kinematics.resetHeadings(headings);
+        DriveConstants.kDriveKinematics.resetHeadings(headings);
         stop();
     }
 
@@ -266,7 +274,7 @@ public class Drive extends SubsystemBase {
     /** Returns the measured chassis speeds of the robot. */
     @AutoLogOutput(key = "SwerveChassisSpeeds/Measured")
     private ChassisSpeeds getChassisSpeeds() {
-        return kinematics.toChassisSpeeds(getModuleStates());
+        return DriveConstants.kDriveKinematics.toChassisSpeeds(getModuleStates());
     }
 
     /** Returns the position of each module in radians. */
@@ -304,19 +312,20 @@ public class Drive extends SubsystemBase {
         poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
     }
 
-    // /** Adds a new timestamped vision measurement. */
-    // @Override
-    // public void accept(Pose2d visionRobotPoseMeters, double timestampSeconds, Matrix<N3, N1> visionMeasurementStdDevs) {
-    //     poseEstimator.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
-    // }
+    /** Adds a new timestamped vision measurement. */
+    @Override
+    public void accept(Pose2d visionRobotPoseMeters, double timestampSeconds, Matrix<N3, N1> visionMeasurementStdDevs) {
+        poseEstimator.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
+    }
 
     /** Returns the maximum linear speed in meters per sec. */
     public double getMaxLinearSpeedMetersPerSec() {
-        return maxSpeedMetersPerSec;
+        return DriveConstants.kMaxSpeedMetersPerSecond;
+
     }
 
     /** Returns the maximum angular speed in radians per sec. */
     public double getMaxAngularSpeedRadPerSec() {
-        return maxSpeedMetersPerSec / driveBaseRadius;
+        return  DriveConstants.kMaxSpeedMetersPerSecond/ DriveConstants.driveBaseRadius;
     }
 }
