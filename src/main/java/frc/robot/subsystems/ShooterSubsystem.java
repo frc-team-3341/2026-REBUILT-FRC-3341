@@ -15,21 +15,26 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
-
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ShooterConstants;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.motorcontrol.ControlMode;
+
 
 public class ShooterSubsystem extends SubsystemBase {
   private final int drivingCANId = 1; //NEED TO SET
   private final SparkFlex shooter;
   private double targetRPM = 1000;
   private double velocity = 0;
+  private int counter = 0;
 
   private final SparkFlexConfig shooterConfig;
   private SparkClosedLoopController closedLoopController;
   private RelativeEncoder relativeEncoder;
+  TalonSRX _motor = new TalonSRX(3);
+  
 
   public ShooterSubsystem() {
     shooter = new SparkFlex(drivingCANId, MotorType.kBrushless);
@@ -69,27 +74,6 @@ public double getRPM4Vel(double velocity){
   return rpm;
 }
 
-  /**
-   * Uses basic projectile motion to calculate the linear launch velocity necessary to shoot a
-   * projectile a specified distance (assuming a 75° launch angle). Neglects air resistance
-   * 
-   * 
-   * @param distance
-   * The desired distance in meters
-   * 
-   * @param initialHeight
-   * The initial height of the projectile in meters
-   * 
-   * @param center_offset
-   * 
-   * The desired offset relative to the center of the hub. If this value is 0, the generated trajectory
-   * will aim for the center of the hub
-   * 
-   * @return
-   * The required launch velocity in meters/second
-   * 
-   * @see <a href="https://drive.google.com/file/d/1QK_I150SMKgldrvAcl2610z9DPRuNhpH/view?usp=sharing">Derivation for the formula used</a>
-   */
   public double calculateLinearLaunchVelocity(double distance, double initialHeight, double center_offset) {
       double angle = Math.toRadians(75);
 
@@ -131,6 +115,18 @@ public double getRPM4Vel(double velocity){
       setRPM(targetRPM);
     });
   }
+  public Command runIntake(){
+    return this.runOnce(() ->{
+       counter++;
+       if (counter%2 == 0) {
+        _motor.set(ControlMode.PercentOutput, -0.7);
+       }
+      else {
+        _motor.set(ControlMode.PercentOutput, 0.0);
+      }
+    });
+  }
+
 
 
  @Override
