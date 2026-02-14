@@ -2,10 +2,12 @@ package frc.robot;
 
 import com.revrobotics.spark.config.AbsoluteEncoderConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import com.pathplanner.lib.config.PIDConstants;
 import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import frc.robot.Constants.ModuleConstants;
+import static frc.robot.Constants.DriveConstants.*;
 
 public final class Configs {
   public static final class EasySwerveModule {
@@ -23,7 +25,7 @@ public final class Configs {
 
       drivingConfig
         .idleMode(IdleMode.kBrake)
-        .smartCurrentLimit(40);   // 70 for SparkFlex
+        .smartCurrentLimit(drivingCurrentLimit);   // 70 for SparkFlex
       drivingConfig
         .encoder
           .positionConversionFactor(drivingFactor) // meters
@@ -32,14 +34,14 @@ public final class Configs {
         .closedLoop
           .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
           // These are example gains you may need to adjust them for your own robot!
-          .pid(0.04, 0, 0)
+          .pid(drivingPID.kP, drivingPID.kI, drivingPID.kD)
           .outputRange(-1, 1)
         .feedForward
           .kV(drivingVelocityFeedForward);
 
       turningConfig
         .idleMode(IdleMode.kBrake)
-        .smartCurrentLimit(40);   // 70 for SparkFlex
+        .smartCurrentLimit(turningCurrentLimit);   // 70 for SparkFlex
       turningConfig
         .absoluteEncoder
           // Do not invert the turning encoder, since the output shaft rotates in the same
@@ -54,7 +56,7 @@ public final class Configs {
         .closedLoop
           .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
           // These are example gains you may need to adjust them for your own robot!
-          .pid(1, 0, 0)
+          .pid(turningPID.kP, turningPID.kI, turningPID.kD)
           .outputRange(-1, 1)
           // Enable PID wrap around for the turning motor. This will allow the PID
           // controller to go through 0 to get to the setpoint i.e. going from 350 degrees

@@ -54,8 +54,6 @@ public class SwerveTeleop extends Command{
 
         swerve.drive(xInput, yInput, rotInput, true);
 
-
-
     }
 
     @Override

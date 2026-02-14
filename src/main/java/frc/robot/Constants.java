@@ -4,9 +4,20 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.config.PIDConstants;
+
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 
@@ -50,10 +61,10 @@ public final class Constants {
     // The EasySwerve module allows installation of the motors either on top or bottom of the module.
     // These constants configure the location of the motors. The default configuration is with both
     // motors on the bottom of the module.
-    public static final boolean kFrontLeftDrivingMotorOnBottom = true;
-    public static final boolean kRearLeftDrivingMotorOnBottom = false;
-    public static final boolean kFrontRightDrivingMotorOnBottom = true;
-    public static final boolean kRearRightDrivingMotorOnBottom = true;
+    public static final boolean kFrontLeftDrivingMotorOnBottom = false;
+    public static final boolean kRearLeftDrivingMotorOnBottom = true;
+    public static final boolean kFrontRightDrivingMotorOnBottom = false;
+    public static final boolean kRearRightDrivingMotorOnBottom = false;
 
     public static final boolean kFrontLeftTurningMotorOnBottom = false;
     public static final boolean kRearLeftTurningMotorOnBottom = false;
@@ -61,7 +72,6 @@ public final class Constants {
     public static final boolean kRearRightTurningMotorOnBottom = false;
 
     // SPARK MAX CAN IDs
-    //TODO: WE NEED TO CHANGE THESE BEFORE TESTING!!!!!
     public static final int kFrontLeftDrivingCanId = 1;
     public static final int kRearLeftDrivingCanId = 5;
     public static final int kFrontRightDrivingCanId = 3;
@@ -72,8 +82,52 @@ public final class Constants {
     public static final int kFrontRightTurningCanId = 4;
     public static final int kRearRightTurningCanId = 8;
 
+
     public static final boolean kGyroReversed = false;
-    public static final Rotation2d navxOffset = Rotation2d.fromDegrees(0); //Offsets driving by 90 degrees clockwise
+    public static final Rotation2d navxOffset = Rotation2d.fromDegrees(-90); //Offsets driving by 90 degrees clockwise
+
+    public static final double kRobotMassKg = 54.43; // TODO: Adjust to your robot's mass
+    public static final double kWheelCOF = 1.2; // TODO: Coefficient of friction (from pathplanner settings)
+
+
+    public static final int drivingCurrentLimit = 40; //amps
+    public static final int turningCurrentLimit = 20;
+
+    public static final PIDConstants turningPID = new PIDConstants(1,0,0);
+    public static final PIDConstants drivingPID = new PIDConstants(0.04, 0, 0);
+
+    // TODO: CONSTANTS TAKEN FROM HERE https://github.com/Shenzhen-Robotics-Alliance/AdvantageKit-SparkSwerveTemplate-MapleSim/blob/9b988399e73c70c1efdf33513f3183908f242504/src/main/java/frc/robot/subsystems/drive/DriveConstants.java
+    // We need to determine our own k values for the robot (i think leaving the sim ones are fine)
+    public static final double driveKp = 0.0;
+    public static final double driveKd = 0.0;
+    public static final double driveKs = 0.0;
+    public static final double driveKv = 0.1;
+    public static final double driveSimP = 0.05;
+    public static final double driveSimD = 0.0;
+    public static final double driveSimKs = 0.0;
+    public static final double driveSimKv = 0.0789;
+    public static final double turnPIDMinInput = 0; // Radians
+    public static final double turnPIDMaxInput = 2 * Math.PI; // Radians
+    //I think these two above are the same as the outputrange lines in config.java
+
+  }
+  public static final class VisionConstants {
+    public static final String frontCameraName = "pterodactyl";
+    // See https://docs.wpilib.org/en/stable/docs/software/basic-programming/coordinate-system.html#robot-coordinate-system
+    // for why these values the way they are. In short x is positive towards the front, y is positive to left, z is positive to the sky
+    private static final double frontCamPitch = Units.degreesToRadians(25.0); //TODO: for testing, check what the camera pitch is
+    public static final Transform3d robotToFrontCam =
+            new Transform3d(new Translation3d(Units.inchesToMeters(12.75), Units.inchesToMeters(0), Units.inchesToMeters(12.5)), new Rotation3d(0, frontCamPitch, 0));
+
+    // The layout of the AprilTags on the field
+    public static final AprilTagFieldLayout kTagLayout =
+            AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+
+    // The standard deviations of our vision estimated poses, which affect correction rate
+    // TODO: (Fake values. Experiment and determine estimation noise on an actual robot.)
+    public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(4, 4, 8);
+    public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
+
   }
 
   public static final class ModuleConstants {
