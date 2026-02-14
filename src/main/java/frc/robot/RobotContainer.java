@@ -146,6 +146,8 @@ public class RobotContainer {
         // Configure the button bindings
         configureButtonBindings();
         configureFuelSim();
+        configureFuelSimRobot();
+        
     }
 
     /**
@@ -207,6 +209,15 @@ public class RobotContainer {
 
 
   }
+   private void configureFuelSimRobot() {
+        fuelsim.registerRobot(
+                Dimensions.FULL_WIDTH.in(Meters),
+                Dimensions.FULL_LENGTH.in(Meters),
+                Dimensions.BUMPER_HEIGHT.in(Meters),
+                drive::getPose,
+                drive::getFieldSpeeds);
+        
+    }
 
     public void resetSimulationField() {
         if (Constants.ModeConstants.currentMode != Constants.ModeConstants.Mode.SIM) return;

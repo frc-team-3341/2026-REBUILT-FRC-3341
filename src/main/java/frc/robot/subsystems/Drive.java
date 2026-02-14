@@ -16,6 +16,7 @@ import frc.robot.subsystems.Modules.*;
 import static edu.wpi.first.units.Units.*;
 import static frc.robot.Constants.*;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.Constants.ModeConstants;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
@@ -70,6 +71,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
     private final EasySwerveModule[] modules = new EasySwerveModule[4]; // FL, FR, BL, BR
     private final SysIdRoutine sysId;
+    private ChassisSpeeds currSpeeds;
     private final Alert gyroDisconnectedAlert =
             new Alert("Disconnected gyro, using kinematics as fallback.", AlertType.kError);
 
@@ -203,6 +205,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         speeds = ChassisSpeeds.discretize(speeds, 0.02);
         SwerveModuleState[] setpointStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(speeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, DriveConstants.kMaxSpeedMetersPerSecond);
+        currSpeeds = speeds;
 
         // Log unoptimized setpoints
         Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
@@ -215,6 +218,14 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
 
         // Log optimized setpoints (runSetpoint mutates each state)
         Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
+    }
+
+
+    public ChassisSpeeds getFieldSpeeds() {
+        if (currSpeeds == null)
+            return new ChassisSpeeds();
+
+        return ChassisSpeeds.fromRobotRelativeSpeeds(currSpeeds, getRotation());
     }
 
     /** Runs the drive in a straight line with the specified drive output. */
