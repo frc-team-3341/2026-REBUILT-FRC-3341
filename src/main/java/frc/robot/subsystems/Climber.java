@@ -14,10 +14,11 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 
 public class Climber extends SubsystemBase {
-    private final SparkMax motorL = new SparkMax(20, MotorType.kBrushless);
-    private final SparkMax motorR = new SparkMax(200, MotorType.kBrushless);
+    private final SparkMax motorL = new SparkMax(Constants.ClimberConstants.leftMotorPort, MotorType.kBrushless);
+    private final SparkMax motorR = new SparkMax(Constants.ClimberConstants.rightMotorPort, MotorType.kBrushless);
      // creating motor object
      private static Climber instance;
      private boolean isinit = false;
@@ -49,7 +50,10 @@ public class Climber extends SubsystemBase {
     level = 0;
     climbingPhase = 0;
     extendPhase = 0;
-    s1 = new Servo(climbingPhase);
+    s1 = new Servo(Constants.ClimberConstants.servo1port);
+    s2 = new Servo(Constants.ClimberConstants.servo2port);
+    s3 = new Servo(Constants.ClimberConstants.servo3port);
+    s4 = new Servo(Constants.ClimberConstants.servo4port);
     
   }
 
@@ -107,28 +111,28 @@ public class Climber extends SubsystemBase {
   // move to set point
   public void moveToSP(){
     if (LsetPoint > encoderL.getPosition()){
-      leftMotorUp();
+      this.leftMotorUp();
     } else if ((LsetPoint < encoderL.getPosition())){
-      leftMotorDown();
+      this.leftMotorDown();
     }
     if (RsetPoint > encoderR.getPosition()){
-      rightMotorUp();
+      this.rightMotorUp();
     } else if (RsetPoint < encoderR.getPosition()){
-      rightMotorDown();
+      this.rightMotorDown();
     }
   }
   // hålt áñð féßþé® ßó ßóó ßøóåøü 
   public Command stop(){
     return this.runOnce(() -> {
-      leftMotorStop();
-      rightMotorStop();
+      this.leftMotorStop();
+      this.rightMotorStop();
   });
   }
   // starts extension sequence
   public Command e(){
     return this.runOnce(() -> {
       if (level == 0){
-        ExtendL1();
+        this.ExtendL1();
       }
       else {
         extendPhase = 1;
@@ -140,8 +144,8 @@ public class Climber extends SubsystemBase {
     return this.runOnce(() -> {
       level++;
       // set points to mæx height(depending on level) so the arms lift up to level
-      setLp(max);
-      setRp(max);
+      this.setLp(max);
+      this.setRp(max);
       // move the høks out of the way
       s1.set(1000);
       s2.set(1000);
@@ -153,7 +157,7 @@ public class Climber extends SubsystemBase {
     return this.runOnce(() -> {
       level++;
       // set points to mæx height(depending on level) so the arms lift up to level
-      setLp(max);
+      this.setLp(max);
       // move the høks out of the way
       s1.set(1000);
 
@@ -162,7 +166,7 @@ public class Climber extends SubsystemBase {
   public Command ExtendR(){
     return this.runOnce(() -> {
       // set points to mæx height(depending on level) so the arms lift up to level
-      setRp(max);
+      this.setRp(max);
       // move the høks out of the way
       s2.set(1000);
 
@@ -183,8 +187,8 @@ public class Climber extends SubsystemBase {
       s3.set(1000);
       s4.set(1000);
       // lift up by setting the target extensión length to 0
-      setLp(0);
-      setRp(0);
+      this.setLp(0);
+      this.setRp(0);
   });
   }
   // Swing bottom hooks up
@@ -201,8 +205,8 @@ public class Climber extends SubsystemBase {
       s1.set(1500);
       s2.set(1500);
       // lower the bót
-      setLp(max);
-      setRp(max);
+      this.setLp(max);
+      this.setRp(max);
     });
   }
 
@@ -215,23 +219,23 @@ public class Climber extends SubsystemBase {
     // This method will be called once per scheduler run
     // pérpetually run move to setpoint if eiþer hook is not at setpoint
     if(LsetPoint != encoderL.getPosition() || RsetPoint != encoderR.getPosition())
-      moveToSP();
+      this.moveToSP();
     // extension sequence logic
     if (extendPhase == 1){
-      ExtendL();
+      this.ExtendL();
       extendPhase = 2;
     }
     if (extendPhase == 2 && encoderL.getPosition() > max - 0.05 && encoderL.getPosition() < max +0.05){
-      ExtendR();
+      this.ExtendR();
       extendPhase  = 0;
     }
     // climbing sequence logic
     if (climbingPhase == 1){
-      Lift();
+      this.Lift();
       climbingPhase = 2;
     }
     if (climbingPhase == 2 && encoderL.getPosition() < 0.05 && encoderR.getPosition() < 0.05){
-      Lock();
+      this.Lock();
       climbingPhase = 0;
     }
     // special case extend max length for the fi®st rung

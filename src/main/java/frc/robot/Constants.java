@@ -121,4 +121,13 @@ public final class Constants {
   public static final class NeoMotorConstants {
     public static final double kFreeSpeedRpm = 5676;
   }
+
+  public static final class ClimberConstants {
+    public static final int leftMotorPort = 20;
+    public static final int rightMotorPort = 21;
+    public static final int servo1port = 1;
+    public static final int servo2port = 2;
+    public static final int servo3port = 3;
+    public static final int servo4port = 4;
+  }
 }
