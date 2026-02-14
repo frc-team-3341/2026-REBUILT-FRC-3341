@@ -16,8 +16,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Climber extends SubsystemBase {
-    private final SparkMax motorL = new SparkMax(20, MotorType.kBrushless);
-    private final SparkMax motorR = new SparkMax(200, MotorType.kBrushless);
+    private final SparkMax motorL = new SparkMax(2, MotorType.kBrushless);
+    private final SparkMax motorR = new SparkMax(3, MotorType.kBrushless);
      // creating motor object
      private static Climber instance;
      private boolean isinit = false;
@@ -45,11 +45,15 @@ public class Climber extends SubsystemBase {
     isinit = true;
     LsetPoint = 0;
     RsetPoint = 0;
+
     max = 30;
     level = 0;
     climbingPhase = 0;
     extendPhase = 0;
-    s1 = new Servo(climbingPhase);
+    s1 = new Servo(0);
+    s2 = new Servo(1);
+    s3 = new Servo(2);
+    s4 = new Servo(3);
     
   }
 
@@ -127,6 +131,7 @@ public class Climber extends SubsystemBase {
   // starts extension sequence
   public Command e(){
     return this.runOnce(() -> {
+      
       if (level == 0){
         ExtendL1();
       }
@@ -138,6 +143,7 @@ public class Climber extends SubsystemBase {
   // extension sequence for L1 because L1 is ✨special✨
   public Command ExtendL1(){
     return this.runOnce(() -> {
+      System.out.println("g");
       level++;
       // set points to mæx height(depending on level) so the arms lift up to level
       setLp(max);
