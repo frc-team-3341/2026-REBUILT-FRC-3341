@@ -46,6 +46,7 @@ public class Climber extends SubsystemBase {
     isinit = true;
     LsetPoint = 0;
     RsetPoint = 0;
+
     max = 30;
     level = 0;
     climbingPhase = 0;
@@ -131,6 +132,7 @@ public class Climber extends SubsystemBase {
   // starts extension sequence
   public Command e(){
     return this.runOnce(() -> {
+      
       if (level == 0){
         this.ExtendL1();
       }
@@ -142,6 +144,7 @@ public class Climber extends SubsystemBase {
   // extension sequence for L1 because L1 is ✨special✨
   public Command ExtendL1(){
     return this.runOnce(() -> {
+      System.out.println("g");
       level++;
       // set points to mæx height(depending on level) so the arms lift up to level
       this.setLp(max);
