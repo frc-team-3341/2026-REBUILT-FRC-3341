@@ -11,6 +11,7 @@ import frc.robot.Constants.OIConstants;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 
+
 /*
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
  * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
@@ -22,11 +23,13 @@ public class RobotContainer {
   // The robot's subsystems
   CommandXboxController driver_controller = new CommandXboxController(OIConstants.kDriverControllerPort);
   private final ShooterSubsystem shooter = new ShooterSubsystem();
+
+
   public RobotContainer() {
     driver_controller.a().onTrue(shooter.incrementVel());
     driver_controller.b().onTrue(shooter.stopMotor());
     driver_controller.x().onTrue(shooter.decrementVel());
-    driver_controller.leftTrigger().onTrue(shooter.stopMotor());
+    driver_controller.y().onTrue(shooter.runIntake());
 
     //shooter.setRPM(shooter.getRPM4Vel(8.0));
   }
