@@ -20,7 +20,7 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 
 import static frc.robot.Constants.ModuleConstants.*;
-import frc.robot.subsystems.Modules.EasySwerveModuleIOInputsAutoLogged;
+// import frc.robot.subsystems.Modules.EasySwerveModuleIOInputsAutoLogged;
 
 import org.littletonrobotics.junction.Logger;
 
@@ -36,21 +36,19 @@ public class EasySwerveModule {
     public EasySwerveModule(EasySwerveModuleIO io, int index) {
         this.io = io;
         this.index = index;
-        driveDisconnectedAlert =
-                new Alert("Disconnected drive motor on module " + Integer.toString(index) + ".", AlertType.kError);
-        turnDisconnectedAlert =
-                new Alert("Disconnected turn motor on module " + Integer.toString(index) + ".", AlertType.kError);
+        driveDisconnectedAlert = new Alert("Disconnected drive motor on module " + index + ".", AlertType.kError);
+        turnDisconnectedAlert = new Alert("Disconnected turn motor on module " + index + ".", AlertType.kError);
     }
 
     public void periodic() {
         io.updateInputs(inputs);
-        Logger.processInputs("Drive/Module" + Integer.toString(index), inputs);
+        Logger.processInputs("Drive/Module" + index, inputs);
 
         // Calculate positions for odometry
         int sampleCount = inputs.odometryTimestamps.length; // All signals are sampled together
         odometryPositions = new SwerveModulePosition[sampleCount];
         for (int i = 0; i < sampleCount; i++) {
-            double positionMeters = inputs.odometryDrivePositionsRad[i] * (kWheelDiameterMeters/2);
+            double positionMeters = inputs.odometryDrivePositionsRad[i] * (kWheelDiameterMeters / 2);
             Rotation2d angle = inputs.odometryTurnPositions[i];
             odometryPositions[i] = new SwerveModulePosition(positionMeters, angle);
         }
@@ -60,18 +58,23 @@ public class EasySwerveModule {
         turnDisconnectedAlert.set(!inputs.turnConnected);
     }
 
-    /** Runs the module with the specified setpoint state. Mutates the state to optimize it. */
+    /**
+     * Runs the module with the specified setpoint state. Mutates the state to
+     * optimize it.
+     */
     public void runSetpoint(SwerveModuleState state) {
         // Optimize velocity setpoint
         state.optimize(getAngle());
         state.cosineScale(inputs.turnPosition);
 
         // Apply setpoints
-        io.setDriveVelocity(state.speedMetersPerSecond / (kWheelDiameterMeters/2));
+        io.setDriveVelocity(state.speedMetersPerSecond / (kWheelDiameterMeters / 2));
         io.setTurnPosition(state.angle);
     }
 
-    /** Runs the module with the specified output while controlling to zero degrees. */
+    /**
+     * Runs the module with the specified output while controlling to zero degrees.
+     */
     public void runCharacterization(double output) {
         io.setDriveOpenLoop(output);
         io.setTurnPosition(new Rotation2d());
@@ -90,12 +93,12 @@ public class EasySwerveModule {
 
     /** Returns the current drive position of the module in meters. */
     public double getPositionMeters() {
-        return inputs.drivePositionRad * (kWheelDiameterMeters/2);
+        return inputs.drivePositionRad * (kWheelDiameterMeters / 2);
     }
 
     /** Returns the current drive velocity of the module in meters per second. */
     public double getVelocityMetersPerSec() {
-        return inputs.driveVelocityRadPerSec * (kWheelDiameterMeters/2);
+        return inputs.driveVelocityRadPerSec * (kWheelDiameterMeters / 2);
     }
 
     /** Returns the module position (turn angle and drive position). */

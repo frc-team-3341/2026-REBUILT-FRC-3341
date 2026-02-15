@@ -26,7 +26,7 @@ public class VisionIOPhotonVisionSim extends VisionIOPhotonVision {
     /**
      * Creates a new VisionIOPhotonVisionSim.
      *
-     * @param name The name of the camera.
+     * @param name         The name of the camera.
      * @param poseSupplier Supplier for the robot pose to use in simulation.
      */
     public VisionIOPhotonVisionSim(String name, Transform3d robotToCamera, Supplier<Pose2d> poseSupplier) {
@@ -43,7 +43,7 @@ public class VisionIOPhotonVisionSim extends VisionIOPhotonVision {
         var cameraProperties = new SimCameraProperties();
         cameraSim = new PhotonCameraSim(camera, cameraProperties, APRIL_TAGS);
         // TODO: Input proper constants
-        cameraProperties.setCalibError(0, 0); 
+        cameraProperties.setCalibError(0, 0);
         cameraProperties.setFPS(20);
         // The average and standard deviation in milliseconds of image data latency.
         cameraProperties.setAvgLatencyMs(35);

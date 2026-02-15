@@ -16,15 +16,11 @@ package frc.robot;
 
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.PathfindingCommand;
-import com.pathplanner.lib.path.PathConstraints;
 
 import static edu.wpi.first.units.Units.*;
 
-import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -42,19 +38,13 @@ import frc.robot.subsystems.Modules.EasySwerveModuleIOSim;
 import frc.robot.subsystems.Modules.EasySwerveModuleIOSpark;
 import frc.robot.subsystems.vision.*;
 import frc.util.FuelSim;
-
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
-
 import frc.robot.Constants.Dimensions;
-import frc.robot.Constants.Dimensions;
-import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.VisionConstants;
-
 import static frc.robot.Constants.ModeConstants.*;
-import static frc.robot.Constants.VisionConstants;
 
 
 /**
@@ -68,10 +58,8 @@ public class RobotContainer {
     private final Vision vision;
     private SwerveDriveSimulation driveSimulation = null;
     public FuelSim fuelsim;
-
     // Controller
     private final CommandXboxController controller = new CommandXboxController(0);
-
     // Dashboard inputs
     private final LoggedDashboardChooser<Command> autoChooser;
 

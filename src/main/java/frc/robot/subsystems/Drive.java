@@ -12,9 +12,9 @@
 // GNU General Public License for more details.
 
 package frc.robot.subsystems;
+
 import frc.robot.subsystems.Modules.*;
 import static edu.wpi.first.units.Units.*;
-import static frc.robot.Constants.*;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.ModeConstants;
 
@@ -24,9 +24,6 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.PathPlannerLogging;
-import edu.wpi.first.hal.FRCNetComm.tInstances;
-import edu.wpi.first.hal.FRCNetComm.tResourceType;
-import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -46,24 +43,18 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
-import frc.robot.Constants.DriveConstants;
-import frc.robot.Constants.ModeConstants.*;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.Gyro.GyroIO;
 import frc.util.LocalADStarAK;
 
-import java.io.IOException;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
-import org.json.simple.parser.ParseException;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 import frc.robot.subsystems.Gyro.GyroIOInputsAutoLogged;
-
 
 public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     static final Lock odometryLock = new ReentrantLock();
@@ -72,20 +63,19 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     private final EasySwerveModule[] modules = new EasySwerveModule[4]; // FL, FR, BL, BR
     private final SysIdRoutine sysId;
     private ChassisSpeeds currSpeeds;
-    private final Alert gyroDisconnectedAlert =
-            new Alert("Disconnected gyro, using kinematics as fallback.", AlertType.kError);
-
+    private final Alert gyroDisconnectedAlert = new Alert("Disconnected gyro, using kinematics as fallback.",
+            AlertType.kError);
 
     private Rotation2d rawGyroRotation = new Rotation2d();
     private final SwerveModulePosition[] lastModulePositions = // For delta tracking
             new SwerveModulePosition[] {
-                new SwerveModulePosition(),
-                new SwerveModulePosition(),
-                new SwerveModulePosition(),
-                new SwerveModulePosition()
+                    new SwerveModulePosition(),
+                    new SwerveModulePosition(),
+                    new SwerveModulePosition(),
+                    new SwerveModulePosition()
             };
-    private final SwerveDrivePoseEstimator poseEstimator =
-            new SwerveDrivePoseEstimator(DriveConstants.kDriveKinematics, rawGyroRotation, lastModulePositions, new Pose2d());
+    private final SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(DriveConstants.kDriveKinematics,
+            rawGyroRotation, lastModulePositions, new Pose2d());
     private final Consumer<Pose2d> resetSimulationPoseCallBack;
 
     public Drive(
@@ -103,7 +93,8 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         modules[3] = new EasySwerveModule(brModuleIO, 3);
 
         // Usage reporting for swerve template
-        // HAL.report(tResourceType.kResourceType_RobotDrive, tInstances.kRobotDriveSwerve_AdvantageKit);
+        // HAL.report(tResourceType.kResourceType_RobotDrive,
+        // tInstances.kRobotDriveSwerve_AdvantageKit);
 
         // Start odometry thread
         SparkOdometryThread.getInstance().start();
@@ -131,7 +122,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
             e.printStackTrace();
             System.out.println("uh oh auto is broken!!");
         }
-        
+
         // Configure SysId
         sysId = new SysIdRoutine(
                 new SysIdRoutine.Config(
@@ -192,7 +183,8 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         }
 
         // Update gyro alert
-        gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.ModeConstants.currentMode != ModeConstants.Mode.SIM);
+        gyroDisconnectedAlert
+                .set(!gyroInputs.connected && Constants.ModeConstants.currentMode != ModeConstants.Mode.SIM);
     }
 
     /**
@@ -220,7 +212,6 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
     }
 
-
     public ChassisSpeeds getFieldSpeeds() {
         if (currSpeeds == null)
             return new ChassisSpeeds();
@@ -241,7 +232,8 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     }
 
     /**
-     * Stops the drive and turns the modules to an X arrangement to resist movement. The modules will return to their
+     * Stops the drive and turns the modules to an X arrangement to resist movement.
+     * The modules will return to their
      * normal orientations the next time a nonzero velocity is requested.
      */
     public void stopWithX() {
@@ -263,7 +255,10 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         return run(() -> runCharacterization(0.0)).withTimeout(1.0).andThen(sysId.dynamic(direction));
     }
 
-    /** Returns the module states (turn angles and drive velocities) for all of the modules. */
+    /**
+     * Returns the module states (turn angles and drive velocities) for all of the
+     * modules.
+     */
     @AutoLogOutput(key = "SwerveStates/Measured")
     private SwerveModuleState[] getModuleStates() {
         SwerveModuleState[] states = new SwerveModuleState[4];
@@ -273,7 +268,10 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         return states;
     }
 
-    /** Returns the module positions (turn angles and drive positions) for all of the modules. */
+    /**
+     * Returns the module positions (turn angles and drive positions) for all of the
+     * modules.
+     */
     private SwerveModulePosition[] getModulePositions() {
         SwerveModulePosition[] states = new SwerveModulePosition[4];
         for (int i = 0; i < 4; i++) {
@@ -337,6 +335,6 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
 
     /** Returns the maximum angular speed in radians per sec. */
     public double getMaxAngularSpeedRadPerSec() {
-        return  DriveConstants.kMaxSpeedMetersPerSecond/ DriveConstants.driveBaseRadius;
+        return DriveConstants.kMaxSpeedMetersPerSecond / DriveConstants.driveBaseRadius;
     }
 }

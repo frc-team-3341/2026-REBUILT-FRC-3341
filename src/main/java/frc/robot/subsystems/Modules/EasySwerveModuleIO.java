@@ -8,7 +8,6 @@ package frc.robot.subsystems.Modules;
 import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;
 
-
 public interface EasySwerveModuleIO {
     @AutoLog
     public static class EasySwerveModuleIOInputs {
@@ -30,17 +29,22 @@ public interface EasySwerveModuleIO {
     }
 
     /** Updates the set of loggable inputs. */
-    public default void updateInputs(EasySwerveModuleIOInputs inputs) {}
+    public default void updateInputs(EasySwerveModuleIOInputs inputs) {
+    }
 
     /** Run the drive motor at the specified open loop value. */
-    public default void setDriveOpenLoop(double output) {}
+    public default void setDriveOpenLoop(double output) {
+    }
 
     /** Run the turn motor at the specified open loop value. */
-    public default void setTurnOpenLoop(double output) {}
+    public default void setTurnOpenLoop(double output) {
+    }
 
     /** Run the drive motor at the specified velocity. */
-    public default void setDriveVelocity(double velocityRadPerSec) {}
+    public default void setDriveVelocity(double velocityRadPerSec) {
+    }
 
     /** Run the turn motor to the specified rotation. */
-    public default void setTurnPosition(Rotation2d rotation) {}
+    public default void setTurnPosition(Rotation2d rotation) {
+    }
 }

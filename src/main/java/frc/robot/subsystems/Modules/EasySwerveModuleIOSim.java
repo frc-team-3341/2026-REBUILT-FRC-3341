@@ -13,7 +13,6 @@
 
 package frc.robot.subsystems.Modules;
 
-
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.util.SparkUtil;
@@ -37,7 +36,7 @@ public class EasySwerveModuleIOSim implements EasySwerveModuleIO {
 
     private boolean driveClosedLoop = false;
     private boolean turnClosedLoop = false;
-    
+
     private final PIDController driveController = new PIDController(drivingPID.kP, drivingPID.kI, drivingPID.kD);
     private final PIDController turnController = new PIDController(turningPID.kP, turningPID.kI, turningPID.kD);
     private double driveFFVolts = 0.0;
@@ -46,11 +45,9 @@ public class EasySwerveModuleIOSim implements EasySwerveModuleIO {
 
     public EasySwerveModuleIOSim(SwerveModuleSimulation moduleSimulation) {
         this.moduleSimulation = moduleSimulation;
-        this.driveMotor =
-                moduleSimulation.useGenericMotorControllerForDrive().withCurrentLimit(Amps.of(drivingCurrentLimit));
-        this.turnMotor =
-                moduleSimulation.useGenericControllerForSteer().withCurrentLimit(Amps.of(turningCurrentLimit));
-        
+        this.driveMotor = moduleSimulation.useGenericMotorControllerForDrive()
+                .withCurrentLimit(Amps.of(drivingCurrentLimit));
+        this.turnMotor = moduleSimulation.useGenericControllerForSteer().withCurrentLimit(Amps.of(turningCurrentLimit));
 
         // Enable wrapping for turn PID
         turnController.enableContinuousInput(-Math.PI, Math.PI);
@@ -80,20 +77,16 @@ public class EasySwerveModuleIOSim implements EasySwerveModuleIO {
         // Update drive inputs
         inputs.driveConnected = true;
         inputs.drivePositionRad = moduleSimulation.getDriveWheelFinalPosition().in(Radians);
-        inputs.driveVelocityRadPerSec =
-                moduleSimulation.getDriveWheelFinalSpeed().in(RadiansPerSecond);
+        inputs.driveVelocityRadPerSec = moduleSimulation.getDriveWheelFinalSpeed().in(RadiansPerSecond);
         inputs.driveAppliedVolts = driveAppliedVolts;
-        inputs.driveCurrentAmps =
-                Math.abs(moduleSimulation.getDriveMotorStatorCurrent().in(Amps));
+        inputs.driveCurrentAmps = Math.abs(moduleSimulation.getDriveMotorStatorCurrent().in(Amps));
 
         // Update turn inputs
         inputs.turnConnected = true;
         inputs.turnPosition = moduleSimulation.getSteerAbsoluteFacing();
-        inputs.turnVelocityRadPerSec =
-                moduleSimulation.getSteerAbsoluteEncoderSpeed().in(RadiansPerSecond);
+        inputs.turnVelocityRadPerSec = moduleSimulation.getSteerAbsoluteEncoderSpeed().in(RadiansPerSecond);
         inputs.turnAppliedVolts = turnAppliedVolts;
-        inputs.turnCurrentAmps =
-                Math.abs(moduleSimulation.getSteerMotorStatorCurrent().in(Amps));
+        inputs.turnCurrentAmps = Math.abs(moduleSimulation.getSteerMotorStatorCurrent().in(Amps));
 
         // Update odometry inputs
         inputs.odometryTimestamps = SparkUtil.getSimulationOdometryTimeStamps();
