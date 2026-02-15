@@ -75,4 +75,16 @@ public class Intake extends SubsystemBase{
         });
     }
 
+
+     public Command keepOn(){
+        return runOnce(() -> {
+            if(getMotorOn()){
+                setMotorOn(false);
+            }
+            else{
+             setMotorOn(true);
+            }
+        });
+    }
+
 }

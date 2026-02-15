@@ -98,29 +98,34 @@ public class RobotContainer {
       }
     });
 
-    Trigger controllerInput = driver_controller.a();
     
-    Trigger motorOutputOn = (controllerInput).and(timer);
+    Trigger motorOutputOn = (driver_controller.a()).and(timer);
     motorOutputOn.onTrue(robotIntake.intakeBall());
 
    // motorOutputOn.toggleOnTrue(robotIntake.intakeBall());
 
-    Trigger keepOn = new Trigger(() -> {
-      if(controllerInput.getAsBoolean()){
+    // Trigger keepOn = new Trigger(() -> {
+    //   if(driver_controller.a().getAsBoolean()){
         
-        if(robotIntake.getMotorOn() == true){
-          robotIntake.setMotorOn(false);
-        }
-        else{
-          robotIntake.setMotorOn(true);
-        }
-      }
-      return robotIntake.getMotorOn();
-    });
+    //     if(robotIntake.getMotorOn()){
+    //       robotIntake.setMotorOn(false);
+    //     }
+    //     else{
+    //       robotIntake.setMotorOn(true);
+    //     }
+    //   }
+    //   System.out.println(robotIntake.getMotorOn());
+    //   return robotIntake.getMotorOn();
+    // });
 
     timer.onFalse(robotIntake.stopIntake());
-    keepOn.toggleOnFalse(robotIntake.stopIntake());
-    
+    driver_controller.a().onTrue(robotIntake.keepOn());
+    Trigger keepOn = new Trigger(() -> {
+      
+      return robotIntake.getMotorOn();
+    });
+   keepOn.toggleOnFalse(robotIntake.stopIntake());
+
   }
 
   public Command getAutonomousCommand() {
