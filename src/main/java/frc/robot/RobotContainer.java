@@ -16,6 +16,7 @@ package frc.robot;
 
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.path.PathConstraints;
 
 import static edu.wpi.first.units.Units.*;
 
@@ -28,7 +29,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.commands.SwerveTeleopCommand;
+import frc.robot.commands.SwerveTeleOpCommand;
 import frc.robot.subsystems.Drive;
 import frc.robot.subsystems.Gyro.GyroIO;
 import frc.robot.subsystems.Gyro.GyroIONavX;
@@ -122,16 +123,9 @@ public class RobotContainer {
         autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
         // Set up SysId routines
-        autoChooser.addOption("Drive Wheel Radius Characterization", SwerveTeleopCommand.wheelRadiusCharacterization(drive));
-        autoChooser.addOption("Drive Simple FF Characterization", SwerveTeleopCommand.feedforwardCharacterization(drive));
-        autoChooser.addOption(
-                "Drive SysId (Quasistatic Forward)", drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-        autoChooser.addOption(
-                "Drive SysId (Quasistatic Reverse)", drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-        autoChooser.addOption("Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
-        autoChooser.addOption("Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-
-        // Configure the button bindings
+        autoChooser.addOption("Drive Wheel Radius Characterization", SwerveTeleOpCommand.wheelRadiusCharacterization(drive));
+        autoChooser.addOption("Drive Simple FF Characterization", SwerveTeleOpCommand.feedforwardCharacterization(drive));
+       // Configure the button bindings
         configureButtonBindings();
         configureFuelSim();
         configureFuelSimRobot();
@@ -145,15 +139,21 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
         // Default command, normal field-relative drive
-        drive.setDefaultCommand(SwerveTeleopCommand.joystickDrive(
+        drive.setDefaultCommand(SwerveTeleOpCommand.joystickDrive(
                 drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()));
 
         // Lock to 0° when A button is held
-        controller
-                .a()
-                .whileTrue(SwerveTeleopCommand.joystickDriveAtAngle(
-                        drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> new Rotation2d()));
-
+        // controller
+        //         .a()
+        //         .whileTrue(SwerveTeleOpCommand.joystickDriveAtAngle(
+        //                 drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> new Rotation2d()));
+        controller.a().onTrue(
+                AutoBuilder.pathfindToPose(
+                        new Pose2d(13.13, 4.035, Rotation2d.fromDegrees(180)),
+                        new PathConstraints(3.0, 3.0, Math.toRadians(540), Math.toRadians(720)),
+                        0.0
+                )
+        );
         // Switch to X pattern when X button is pressed
         controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 

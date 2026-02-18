@@ -7,6 +7,9 @@ package frc.robot;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
+import org.littletonrobotics.junction.wpilog.WPILOGWriter;
+
+import com.pathplanner.lib.commands.PathfindingCommand;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -33,14 +36,16 @@ public class Robot extends LoggedRobot {
         Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
     } else {
         setUseTiming(false); // Run as fast as possible
-        //String logPath = LogFileUtil.findReplayLog(); // Pull the replay log from AdvantageScope (or prompt the user)
-        // Logger.setReplaySource(new WPILOGReader(logPath)); // Read replay log
-        Logger.addDataReceiver(new NT4Publisher()); // Save outputs to a new log
+        // Write a log file to disk so AdvantageScope can replay the simulation.
+        // Logs are saved to the project directory under "logs/".
+        // Logger.addDataReceiver(new WPILOGWriter("logs"));
+        // Also publish to NT so the sim GUI and AdvantageScope live-connect work.
+        Logger.addDataReceiver(new NT4Publisher());
     }
 
     Logger.start(); // Start logging! No more data receivers, replay sources, or metadata values may be added.
-    
-
+    // In Robot.java constructor, after Logger.start():
+    PathfindingCommand.warmupCommand().schedule();
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
