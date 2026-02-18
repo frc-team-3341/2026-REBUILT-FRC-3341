@@ -267,7 +267,7 @@ public final class Constants {
 
   public static final class ShooterConstants {
     //random value for testing
-    public static final double shooterHeight = 0.762;
+    public static final double shooterHeight = 0.635;
     public static final double hubHeight = 1.43; 
   }
 

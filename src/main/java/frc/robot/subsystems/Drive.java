@@ -20,6 +20,7 @@ import static frc.robot.Constants.DriveConstants.kDriveKinematics;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.ModeConstants;
+import frc.robot.Constants.ShooterConstants;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
@@ -165,6 +166,13 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
             Logger.recordOutput("SwerveStates/SetpointsOptimized", new SwerveModuleState[] {});
         }
 
+        Logger.recordOutput("distance to hub", ShooterUtil.getDistanceToHub(getPose()));
+        Logger.recordOutput("launch velocity", ShooterUtil.calculateLinearLaunchVelocity(ShooterUtil.getDistanceToHub(getPose()),
+                                        ShooterConstants.shooterHeight, 
+                                        0));
+        
+        ShooterUtil.updateTrajectory(getPose(), ShooterConstants.shooterHeight);
+
         // Update odometry
         double[] sampleTimestamps = modules[0].getOdometryTimestamps(); // All signals are sampled together
         int sampleCount = sampleTimestamps.length;
@@ -267,7 +275,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
       double yDisplacement = (hubCenterPose.getY() - currentPose.getY());
 
       if (xDisplacement != 0) { 
-        theta = offset+Math.toDegrees(Math.atan(yDisplacement/xDisplacement)); 
+        theta = offset+Math.toDegrees(Math.atan2(yDisplacement, xDisplacement)); 
       } 
 
       //this is incorrect currently cuz there are two places where x is 0, which means the angle

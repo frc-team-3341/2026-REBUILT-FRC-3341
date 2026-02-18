@@ -22,6 +22,7 @@ import static edu.wpi.first.units.Units.*;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -162,7 +163,7 @@ public class RobotContainer {
                 fuelsim.launchFuel(
                         MetersPerSecond.of(
                                 ShooterUtil.calculateLinearLaunchVelocity(
-                                        ShooterUtil.getDistanceToHub(drive),
+                                        ShooterUtil.getDistanceToHub(drive.getPose()),
                                         ShooterConstants.shooterHeight, 
                                         0)), 
                         Degrees.of(75), 
