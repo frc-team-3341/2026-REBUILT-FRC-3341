@@ -74,7 +74,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     private final SysIdRoutine sysId;
     private ChassisSpeeds currSpeeds;
 
-    private PIDController aimDriveController = new PIDController(0.1, 0, 0);
+    private PIDController aimDriveController = new PIDController(0.1, 0, 0.05);
 
     private final Alert gyroDisconnectedAlert = new Alert("Disconnected gyro, using kinematics as fallback.",
             AlertType.kError);
@@ -104,6 +104,9 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         modules[1] = new EasySwerveModule(frModuleIO, 1);
         modules[2] = new EasySwerveModule(blModuleIO, 2);
         modules[3] = new EasySwerveModule(brModuleIO, 3);
+
+        //this is required to stop the robot from tweaking when going from -179 to 179
+        aimDriveController.enableContinuousInput(-180, 180);
 
         // Usage reporting for swerve template
         // HAL.report(tResourceType.kResourceType_RobotDrive,
@@ -263,30 +266,20 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
       Translation2d hubCenterPose = ShooterUtil.getHubPose2d();
 
       //end method if there is no alliance selected cuz this should only be used on the field
-      if(hubCenterPose == null) {
+      if (hubCenterPose == null) {
         return;
       }
-
-      int offset = (hubCenterPose.getX() == 4.633 ? 0 : 180);
       
       double theta;
 
       double xDisplacement = (hubCenterPose.getX() - currentPose.getX()); 
       double yDisplacement = (hubCenterPose.getY() - currentPose.getY());
 
-      if (xDisplacement != 0) { 
-        theta = offset+Math.toDegrees(Math.atan2(yDisplacement, xDisplacement)); 
-      } 
+      theta = Math.toDegrees(Math.atan2(yDisplacement, xDisplacement)); 
 
-      //this is incorrect currently cuz there are two places where x is 0, which means the angle
-      //can either be 90 or 270
-      else {
-        theta = offset+90;
-      }
-
-      SmartDashboard.putNumber("theta offset", theta);
-      SmartDashboard.putNumber("x displacement", xDisplacement);
-      SmartDashboard.putNumber("y displacement", yDisplacement);
+      Logger.recordOutput("theta offset", theta);
+      Logger.recordOutput("x displacement", xDisplacement);
+      Logger.recordOutput("y displacement", yDisplacement);
       
       double rotOutput = aimDriveController.calculate(getRotation().getDegrees(), theta); 
 
