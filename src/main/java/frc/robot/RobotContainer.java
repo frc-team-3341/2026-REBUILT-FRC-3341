@@ -41,11 +41,14 @@ import frc.robot.subsystems.Modules.EasySwerveModuleIOSim;
 import frc.robot.subsystems.Modules.EasySwerveModuleIOSpark;
 import frc.robot.subsystems.vision.*;
 import frc.util.FuelSim;
+import frc.util.ShooterUtil;
+
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import frc.robot.Constants.Dimensions;
+import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.VisionConstants;
 import static frc.robot.Constants.ModeConstants.*;
 
@@ -156,7 +159,15 @@ public class RobotContainer {
         );
 
         controller.b().onTrue(Commands.runOnce(() -> {
-                fuelsim.launchFuel(MetersPerSecond.of(7), Degrees.of(75), Degrees.of(0), Meters.of(0.762));
+                fuelsim.launchFuel(
+                        MetersPerSecond.of(
+                                ShooterUtil.calculateLinearLaunchVelocity(
+                                        ShooterUtil.getDistanceToHub(drive),
+                                        ShooterConstants.shooterHeight, 
+                                        0)), 
+                        Degrees.of(75), 
+                        Degrees.of(0), 
+                        Meters.of(0.762));
         }));
 
         // Reset gyro / odometry

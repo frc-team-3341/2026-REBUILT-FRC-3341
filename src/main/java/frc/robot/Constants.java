@@ -266,11 +266,13 @@ public final class Constants {
   }
 
   public static final class ShooterConstants {
+    //random value for testing
+    public static final double shooterHeight = 0.762;
     public static final double hubHeight = 1.43; 
   }
 
   public static final class FieldConstants {
-    public static final Pose2d blueHubCenterPose = new Pose2d(4.633, 4.035, new Rotation2d(0));
-    public static final Pose2d redHubCenterPose = new Pose2d(11.907, 4.035, new Rotation2d(0));
+    public static final Translation2d blueHubCenterPose = new Translation2d(4.633, 4.035);
+    public static final Translation2d redHubCenterPose = new Translation2d(11.907, 4.035);
   }
 }

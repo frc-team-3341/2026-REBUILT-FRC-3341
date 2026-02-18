@@ -32,6 +32,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -51,6 +52,7 @@ import frc.robot.Constants;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.Gyro.GyroIO;
 import frc.util.LocalADStarAK;
+import frc.util.ShooterUtil;
 
 import java.util.Map;
 import java.util.Optional;
@@ -250,25 +252,14 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
 
       Pose2d currentPose = getPose();
 
-      Pose2d hubCenterPose = new Pose2d();
-
-      Optional<Alliance> alliance = DriverStation.getAlliance(); 
-
-      int offset = 0;
+      Translation2d hubCenterPose = ShooterUtil.getHubPose2d();
 
       //end method if there is no alliance selected cuz this should only be used on the field
-      if(!alliance.isPresent()) {
+      if(hubCenterPose == null) {
         return;
       }
 
-      if (alliance.get() == Alliance.Blue) {
-        hubCenterPose = FieldConstants.blueHubCenterPose;
-      }
-      
-      else {
-          hubCenterPose = FieldConstants.redHubCenterPose;
-          offset = 180;
-      } 
+      int offset = (hubCenterPose.getX() == 4.633 ? 0 : 180);
       
       double theta;
 
