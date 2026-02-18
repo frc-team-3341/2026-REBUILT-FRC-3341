@@ -15,7 +15,10 @@ package frc.robot.subsystems;
 
 import frc.robot.subsystems.Modules.*;
 import static edu.wpi.first.units.Units.*;
+import static frc.robot.Constants.DriveConstants.kDriveKinematics;
+
 import frc.robot.Constants.DriveConstants;
+import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.ModeConstants;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -25,6 +28,7 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -39,6 +43,7 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -47,6 +52,8 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.Gyro.GyroIO;
 import frc.util.LocalADStarAK;
 
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
@@ -63,6 +70,9 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     private final EasySwerveModule[] modules = new EasySwerveModule[4]; // FL, FR, BL, BR
     private final SysIdRoutine sysId;
     private ChassisSpeeds currSpeeds;
+
+    private PIDController aimDriveController = new PIDController(0.1, 0, 0);
+
     private final Alert gyroDisconnectedAlert = new Alert("Disconnected gyro, using kinematics as fallback.",
             AlertType.kError);
 
@@ -211,6 +221,78 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         // Log optimized setpoints (runSetpoint mutates each state)
         Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
     }
+
+    public void drive(ChassisSpeeds speeds, boolean fieldRelative) {
+        if (fieldRelative) {
+            if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red) {
+                speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+                    speeds, getRotation().plus(new Rotation2d(Math.PI)));
+            }
+            else {
+                speeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds, getRotation());
+            }
+        }
+        
+        speeds = ChassisSpeeds.discretize(speeds, 0.02);
+
+        currSpeeds = speeds;
+
+        SwerveModuleState[] moduleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(speeds);
+        SwerveDriveKinematics.desaturateWheelSpeeds(moduleStates, DriveConstants.kMaxSpeedMetersPerSecond);
+
+        for (int i = 0; i < 4; i++) {
+            modules[i].runSetpoint(moduleStates[i]);
+        }
+    }
+
+    //broken for red alliance for now
+    public void aimDrive(double xSpeed, double ySpeed) { 
+
+      Pose2d currentPose = getPose();
+
+      Pose2d hubCenterPose = new Pose2d();
+
+      Optional<Alliance> alliance = DriverStation.getAlliance(); 
+
+      int offset = 0;
+
+      //end method if there is no alliance selected cuz this should only be used on the field
+      if(!alliance.isPresent()) {
+        return;
+      }
+
+      if (alliance.get() == Alliance.Blue) {
+        hubCenterPose = FieldConstants.blueHubCenterPose;
+      }
+      
+      else {
+          hubCenterPose = FieldConstants.redHubCenterPose;
+          offset = 180;
+      } 
+      
+      double theta;
+
+      double xDisplacement = (hubCenterPose.getX() - currentPose.getX()); 
+      double yDisplacement = (hubCenterPose.getY() - currentPose.getY());
+
+      if (xDisplacement != 0) { 
+        theta = offset+Math.toDegrees(Math.atan(yDisplacement/xDisplacement)); 
+      } 
+
+      //this is incorrect currently cuz there are two places where x is 0, which means the angle
+      //can either be 90 or 270
+      else {
+        theta = offset+90;
+      }
+
+      SmartDashboard.putNumber("theta offset", theta);
+      SmartDashboard.putNumber("x displacement", xDisplacement);
+      SmartDashboard.putNumber("y displacement", yDisplacement);
+      
+      double rotOutput = aimDriveController.calculate(getRotation().getDegrees(), theta); 
+
+      drive(new ChassisSpeeds(xSpeed, ySpeed, rotOutput), true);
+  }
 
     public ChassisSpeeds getFieldSpeeds() {
         if (currSpeeds == null)

@@ -22,6 +22,7 @@ import static edu.wpi.first.units.Units.*;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -30,6 +31,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.SwerveTeleOpCommand;
+import frc.robot.commands.SwerveTeleop;
 import frc.robot.subsystems.Drive;
 import frc.robot.subsystems.Gyro.GyroIO;
 import frc.robot.subsystems.Gyro.GyroIONavX;
@@ -57,6 +59,7 @@ public class RobotContainer {
     // Subsystems
     private final Drive drive;
     private final Vision vision;
+    private SwerveTeleop swerveTeleop;
     private SwerveDriveSimulation driveSimulation = null;
     public FuelSim fuelsim;
     // Controller
@@ -104,6 +107,9 @@ public class RobotContainer {
                         new VisionIOPhotonVisionSim(
                                 VisionConstants.CAMERA_NAMES[0], VisionConstants.CAMERA_TRANSFORMS[0], driveSimulation::getSimulatedDriveTrainPose));
 
+                configureFuelSim();
+                configureFuelSimRobot();
+
                 break;
             default:
                 // Replayed robot, disable IO implementations
@@ -119,6 +125,8 @@ public class RobotContainer {
                 break;
         }
 
+        swerveTeleop = new SwerveTeleop(drive, controller, () -> controller.x().getAsBoolean());
+
         // Set up auto routines
         autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
@@ -127,8 +135,6 @@ public class RobotContainer {
         autoChooser.addOption("Drive Simple FF Characterization", SwerveTeleOpCommand.feedforwardCharacterization(drive));
        // Configure the button bindings
         configureButtonBindings();
-        configureFuelSim();
-        configureFuelSimRobot();
         
     }
 
@@ -139,14 +145,8 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
         // Default command, normal field-relative drive
-        drive.setDefaultCommand(SwerveTeleOpCommand.joystickDrive(
-                drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()));
+        drive.setDefaultCommand(swerveTeleop);
 
-        // Lock to 0° when A button is held
-        // controller
-        //         .a()
-        //         .whileTrue(SwerveTeleOpCommand.joystickDriveAtAngle(
-        //                 drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> new Rotation2d()));
         controller.a().onTrue(
                 AutoBuilder.pathfindToPose(
                         new Pose2d(13.13, 4.035, Rotation2d.fromDegrees(180)),
@@ -154,8 +154,10 @@ public class RobotContainer {
                         0.0
                 )
         );
-        // Switch to X pattern when X button is pressed
-        controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+
+        controller.b().onTrue(Commands.runOnce(() -> {
+                fuelsim.launchFuel(MetersPerSecond.of(7), Degrees.of(75), Degrees.of(0), Meters.of(0.762));
+        }));
 
         // Reset gyro / odometry
         final Runnable resetGyro = Constants.ModeConstants.currentMode == Constants.ModeConstants.Mode.SIM
@@ -179,7 +181,7 @@ public class RobotContainer {
     private void configureFuelSim() {
     fuelsim = new FuelSim();
 
-    fuelsim.spawnStartingFuel();
+//     fuelsim.spawnStartingFuel();
 
     fuelsim.start();
     
@@ -189,7 +191,7 @@ public class RobotContainer {
 
     SmartDashboard.putData(Commands.runOnce(() -> {
             fuelsim.clearFuel();
-            fuelsim.spawnStartingFuel();
+        //     fuelsim.spawnStartingFuel();
 
     })
     .withName("Reset Fuel")

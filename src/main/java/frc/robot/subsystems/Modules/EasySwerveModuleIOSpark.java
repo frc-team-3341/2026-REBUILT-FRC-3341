@@ -24,7 +24,6 @@ import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
-import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import edu.wpi.first.math.MathUtil;
@@ -90,6 +89,8 @@ public class EasySwerveModuleIOSpark implements EasySwerveModuleIO {
         turnEncoder = turnSpark.getAbsoluteEncoder();
         driveController = driveSpark.getClosedLoopController();
         turnController = turnSpark.getClosedLoopController();
+
+        
 
         // Configure drive motor
         var driveConfig = Configs.EasySwerveModule.drivingConfig;
@@ -164,15 +165,14 @@ public class EasySwerveModuleIOSpark implements EasySwerveModuleIO {
 
     @Override
     public void setDriveVelocity(double velocityRadPerSec) {
-        double ffVolts = driveKs * Math.signum(velocityRadPerSec) + driveKv * velocityRadPerSec;
         driveController.setSetpoint(
-                velocityRadPerSec, ControlType.kVelocity, ClosedLoopSlot.kSlot0, ffVolts, ArbFFUnits.kVoltage);
+                velocityRadPerSec, ControlType.kVelocity, ClosedLoopSlot.kSlot0);
     }
 
     @Override
     public void setTurnPosition(Rotation2d rotation) {
         double setpoint =
-                MathUtil.inputModulus(rotation.plus(zeroRotation).getRadians(), turnPIDMinInput, turnPIDMaxInput);
+                MathUtil.inputModulus(rotation.getRadians(), turnPIDMinInput, turnPIDMaxInput);
         turnController.setSetpoint(setpoint, ControlType.kPosition);
     }
 }

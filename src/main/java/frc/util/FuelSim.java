@@ -318,7 +318,7 @@ public class FuelSim {
     protected double robotLength; // size along the robot's x axis
     protected double bumperHeight;
     protected ArrayList<SimIntake> intakes = new ArrayList<>();
-    protected int subticks = 5;
+    protected int subticks = 1;
 
     /**
      * Creates a new instance of FuelSim
