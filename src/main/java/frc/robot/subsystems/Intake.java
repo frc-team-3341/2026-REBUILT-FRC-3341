@@ -68,6 +68,15 @@ public class Intake extends SubsystemBase{
                 intakeWheel.set(0.25);
         });
     }
+
+    public Command reverseIntakeBall() {
+        return runOnce(
+            () -> {
+                
+                intakeWheel.set(speed:-0.25);
+        });
+    }
+    
     public Command stopIntake(){
         return runOnce(
             () -> {
