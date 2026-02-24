@@ -15,7 +15,6 @@ public class IntakeIOSpark implements IntakeIO {
     
     public IntakeIOSpark() {
         intakeSpark = new SparkFlex(IntakeConstants.INTAKE_CAN_ID, MotorType.kBrushless);
-
         intakeSpark.configure(Configs.Intake.INTAKE_CONFIG, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 

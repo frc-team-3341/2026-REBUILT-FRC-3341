@@ -1,10 +1,13 @@
 package frc.robot.subsystems.Shooter;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.Superstructure.FeederState;
 import frc.robot.subsystems.Superstructure.ShooterState;
+import frc.util.ShooterUtil;
 
 import static frc.robot.Constants.ShooterConstants.*;
 
@@ -42,6 +45,24 @@ public class Shooter extends SubsystemBase {
     //TODO finish ts
     public Command handleShooterTransitions(ShooterState desiredState) {
         switch (desiredState) {
+            case IDLE:
+                return this.runOnce(() -> io.stopFlywheel());
+
+            case PASSING:
+                return this.runOnce(() -> io.setFlywheelRPM(PASSING_RPM));
+
+            //TODO reimplement this so that flywheelRPM isn't constantly recalculated, only if
+            //there is a significant change in distance
+            case SCORING:
+                return this.run(() -> {
+                    Pose2d robotPose = RobotContainer.getPose();
+
+                    double distanceToHub = ShooterUtil.getDistanceToHub(robotPose);
+
+                    double flywheelRPM = speedMap.get(distanceToHub);
+
+                    io.setFlywheelRPM(flywheelRPM);
+                });
             default:
                 return Commands.print("Invalid Shooter State Provided!");
         }

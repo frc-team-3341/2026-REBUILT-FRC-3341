@@ -12,6 +12,8 @@ import static frc.robot.Constants.DriveConstants.kDriveKinematics;
 import static frc.robot.Constants.DriveConstants.kRobotMassKg;
 import static frc.robot.Constants.DriveConstants.kWheelCOF;
 
+import java.util.Map;
+
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -295,7 +297,7 @@ public final class Constants {
 
     //put entries into the speed map here
     static {
-
+      
     }
   }
 

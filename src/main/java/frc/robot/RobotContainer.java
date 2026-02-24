@@ -61,7 +61,7 @@ import static frc.robot.Constants.ModeConstants.*;
  */
 public class RobotContainer {
     // Subsystems
-    private final Drive drive;
+    private static Drive drive;
     private final Vision vision;
     private SwerveTeleop swerveTeleop;
     private SwerveDriveSimulation driveSimulation = null;
@@ -226,6 +226,10 @@ public class RobotContainer {
 
         drive.resetOdometry(new Pose2d(3, 3, new Rotation2d()));
         SimulatedArena.getInstance().resetFieldForAuto();
+    }
+
+    public static Pose2d getPose() {
+        return drive.getPose();
     }
 
     public void updateSimulation() {

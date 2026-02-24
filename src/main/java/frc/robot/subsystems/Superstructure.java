@@ -39,6 +39,11 @@ public class Superstructure extends SubsystemBase {
             .alongWith(shooter.handleFeederTransition(desiredFeederState));
     }
 
+    public Command setShooterState(ShooterState desiredShooterState) {
+        return Commands.runOnce(() -> this.desiredShooterState = desiredShooterState)
+            .alongWith(shooter.handleShooterTransitions(desiredShooterState));
+    }
+
     public enum SuperState {
         IDLE,
         INTAKING,
