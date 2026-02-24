@@ -47,10 +47,12 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.Superstructure.SwerveState;
 import frc.robot.subsystems.Gyro.GyroIO;
 import frc.util.LocalADStarAK;
 import frc.util.ShooterUtil;
@@ -73,6 +75,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     private final EasySwerveModule[] modules = new EasySwerveModule[4]; // FL, FR, BL, BR
     private final SysIdRoutine sysId;
     private ChassisSpeeds currSpeeds;
+    private boolean aimDriveEnabled;
 
     private PIDController aimDriveController = new PIDController(0.1, 0, 0.05);
 
@@ -111,7 +114,9 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         // Usage reporting for swerve template
         // HAL.report(tResourceType.kResourceType_RobotDrive,
         // tInstances.kRobotDriveSwerve_AdvantageKit);
-
+        
+        aimDriveEnabled = false;
+        
         // Start odometry thread
         SparkOdometryThread.getInstance().start();
         try {
@@ -301,9 +306,34 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         }
     }
 
+    //might want to move this into a separate file in the future
+    public Command handleSwerveTransitions(SwerveState desiredState) {
+        switch (desiredState) {
+            case MANUAL:
+                return this.runOnce(() -> aimDriveEnabled = false);
+
+            case TRACKING_HUB:
+                return this.runOnce(() -> aimDriveEnabled = true);
+
+            //replace these with pathfinding commands
+            case ALIGNING_TOWER_LEFT:
+                return Commands.print("filler");
+
+            case ALIGNING_TOWER_RIGHT:
+                return Commands.print("filler");
+
+            default:
+                return Commands.print("Invalid Swerve State Provided!");
+        }
+    }
+
     /** Stops the drive. */
     public void stop() {
         runVelocity(new ChassisSpeeds());
+    }
+
+    public boolean aimDriveEnabled() {
+        return aimDriveEnabled;
     }
 
     /**

@@ -129,7 +129,7 @@ public class RobotContainer {
                 break;
         }
 
-        swerveTeleop = new SwerveTeleop(drive, controller, () -> controller.x().getAsBoolean());
+        swerveTeleop = new SwerveTeleop(drive, controller, drive::aimDriveEnabled);
 
         // Set up auto routines
         autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
