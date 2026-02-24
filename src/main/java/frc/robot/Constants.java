@@ -269,6 +269,27 @@ public final class Constants {
     //random value for testing
     public static final double shooterHeight = 0.635;
     public static final double hubHeight = 1.43; 
+
+    //TODO NEED TO BE SET
+    public static final int SHOOTER_FLYWHEEL_CAN_ID = 0;
+    public static final int FEEDER_CAN_ID = 0;
+
+    //TODO THIS IS ARBITRARY
+    public static final int shooterCurrentLimit = 25;
+
+    public static final double kP = 0.0001;
+    public static final double kI = 0.0000001;
+    public static final double kD = 0;
+
+    public static final double kV = 0.00016;
+  }
+
+  public static final class IntakeConstants {
+    //TODO NEEDS TO BE SET
+    public static final int INTAKE_CAN_ID = 0;
+
+    //TODO THIS IS ARBITRARY
+    public static final int intakeCurrentLimit = 25;
   }
 
   public static final class FieldConstants {
