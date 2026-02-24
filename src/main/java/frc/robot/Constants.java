@@ -20,6 +20,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
@@ -282,6 +283,20 @@ public final class Constants {
     public static final double kD = 0;
 
     public static final double kV = 0.00016;
+
+    //TODO figure this out
+    public static final int PASSING_RPM = 0;
+
+    //TODO more things to set lol (might be the same as the intake speeds)
+    public static final double FEEDING_SPEED = 0;
+    public static final double BACKFEED_SPEED = 0;
+
+    public static InterpolatingDoubleTreeMap speedMap = new InterpolatingDoubleTreeMap();
+
+    //put entries into the speed map here
+    static {
+
+    }
   }
 
   public static final class IntakeConstants {
@@ -290,6 +305,10 @@ public final class Constants {
 
     //TODO THIS IS ARBITRARY
     public static final int intakeCurrentLimit = 25;
+
+    //TODO needs to be set as well
+    public static final double INTAKE_SPEED = 0;
+    public static final double OUTTAKE_SPEED = 0;
   }
 
   public static final class FieldConstants {

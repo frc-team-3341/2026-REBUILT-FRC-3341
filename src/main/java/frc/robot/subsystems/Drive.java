@@ -146,12 +146,6 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
                 new SysIdRoutine.Mechanism((voltage) -> runCharacterization(voltage.in(Volts)), null, this));
     }
 
-    enum SwerveState {
-        MANUAL,
-        TRACKING_HUB,
-        ALIGNING_TOWER_LEFT,
-        ALIGNING_TOWER_RIGHT
-    }
 
     @Override
     public void periodic() {

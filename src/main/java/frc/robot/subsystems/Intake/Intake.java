@@ -1,6 +1,11 @@
 package frc.robot.subsystems.Intake;
 
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.Superstructure.IntakeState;
+
+import static frc.robot.Constants.IntakeConstants.*;
 
 public class Intake extends SubsystemBase {
 
@@ -16,9 +21,20 @@ public class Intake extends SubsystemBase {
         io.updateInputs(inputs);
     }
 
-    enum IntakeState {
-        IDLE,
-        INTAKE,
-        OUTTAKE
+    public Command handleIntakeTransition(IntakeState desiredState) {
+        switch (desiredState) {
+            case IDLE:
+                return this.runOnce(() -> io.stopIntake());
+
+            case INTAKE:
+                return this.runOnce(() -> io.setIntakeSpeed(INTAKE_SPEED));
+
+            case OUTTAKE:
+                return this.runOnce(() -> io.reverseIntake(OUTTAKE_SPEED));
+
+            default:
+                return Commands.print("Invalid Intake State Provided!");
+
+        }
     }
 }

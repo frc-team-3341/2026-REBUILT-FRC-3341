@@ -1,6 +1,12 @@
 package frc.robot.subsystems.Shooter;
 
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.Superstructure.FeederState;
+import frc.robot.subsystems.Superstructure.ShooterState;
+
+import static frc.robot.Constants.ShooterConstants.*;
 
 public class Shooter extends SubsystemBase {
     
@@ -16,15 +22,28 @@ public class Shooter extends SubsystemBase {
         io.updateInputs(inputs);
     }
 
-    enum ShooterState {
-        IDLE,
-        PASSING,
-        SCORING
+    public Command handleFeederTransition(FeederState desiredState) {
+        switch (desiredState) {
+            case IDLE:
+                return this.runOnce(() -> io.stopFlywheel());
+
+            case FEED:
+                return this.runOnce(() -> io.setFeederSpeed(FEEDING_SPEED));
+
+            case BACKFEED:
+                return this.runOnce(() -> io.reverseFeed(BACKFEED_SPEED));
+                
+            default:
+                return Commands.print("Invalid Feeder State Provided!");
+
+        }
     }
 
-    enum FeederState {
-        IDLE,
-        FEED,
-        BACKFEED
+    //TODO finish ts
+    public Command handleShooterTransitions(ShooterState desiredState) {
+        switch (desiredState) {
+            default:
+                return Commands.print("Invalid Shooter State Provided!");
+        }
     }
 }
