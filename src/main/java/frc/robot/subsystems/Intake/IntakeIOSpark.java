@@ -11,6 +11,7 @@ import frc.robot.Constants.IntakeConstants;
 public class IntakeIOSpark implements IntakeIO {
     
     SparkFlex intakeSpark;
+    double intakeSpeed;
     
     public IntakeIOSpark() {
         intakeSpark = new SparkFlex(IntakeConstants.INTAKE_CAN_ID, MotorType.kBrushless);
@@ -20,17 +21,20 @@ public class IntakeIOSpark implements IntakeIO {
 
     @Override
     public void updateInputs(IntakeIOInputs inputs) {
-
+        inputs.intakeMotorConnected = true;
+        inputs.intakeWheelSpeed = intakeSpeed;
     }
 
     @Override
     public void setIntakeSpeed(double speed) {
-        intakeSpark.set(Math.abs(speed));
+        intakeSpeed = Math.abs(speed);
+        intakeSpark.set(intakeSpeed);
     }
 
     @Override
     public void reverseIntake(double speed) {
-        intakeSpark.set(-Math.abs(speed));
+        intakeSpeed = -Math.abs(speed);
+        intakeSpark.set(intakeSpeed);
     }
 
     @Override
