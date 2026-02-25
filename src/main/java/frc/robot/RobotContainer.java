@@ -31,7 +31,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.commands.SwerveTeleOpCommand;
 import frc.robot.commands.SwerveTeleop;
 import frc.robot.subsystems.Drive;
 import frc.robot.subsystems.Superstructure;
@@ -151,9 +150,6 @@ public class RobotContainer {
         // Set up auto routines
         autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
-        // Set up SysId routines
-        autoChooser.addOption("Drive Wheel Radius Characterization", SwerveTeleOpCommand.wheelRadiusCharacterization(drive));
-        autoChooser.addOption("Drive Simple FF Characterization", SwerveTeleOpCommand.feedforwardCharacterization(drive));
        // Configure the button bindings
         configureButtonBindings();
         
