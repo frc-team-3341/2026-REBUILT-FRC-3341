@@ -42,31 +42,7 @@ public class Superstructure extends SubsystemBase {
     }
 
     public Command setSuperState(SuperState newSuperState) {
-        if (newSuperState != SuperState.IDLE) {
-            if (desiredSuperState == SuperState.ALIGNING_TOWER_LEFT) {
-                return Commands.runOnce(
-                    () -> desiredSuperState = SuperState.ALIGNING_TOWER_LEFT
-                )
-                .alongWith(
-                    setSwerveState(SwerveState.ALIGNING_TOWER_LEFT),
-                    setIntakeState(IntakeState.IDLE),
-                    setShooterState(ShooterState.IDLE),
-                    setFeederState(FeederState.IDLE)
-                );
-            }
-            if (desiredSuperState == SuperState.ALIGNING_TOWER_RIGHT) {
-                return Commands.runOnce(
-                    () -> desiredSuperState = SuperState.ALIGNING_TOWER_RIGHT
-                )
-                .alongWith(
-                    setSwerveState(SwerveState.ALIGNING_TOWER_RIGHT),
-                    setIntakeState(IntakeState.IDLE),
-                    setShooterState(ShooterState.IDLE),
-                    setFeederState(FeederState.IDLE)
-                );
-            }
-            
-        }
+
         switch (newSuperState) {
             case IDLE:
                 return Commands.runOnce(() -> desiredSuperState = newSuperState)
@@ -78,13 +54,22 @@ public class Superstructure extends SubsystemBase {
                 );
             case INTAKING:
                 switch (desiredSuperState) {
+                    case PASSING:
+                    case REVERSE:
+                    case ALIGNING_TOWER_LEFT:
+                    case ALIGNING_TOWER_RIGHT:
+                        return setSuperState(desiredSuperState);
                     case IDLE:
                     case INTAKING:
                     case SCORING:
-                    case PASSING:
-                    case REVERSE:
-                    case ALIGNING_TOWER_LEFT:    
-                    case ALIGNING_TOWER_RIGHT:
+                        return Commands.runOnce(
+                            () -> desiredSuperState = newSuperState
+                        )
+                        .alongWith(
+                            setIntakeState(IntakeState.INTAKE),
+                            setSwerveState(SwerveState.MANUAL),
+                            setShooterState(desiredShooterState)
+                        );
                     
                 }
             case SCORING:
@@ -102,48 +87,90 @@ public class Superstructure extends SubsystemBase {
                             setSwerveState(SwerveState.TRACKING_HUB),
                             setShooterState(ShooterState.SCORING)
                         );
+                    case ALIGNING_TOWER_LEFT:
+                    case ALIGNING_TOWER_RIGHT:
+                        return setSuperState(desiredSuperState);
                 }
             case PASSING:
                 switch (desiredSuperState) {
-                    case IDLE:
                     case INTAKING:
+                    case ALIGNING_TOWER_LEFT:
+                    case ALIGNING_TOWER_RIGHT:
+                        return setSuperState(desiredSuperState);
+                    case IDLE:
                     case SCORING:
                     case PASSING:
                     case REVERSE:
-                    case ALIGNING_TOWER_LEFT:    
-                    case ALIGNING_TOWER_RIGHT:
+                        return Commands.runOnce(
+                            () -> desiredSuperState = newSuperState
+                        )
+                        .alongWith(
+                            setIntakeState(IntakeState.INTAKE),
+                            setSwerveState(SwerveState.MANUAL),
+                            setShooterState(ShooterState.PASSING)
+                        );
                     
                 }
             case REVERSE:
                 switch (desiredSuperState) {
-                    case IDLE:
                     case INTAKING:
+                    case ALIGNING_TOWER_LEFT:
+                    case ALIGNING_TOWER_RIGHT:
+                        return setSuperState(desiredSuperState);
+                    case IDLE:
                     case SCORING:
                     case PASSING:
                     case REVERSE:
-                    case ALIGNING_TOWER_LEFT:    
-                    case ALIGNING_TOWER_RIGHT:
+                        return Commands.runOnce(
+                            () -> desiredSuperState = newSuperState
+                        )
+                        .alongWith(
+                            setIntakeState(IntakeState.OUTTAKE),
+                            setFeederState(FeederState.BACKFEED),
+                            setSwerveState(SwerveState.MANUAL),
+                            setShooterState(desiredShooterState)
+                        );
                 }
             case ALIGNING_TOWER_LEFT:
                 switch (desiredSuperState) {
-                    case IDLE:
                     case INTAKING:
                     case SCORING:
                     case PASSING:
                     case REVERSE:
+                        return setSuperState(desiredSuperState);
+                    case IDLE:
                     case ALIGNING_TOWER_LEFT:    
                     case ALIGNING_TOWER_RIGHT:
+                        return Commands.runOnce(
+                            () -> desiredSuperState = newSuperState
+                        )
+                        .alongWith(
+                            setIntakeState(IntakeState.IDLE),
+                            setFeederState(FeederState.IDLE),
+                            setShooterState(ShooterState.IDLE),
+                            setSwerveState(SwerveState.ALIGNING_TOWER_LEFT)
+                        );
                     
                 }
             case ALIGNING_TOWER_RIGHT:
                 switch (desiredSuperState) {
-                    case IDLE:
                     case INTAKING:
                     case SCORING:
                     case PASSING:
                     case REVERSE:
+                        return setSuperState(desiredSuperState);
+                    case IDLE:
                     case ALIGNING_TOWER_LEFT:    
                     case ALIGNING_TOWER_RIGHT:
+                        return Commands.runOnce(
+                            () -> desiredSuperState = newSuperState
+                        )
+                        .alongWith(
+                            setIntakeState(IntakeState.IDLE),
+                            setFeederState(FeederState.IDLE),
+                            setShooterState(ShooterState.IDLE),
+                            setSwerveState(SwerveState.ALIGNING_TOWER_RIGHT)
+                        );
                     
                 }
             default:
