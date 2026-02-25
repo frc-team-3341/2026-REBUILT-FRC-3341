@@ -34,12 +34,18 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.SwerveTeleOpCommand;
 import frc.robot.commands.SwerveTeleop;
 import frc.robot.subsystems.Drive;
+import frc.robot.subsystems.Superstructure;
+import frc.robot.subsystems.Superstructure.SuperState;
 import frc.robot.subsystems.Gyro.GyroIO;
 import frc.robot.subsystems.Gyro.GyroIONavX;
 import frc.robot.subsystems.Gyro.GyroIOSim;
+import frc.robot.subsystems.Intake.Intake;
+import frc.robot.subsystems.Intake.IntakeIOSpark;
 import frc.robot.subsystems.Modules.EasySwerveModuleIO;
 import frc.robot.subsystems.Modules.EasySwerveModuleIOSim;
 import frc.robot.subsystems.Modules.EasySwerveModuleIOSpark;
+import frc.robot.subsystems.Shooter.Shooter;
+import frc.robot.subsystems.Shooter.ShooterIOSpark;
 import frc.robot.subsystems.vision.*;
 import frc.util.FuelSim;
 import frc.util.ShooterUtil;
@@ -65,6 +71,11 @@ public class RobotContainer {
     private final Vision vision;
     private SwerveTeleop swerveTeleop;
     private SwerveDriveSimulation driveSimulation = null;
+
+    private Superstructure superstructure;
+    private Shooter shooter;
+    private Intake intake;
+    
     public FuelSim fuelsim;
     // Controller
     private final CommandXboxController controller = new CommandXboxController(0);
@@ -85,6 +96,10 @@ public class RobotContainer {
                         new EasySwerveModuleIOSpark(3),
                         (pose) -> {});
 
+                shooter = new Shooter(new ShooterIOSpark());
+
+                intake = new Intake(new IntakeIOSpark());
+                        
                 this.vision = new Vision(
                         drive,
                         new VisionIOPhotonVision(VisionConstants.CAMERA_NAMES[0], VisionConstants.CAMERA_TRANSFORMS[0]));
@@ -131,6 +146,8 @@ public class RobotContainer {
 
         swerveTeleop = new SwerveTeleop(drive, controller, drive::aimDriveEnabled);
 
+        superstructure = new Superstructure(drive, shooter, intake);
+
         // Set up auto routines
         autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
@@ -152,24 +169,38 @@ public class RobotContainer {
         drive.setDefaultCommand(swerveTeleop);
 
         controller.a().onTrue(
-                AutoBuilder.pathfindToPose(
-                        new Pose2d(13.13, 4.035, Rotation2d.fromDegrees(180)),
-                        new PathConstraints(3.0, 3.0, Math.toRadians(540), Math.toRadians(720)),
-                        0.0
-                )
+                superstructure.setSuperState(SuperState.PASSING)
+        );
+        
+        controller.b().onTrue(
+                superstructure.setSuperState(SuperState.IDLE)
         );
 
-        controller.b().onTrue(Commands.runOnce(() -> {
-                fuelsim.launchFuel(
-                        MetersPerSecond.of(
-                                ShooterUtil.calculateLinearLaunchVelocity(
-                                        ShooterUtil.getDistanceToHub(drive.getPose()),
-                                        ShooterConstants.shooterHeight, 
-                                        0)), 
-                        Degrees.of(75), 
-                        Degrees.of(0), 
-                        Meters.of(0.762));
-        }));
+        controller.x().onTrue(
+                superstructure.setSuperState(SuperState.SCORING)
+        );
+
+        controller.rightBumper().whileTrue(
+                superstructure.setSuperState(SuperState.INTAKING)
+        )
+        .onFalse(
+                superstructure.setSuperState(superstructure.getPreviousSuperState())
+        );
+
+        controller.leftBumper().whileTrue(
+                superstructure.setSuperState(SuperState.REVERSE)
+        )
+        .onFalse(
+                superstructure.setSuperState(superstructure.getPreviousSuperState())
+        );
+
+        controller.povLeft().onTrue(
+                superstructure.setSuperState(SuperState.ALIGNING_TOWER_LEFT)
+        );
+
+        controller.povRight().onTrue(
+                superstructure.setSuperState(SuperState.ALIGNING_TOWER_RIGHT)
+        );
 
         // Reset gyro / odometry
         final Runnable resetGyro = Constants.ModeConstants.currentMode == Constants.ModeConstants.Mode.SIM

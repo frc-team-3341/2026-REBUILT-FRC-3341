@@ -18,6 +18,9 @@ public class Superstructure extends SubsystemBase {
     SuperState desiredSuperState;
 
     @AutoLogOutput
+    SuperState prevSuperState;
+
+    @AutoLogOutput
     IntakeState desiredIntakeState;
 
     @AutoLogOutput
@@ -28,6 +31,7 @@ public class Superstructure extends SubsystemBase {
 
     @AutoLogOutput
     SwerveState desiredSwerveState;
+
 
     public Superstructure(Drive swerve, Shooter shooter, Intake intake) {
         this.swerve = swerve;
@@ -42,10 +46,12 @@ public class Superstructure extends SubsystemBase {
     }
 
     public Command setSuperState(SuperState newSuperState) {
-
         switch (newSuperState) {
             case IDLE:
-                return Commands.runOnce(() -> desiredSuperState = newSuperState)
+                return Commands.runOnce(() -> {
+                    prevSuperState = desiredSuperState;
+                    desiredSuperState = newSuperState;
+                })
                 .alongWith(
                     setIntakeState(IntakeState.IDLE),
                     setFeederState(FeederState.IDLE),
@@ -62,9 +68,10 @@ public class Superstructure extends SubsystemBase {
                     case IDLE:
                     case INTAKING:
                     case SCORING:
-                        return Commands.runOnce(
-                            () -> desiredSuperState = newSuperState
-                        )
+                        return Commands.runOnce(() -> {
+                            prevSuperState = desiredSuperState;
+                            desiredSuperState = newSuperState;
+                        })
                         .alongWith(
                             setIntakeState(IntakeState.INTAKE),
                             setSwerveState(SwerveState.MANUAL),
@@ -79,9 +86,10 @@ public class Superstructure extends SubsystemBase {
                     case SCORING:
                     case PASSING:
                     case REVERSE:
-                        return Commands.runOnce(
-                            () -> desiredSuperState = newSuperState
-                        )
+                        return Commands.runOnce(() -> {
+                            prevSuperState = desiredSuperState;
+                            desiredSuperState = newSuperState;
+                        })
                         .alongWith(
                             setIntakeState(IntakeState.IDLE),
                             setSwerveState(SwerveState.TRACKING_HUB),
@@ -101,9 +109,10 @@ public class Superstructure extends SubsystemBase {
                     case SCORING:
                     case PASSING:
                     case REVERSE:
-                        return Commands.runOnce(
-                            () -> desiredSuperState = newSuperState
-                        )
+                        return Commands.runOnce(() -> {
+                            prevSuperState = desiredSuperState;
+                            desiredSuperState = newSuperState;
+                        })
                         .alongWith(
                             setIntakeState(IntakeState.INTAKE),
                             setSwerveState(SwerveState.MANUAL),
@@ -121,9 +130,10 @@ public class Superstructure extends SubsystemBase {
                     case SCORING:
                     case PASSING:
                     case REVERSE:
-                        return Commands.runOnce(
-                            () -> desiredSuperState = newSuperState
-                        )
+                        return Commands.runOnce(() -> {
+                            prevSuperState = desiredSuperState;
+                            desiredSuperState = newSuperState;
+                        })
                         .alongWith(
                             setIntakeState(IntakeState.OUTTAKE),
                             setFeederState(FeederState.BACKFEED),
@@ -141,9 +151,10 @@ public class Superstructure extends SubsystemBase {
                     case IDLE:
                     case ALIGNING_TOWER_LEFT:    
                     case ALIGNING_TOWER_RIGHT:
-                        return Commands.runOnce(
-                            () -> desiredSuperState = newSuperState
-                        )
+                        return Commands.runOnce(() -> {
+                            prevSuperState = desiredSuperState;
+                            desiredSuperState = newSuperState;
+                        })
                         .alongWith(
                             setIntakeState(IntakeState.IDLE),
                             setFeederState(FeederState.IDLE),
@@ -162,9 +173,10 @@ public class Superstructure extends SubsystemBase {
                     case IDLE:
                     case ALIGNING_TOWER_LEFT:    
                     case ALIGNING_TOWER_RIGHT:
-                        return Commands.runOnce(
-                            () -> desiredSuperState = newSuperState
-                        )
+                        return Commands.runOnce(() -> {
+                            prevSuperState = desiredSuperState;
+                            desiredSuperState = newSuperState;
+                        })
                         .alongWith(
                             setIntakeState(IntakeState.IDLE),
                             setFeederState(FeederState.IDLE),
@@ -176,6 +188,14 @@ public class Superstructure extends SubsystemBase {
             default:
                 return Commands.print("Invalid SuperState provided!");
         }
+    }
+
+    public SuperState getCurrentSuperState() {
+        return desiredSuperState;
+    }
+
+    public SuperState getPreviousSuperState() {
+        return prevSuperState;
     }
 
     public Command setIntakeState(IntakeState intakeState) {
