@@ -144,10 +144,10 @@ public class Superstructure extends SubsystemBase {
             case ALIGNING_TOWER_LEFT:
                 switch (desiredSuperState) {
                     case INTAKING:
-                    case SCORING:
-                    case PASSING:
                     case REVERSE:
                         return setSuperState(desiredSuperState);
+                    case SCORING:
+                    case PASSING:
                     case IDLE:
                     case ALIGNING_TOWER_LEFT:    
                     case ALIGNING_TOWER_RIGHT:
@@ -166,10 +166,10 @@ public class Superstructure extends SubsystemBase {
             case ALIGNING_TOWER_RIGHT:
                 switch (desiredSuperState) {
                     case INTAKING:
-                    case SCORING:
-                    case PASSING:
                     case REVERSE:
                         return setSuperState(desiredSuperState);
+                    case SCORING:
+                    case PASSING:
                     case IDLE:
                     case ALIGNING_TOWER_LEFT:    
                     case ALIGNING_TOWER_RIGHT:

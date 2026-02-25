@@ -34,6 +34,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.SwerveTeleop;
 import frc.robot.subsystems.Drive;
 import frc.robot.subsystems.Superstructure;
+import frc.robot.subsystems.Superstructure.FeederState;
 import frc.robot.subsystems.Superstructure.SuperState;
 import frc.robot.subsystems.Gyro.GyroIO;
 import frc.robot.subsystems.Gyro.GyroIONavX;
@@ -196,6 +197,13 @@ public class RobotContainer {
 
         controller.povRight().onTrue(
                 superstructure.setSuperState(SuperState.ALIGNING_TOWER_RIGHT)
+        );
+
+        controller.rightTrigger().onTrue(
+                superstructure.setFeederState(FeederState.FEED)
+        )
+        .onFalse(
+                superstructure.setFeederState(FeederState.IDLE)
         );
 
         // Reset gyro / odometry

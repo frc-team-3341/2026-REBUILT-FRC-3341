@@ -23,6 +23,7 @@ import frc.robot.Constants.ModeConstants;
 import frc.robot.Constants.ShooterConstants;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
@@ -116,7 +117,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         // tInstances.kRobotDriveSwerve_AdvantageKit);
         
         aimDriveEnabled = false;
-        
+
         // Start odometry thread
         SparkOdometryThread.getInstance().start();
         try {
