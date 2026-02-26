@@ -15,21 +15,26 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
-
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ShooterConstants;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.motorcontrol.ControlMode;
+
 
 public class ShooterSubsystem extends SubsystemBase {
   private final int drivingCANId = 1; //NEED TO SET
   private final SparkFlex shooter;
   private double targetRPM = 1000;
   private double velocity = 0;
+  private int counter = 0;
 
   private final SparkFlexConfig shooterConfig;
   private SparkClosedLoopController closedLoopController;
   private RelativeEncoder relativeEncoder;
+  TalonSRX _motor = new TalonSRX(3);
+  
 
   public ShooterSubsystem() {
     shooter = new SparkFlex(drivingCANId, MotorType.kBrushless);
@@ -68,55 +73,13 @@ public double getRPM4Vel(double velocity){
   double rpm = 13.50721*(velocity)*velocity -53.50619*(velocity)+2026.24903;
   return rpm;
 }
-/**
- * Uses conservation of angular momentum to calculate the required
- * RPM to launch the ball out at the desired velocity
- * 
- * Might need to update this method to account for loss of energy
- * 
- * @param velocity
- * 
- * Represents the desired launch velocity in m/s
- * 
- * @see <a href="https://drive.google.com/file/d/1pNwEd03rzBCn8M5KGe_-abfVvG_O993O/view?usp=sharing">Derivation for the formula used</a>
 
- */
-
-  public void calculateLaunchRPM(double velocity) {
-
-    double flywheelRadius = ShooterConstants.flywheelDiameter/2;
-
-    double finalAngularVelocity = (velocity/flywheelRadius);
-
-    double initialAngularVelocity = finalAngularVelocity + 
-      (ShooterConstants.flywheelMass*velocity*flywheelRadius)/(ShooterConstants.flywheelMomentofInertia);
-    
-    targetRPM = (initialAngularVelocity*60)/(2*Math.PI); 
-  } 
-
-  /**
-   * Uses basic projectile motion to calculate the linear launch velocity necessary to shoot a
-   * projectile a specified distance (assuming a 75° launch angle). Neglects air resistance
-   * 
-   * 
-   * @param distance
-   * The desired distance in meters (this represents how far  away the projectile will land 
-   * relative to the launch position)
-   * 
-   * @param initialHeight
-   * The initial height of the projectile in meters
-   * 
-   * @return
-   * The required launch velocity in meters/second
-   * 
-   * @see <a href="https://drive.google.com/file/d/1QK_I150SMKgldrvAcl2610z9DPRuNhpH/view?usp=sharing">Derivation for the formula used</a>
-   */
-  public double calculateLinearLaunchVelocity(double distance, double initialHeight) {
+  public double calculateLinearLaunchVelocity(double distance, double initialHeight, double center_offset) {
       double angle = Math.toRadians(75);
 
-      double velocity = ((distance)/(Math.cos(angle))) * 
+      double velocity = ((distance+center_offset)/(Math.cos(angle))) * 
           Math.sqrt(9.81/
-              (2*(distance*Math.tan(angle)+initialHeight)));
+              (2*((distance+center_offset)*Math.tan(angle)+(initialHeight-ShooterConstants.hubHeight))));
       
       return velocity;
   }
@@ -148,6 +111,18 @@ public double getRPM4Vel(double velocity){
       setRPM(targetRPM);
     });
   }
+  public Command runIntake(){
+    return this.runOnce(() ->{
+       counter++;
+       if (counter%2 == 0) {
+        _motor.set(ControlMode.PercentOutput, -0.7);
+       }
+      else {
+        _motor.set(ControlMode.PercentOutput, 0.0);
+      }
+    });
+  }
+
 
 
  @Override
