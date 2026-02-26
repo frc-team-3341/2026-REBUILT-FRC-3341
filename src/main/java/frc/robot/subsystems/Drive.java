@@ -55,6 +55,8 @@ import frc.robot.Constants;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.Superstructure.SwerveState;
 import frc.robot.subsystems.Gyro.GyroIO;
+import static frc.util.ClimberUtil.getTowerPoses;
+import frc.robot.Constants.AutoConstants;
 import frc.util.LocalADStarAK;
 import frc.util.ShooterUtil;
 
@@ -316,12 +318,13 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
             case TRACKING_HUB:
                 return this.runOnce(() -> aimDriveEnabled = true);
 
-            //replace these with pathfinding commands
             case ALIGNING_TOWER_LEFT:
-                return Commands.print("filler");
+                return AutoBuilder.pathfindToPose(
+                    getTowerPoses()[0], AutoConstants.PATH_CONSTRAINTS, 0);
 
             case ALIGNING_TOWER_RIGHT:
-                return Commands.print("filler");
+                return AutoBuilder.pathfindToPose(
+                    getTowerPoses()[1], AutoConstants.PATH_CONSTRAINTS, 0);
 
             default:
                 return Commands.print("Invalid Swerve State Provided!");

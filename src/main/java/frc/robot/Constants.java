@@ -5,7 +5,10 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.RobotBase;
+
+import com.google.flatbuffers.Table;
 import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.path.PathConstraints;
 
 import static edu.wpi.first.units.Units.*;
 import static frc.robot.Constants.DriveConstants.kDriveKinematics;
@@ -262,6 +265,8 @@ public final class Constants {
     // Constraint for the motion profiled robot angle controller
     public static final TrapezoidProfile.Constraints kThetaControllerConstraints = new TrapezoidProfile.Constraints(
         kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
+    
+    public static final PathConstraints PATH_CONSTRAINTS = new PathConstraints(3.0, 3.0, Math.PI, Math.PI);
   }
 
   public static final class NeoMotorConstants {
@@ -316,5 +321,11 @@ public final class Constants {
   public static final class FieldConstants {
     public static final Translation2d blueHubCenterPose = new Translation2d(4.633, 4.035);
     public static final Translation2d redHubCenterPose = new Translation2d(11.907, 4.035);
+
+    public static final Pose2d blueLeftTowerPose = new Pose2d(1.567, 4.180, Rotation2d.fromDegrees(180));
+    public static final Pose2d blueRightTowerPose = new Pose2d(1.567, 3.298, Rotation2d.fromDegrees(180));
+
+    public static final Pose2d redLeftTowerPose = new Pose2d(14.984, 4.740, Rotation2d.fromDegrees(0));
+    public static final Pose2d redRightTowerPose = new Pose2d(14.984, 3.901, Rotation2d.fromDegrees(0));
   }
 }
