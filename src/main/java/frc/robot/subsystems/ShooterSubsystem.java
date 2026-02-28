@@ -75,7 +75,7 @@ public class ShooterSubsystem extends SubsystemBase {
         .d(0, ClosedLoopSlot.kSlot0)
         .outputRange(-1, 1, ClosedLoopSlot.kSlot0)
         .feedForward
-          .kV(0.00016, ClosedLoopSlot.kSlot0);
+          .kV(0.00016, ClosedLoopSlot.kSlot0);//NEEDS TO BE FIGURED OUT
 
 
     shooter.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -114,18 +114,6 @@ public void stopFeedMotor() {
         velocity = 0;
         setRPM(velocity);
     });  
-  }
-  public Command decrementRPM() {
-    return this.runOnce(() -> {
-        targetRPM -= 100;
-      setRPM(targetRPM);
-    });  
-  }
-  public Command incrementRPM(){
-    return this.runOnce(() -> {
-      targetRPM += 100;
-      setRPM(targetRPM);
-    });
   }
   public Command Score(){
     return this.runOnce(() -> {
