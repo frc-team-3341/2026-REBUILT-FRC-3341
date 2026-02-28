@@ -26,12 +26,11 @@ public class SwerveTeleop extends Command{
 
     double rotInput;
 
-    BooleanSupplier aimDriveSupplier;
+    boolean aimDriveEnabled;
 
-    public SwerveTeleop(Drive swerve, CommandXboxController cont, BooleanSupplier aimDriveSupplier) {
+    public SwerveTeleop(Drive swerve, CommandXboxController cont) {
         this.swerve = swerve;
         this.cont = cont;
-        this.aimDriveSupplier = aimDriveSupplier;
 
         addRequirements(swerve);
     }
@@ -39,6 +38,8 @@ public class SwerveTeleop extends Command{
 
     @Override
     public void execute() {
+        aimDriveEnabled = swerve.aimDriveEnabled();
+
         xInput = -cont.getLeftY();
         yInput = -cont.getLeftX();
         rotInput = -cont.getRightX();
@@ -59,7 +60,7 @@ public class SwerveTeleop extends Command{
 
         rotInput *= DriveConstants.kMaxAngularSpeed;
 
-        if (aimDriveSupplier.getAsBoolean()) {
+        if (aimDriveEnabled) {
             swerve.aimDrive(xInput, yInput);
         }
         else {

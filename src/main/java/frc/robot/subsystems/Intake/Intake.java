@@ -10,7 +10,7 @@ import static frc.robot.Constants.IntakeConstants.*;
 public class Intake extends SubsystemBase {
 
     IntakeIO io;
-    IntakeIOInputsAutoLogged inputs;
+    IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
 
     public Intake(IntakeIO io) {
         this.io = io;

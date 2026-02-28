@@ -125,6 +125,9 @@ public class RobotContainer {
                         drive,
                         new VisionIOPhotonVisionSim(
                                 VisionConstants.CAMERA_NAMES[0], VisionConstants.CAMERA_TRANSFORMS[0], driveSimulation::getSimulatedDriveTrainPose));
+                shooter = new Shooter(new ShooterIOSpark());
+
+                intake = new Intake(new IntakeIOSpark());
 
                 configureFuelSim();
                 configureFuelSimRobot();
@@ -144,7 +147,7 @@ public class RobotContainer {
                 break;
         }
 
-        swerveTeleop = new SwerveTeleop(drive, controller, drive::aimDriveEnabled);
+        swerveTeleop = new SwerveTeleop(drive, controller);
 
         superstructure = new Superstructure(drive, shooter, intake);
 

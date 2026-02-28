@@ -247,6 +247,8 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
 
         // Log optimized setpoints (runSetpoint mutates each state)
         Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
+
+        Logger.recordOutput("aim drive enabled", aimDriveEnabled);
     }
 
     public void drive(ChassisSpeeds speeds, boolean fieldRelative) {
@@ -324,12 +326,16 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
                 return this.runOnce(() -> aimDriveEnabled = true);
 
             case ALIGNING_TOWER_LEFT:
-                return AutoBuilder.pathfindToPose(
-                    getTowerPoses()[0], AutoConstants.PATH_CONSTRAINTS, 0);
+                return getTowerPoses() != null ? AutoBuilder.pathfindToPose(
+                    getTowerPoses()[0], AutoConstants.PATH_CONSTRAINTS, 0)
+                    : Commands.print("No alliance selected, cannot run alignment command!")
+                    .alongWith(handleSwerveTransitions(SwerveState.MANUAL));
 
             case ALIGNING_TOWER_RIGHT:
-                return AutoBuilder.pathfindToPose(
-                    getTowerPoses()[1], AutoConstants.PATH_CONSTRAINTS, 0);
+                return getTowerPoses() != null ? AutoBuilder.pathfindToPose(
+                    getTowerPoses()[1], AutoConstants.PATH_CONSTRAINTS, 0)
+                    : Commands.print("No alliance selected, cannot run alignment command!")
+                    .alongWith(handleSwerveTransitions(SwerveState.MANUAL));
 
             default:
                 return Commands.print("Invalid Swerve State Provided!");

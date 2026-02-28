@@ -28,13 +28,13 @@ public class Shooter extends SubsystemBase {
     public Command handleFeederTransition(FeederState desiredState) {
         switch (desiredState) {
             case IDLE:
-                return this.runOnce(() -> io.stopFlywheel());
+                return Commands.runOnce(() -> io.stopFeeder());
 
             case FEED:
-                return this.runOnce(() -> io.setFeederSpeed(FEEDING_SPEED));
+                return Commands.runOnce(() -> io.setFeederSpeed(FEEDING_SPEED));
 
             case BACKFEED:
-                return this.runOnce(() -> io.reverseFeed(BACKFEED_SPEED));
+                return Commands.runOnce(() -> io.reverseFeed(BACKFEED_SPEED));
                 
             default:
                 return Commands.print("Invalid Feeder State Provided!");
@@ -61,7 +61,7 @@ public class Shooter extends SubsystemBase {
 
                 if (Math.abs(distanceToHub-lastPose)>0.05) {
                     System.out.println("UPDATING THE SPEED:" + distanceToHub);
-                   flywheelRPM = speedMap.get(distanceToHub);
+                //    flywheelRPM = speedMap.get(distanceToHub);
                     lastPose = distanceToHub;
                 }
                 io.setFlywheelRPM(flywheelRPM);
@@ -69,7 +69,7 @@ public class Shooter extends SubsystemBase {
                 }).beforeStarting(() -> {
                     lastPose = ShooterUtil.getDistanceToHub(RobotContainer.getPose());
                     //get flywheel spinning to prevent delay
-                    flywheelRPM = speedMap.get(lastPose);
+                    // flywheelRPM = speedMap.get(lastPose);
                 });
                     
             default:
