@@ -2,6 +2,8 @@ package frc.robot.commands;
 
 import java.util.function.BooleanSupplier;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -26,11 +28,12 @@ public class SwerveTeleop extends Command{
 
     double rotInput;
 
-    boolean aimDriveEnabled;
+    BooleanSupplier aimDriveSupplier;
 
-    public SwerveTeleop(Drive swerve, CommandXboxController cont) {
+    public SwerveTeleop(Drive swerve, CommandXboxController cont, BooleanSupplier aimDriveSupplier) {
         this.swerve = swerve;
         this.cont = cont;
+        this.aimDriveSupplier = aimDriveSupplier;
 
         addRequirements(swerve);
     }
@@ -38,7 +41,8 @@ public class SwerveTeleop extends Command{
 
     @Override
     public void execute() {
-        aimDriveEnabled = swerve.aimDriveEnabled();
+
+        Logger.recordOutput("aim drive enabled", aimDriveSupplier.getAsBoolean());
 
         xInput = -cont.getLeftY();
         yInput = -cont.getLeftX();
@@ -60,7 +64,7 @@ public class SwerveTeleop extends Command{
 
         rotInput *= DriveConstants.kMaxAngularSpeed;
 
-        if (aimDriveEnabled) {
+        if (aimDriveSupplier.getAsBoolean()) {
             swerve.aimDrive(xInput, yInput);
         }
         else {

@@ -247,8 +247,6 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
 
         // Log optimized setpoints (runSetpoint mutates each state)
         Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
-
-        Logger.recordOutput("aim drive enabled", aimDriveEnabled);
     }
 
     public void drive(ChassisSpeeds speeds, boolean fieldRelative) {
@@ -320,10 +318,10 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     public Command handleSwerveTransitions(SwerveState desiredState) {
         switch (desiredState) {
             case MANUAL:
-                return this.runOnce(() -> aimDriveEnabled = false);
+                return Commands.runOnce(() -> aimDriveEnabled = false);
 
             case TRACKING_HUB:
-                return this.runOnce(() -> aimDriveEnabled = true);
+                return Commands.runOnce(() -> aimDriveEnabled = true);
 
             case ALIGNING_TOWER_LEFT:
                 return getTowerPoses() != null ? AutoBuilder.pathfindToPose(

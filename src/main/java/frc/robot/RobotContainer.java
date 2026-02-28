@@ -147,7 +147,7 @@ public class RobotContainer {
                 break;
         }
 
-        swerveTeleop = new SwerveTeleop(drive, controller);
+        swerveTeleop = new SwerveTeleop(drive, controller, drive::aimDriveEnabled);
 
         superstructure = new Superstructure(drive, shooter, intake);
 
