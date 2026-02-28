@@ -26,14 +26,14 @@ public class ShooterUtil {
     }
 
     public static double getDistanceToHub(Pose2d robotPose) {
-      if (getHubPose2d() != null) {
-        return robotPose.getTranslation().getDistance(getHubPose2d());
+      if (getHubTranslation2d() != null) {
+        return robotPose.getTranslation().getDistance(getHubTranslation2d());
       }
 
       return 0;      
     }
 
-    public static Translation2d getHubPose2d() {
+    public static Translation2d getHubTranslation2d() {
       Optional<Alliance> alliance = DriverStation.getAlliance();
 
       if (alliance.isEmpty()) {

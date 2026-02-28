@@ -272,7 +272,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
 
       Pose2d currentPose = getPose();
 
-      Translation2d hubCenterPose = ShooterUtil.getHubPose2d();
+      Translation2d hubCenterPose = ShooterUtil.getHubTranslation2d();
 
       //end method if there is no alliance selected cuz this should only be used on the field
       if (hubCenterPose == null) {
