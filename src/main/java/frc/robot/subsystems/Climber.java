@@ -201,7 +201,6 @@ public class Climber extends SubsystemBase {
       s2.setPulseTimeMicroseconds(1500);
       // releaße the bottom hooks if hooked
       s3.setPulseTimeMicroseconds(1000);
-      s4.setPulseTimeMicroseconds(1000);
       // lift up by setting the target extensión length to 0
       this.setLp(0);
       this.setRp(0);
@@ -211,8 +210,6 @@ public class Climber extends SubsystemBase {
   public void Lock(){
 
       s3.setPulseTimeMicroseconds(1500);
-      s4.setPulseTimeMicroseconds(1500);
-
   }
 
   //descent trigger
@@ -222,13 +219,12 @@ public class Climber extends SubsystemBase {
     });
   }
   // auto descent
-  public void Stwech(){
+  public void Lower(){
 
       // make sure the hooks are BOTH on the bar
       s1.setPulseTimeMicroseconds(1500);
       s2.setPulseTimeMicroseconds(1500);
       s3.setPulseTimeMicroseconds(1000);
-      s4.setPulseTimeMicroseconds(1000);
       // lower the bót
       this.setLp(max);
       this.setRp(max);
@@ -297,7 +293,7 @@ public class Climber extends SubsystemBase {
       descentPhase  = 3;
     }
     if (descentPhase == 3 && encoderL.getPosition() < 2){
-      this.Stwech();
+      this.Lower();
       descentPhase  = 0;
     }
     // special case extend max length for the fi®st rung
