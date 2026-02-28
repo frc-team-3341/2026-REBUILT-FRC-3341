@@ -7,6 +7,8 @@ public interface IntakeIO {
     public static class IntakeIOInputs {
         public boolean intakeMotorConnected = false;
 
+        public boolean liftMotorConnected = false;
+
         public double intakeWheelSpeed = 0.0;
     }
 
