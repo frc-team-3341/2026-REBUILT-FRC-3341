@@ -29,7 +29,7 @@ public class RobotContainer {
     driver_controller.a().onTrue(shooter.incrementRPM());
     driver_controller.b().onTrue(shooter.stopMotor());
     driver_controller.x().onTrue(shooter.decrementRPM());
-    driver_controller.y().onTrue(shooter.runIntake());
+    driver_controller.y().onTrue(shooter.feed());
     driver_controller.rightBumper().onTrue(shooter.Score());
     //shooter.setRPM(shooter.getRPM4Vel(8.0));
   }

@@ -16,40 +16,48 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
-import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.ShooterConstants;
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
-import static frc.robot.Constants.ShooterConstants.speedMap;
-
-import com.ctre.phoenix.motorcontrol.ControlMode;
-
+import static frc.robot.Constants.ShooterConstants.*;
 
 public class ShooterSubsystem extends SubsystemBase {
-  private final int drivingCANId = 1; //NEED TO SET
+  private final int SHOOTER_FLYWHEEL_CAN_ID = 16; //NEED TO SET
+  private final int FEEDER_CAN_ID = 15;
   private final SparkFlex shooter;
+  private final SparkFlex feeder;
   private double targetRPM = 1000;
   private double velocity = 0;
   private int counter = 0;
   private double Distance;
   private final SparkFlexConfig shooterConfig;
+  private final SparkFlexConfig feederConfig;
   private SparkClosedLoopController closedLoopController;
+  private SparkClosedLoopController closedLoopFeedController;
   private RelativeEncoder relativeEncoder;
-  TalonSRX _motor = new TalonSRX(3);
-  
+  private RelativeEncoder feederEncoder;
 
   public ShooterSubsystem() {
-    shooter = new SparkFlex(drivingCANId, MotorType.kBrushless);
+    shooter = new SparkFlex(SHOOTER_FLYWHEEL_CAN_ID, MotorType.kBrushless);
+    feeder = new SparkFlex(FEEDER_CAN_ID, MotorType.kBrushless);
+
     relativeEncoder = shooter.getEncoder();
+    feederEncoder = feeder.getEncoder();
+
     shooterConfig = new SparkFlexConfig();
+    feederConfig = new SparkFlexConfig();
+
+    feederConfig
+        .smartCurrentLimit(80)
+        .idleMode(IdleMode.kCoast);
+
     shooterConfig
         .smartCurrentLimit(80)
         .idleMode(IdleMode.kCoast);
 
     closedLoopController = shooter.getClosedLoopController();
+    closedLoopFeedController = feeder.getClosedLoopController();
 
     shooterConfig.closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
@@ -59,8 +67,20 @@ public class ShooterSubsystem extends SubsystemBase {
         .outputRange(-1, 1, ClosedLoopSlot.kSlot0)
         .feedForward
           .kV(0.00016, ClosedLoopSlot.kSlot0);// found through trial and error <a href="https://docs.google.com/spreadsheets/d/1mUxeWXwDsTIuaJu80DP9HOvX7ygvbocv1wcLSLS03-A/edit?gid=0#gid=0">  
+    
+    feederConfig.closedLoop
+        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+        .p(0.0, ClosedLoopSlot.kSlot0)//needs to be set
+        .i(0, ClosedLoopSlot.kSlot0)
+        .d(0, ClosedLoopSlot.kSlot0)
+        .outputRange(-1, 1, ClosedLoopSlot.kSlot0)
+        .feedForward
+          .kV(0.00016, ClosedLoopSlot.kSlot0);
+
 
     shooter.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    feeder.configure(feederConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
     SmartDashboard.putNumber("Distance", 0.0);
   }
 
@@ -70,23 +90,24 @@ public class ShooterSubsystem extends SubsystemBase {
   Distance = SmartDashboard.getNumber("Distance", 0.0);
   SmartDashboard.putNumber("Encoder RPM", relativeEncoder.getVelocity());
   SmartDashboard.putNumber("Target RPM", targetRPM);
+  SmartDashboard.putBoolean("Feed", (feederEncoder.getVelocity() > 1.0));
+  SmartDashboard.putBoolean("BackFeed", (feederEncoder.getVelocity() < -1.0));
     }
 
 public void setRPM(double rpm) {
   targetRPM = rpm;
   closedLoopController.setSetpoint(rpm,ControlType.kVelocity,ClosedLoopSlot.kSlot0);
 }
-/* 
-  public double calculateLinearLaunchVelocity(double distance, double initialHeight, double center_offset) {
-      double angle = Math.toRadians(75);
 
-      double velocity = ((distance+center_offset)/(Math.cos(angle))) * 
-          Math.sqrt(9.81/
-              (2*((distance+center_offset)*Math.tan(angle)+(initialHeight-ShooterConstants.hubHeight))));
-      
-      return velocity;
-  }
-*/
+public void startFeedMotor() {
+  closedLoopFeedController.setSetpoint(FEEDING_SPEED,ControlType.kVelocity,ClosedLoopSlot.kSlot0);
+}
+public void startBackFeed() {
+  closedLoopFeedController.setSetpoint(BACKFEED_SPEED,ControlType.kVelocity,ClosedLoopSlot.kSlot0);
+}
+public void stopFeedMotor() {
+  closedLoopFeedController.setSetpoint(0,ControlType.kVelocity,ClosedLoopSlot.kSlot0);
+}
 
   public Command stopMotor() {
     return this.runOnce(() -> {
@@ -100,7 +121,6 @@ public void setRPM(double rpm) {
       setRPM(targetRPM);
     });  
   }
-
   public Command incrementRPM(){
     return this.runOnce(() -> {
       targetRPM += 100;
@@ -113,16 +133,27 @@ public void setRPM(double rpm) {
       setRPM(targetRPM);
     });
   }
-  public Command runIntake(){
+  public Command feed(){
     return this.runOnce(() ->{
        counter++;
        if (counter%2 == 0) {
-        _motor.set(ControlMode.PercentOutput, -0.7);
+        startFeedMotor();
        }
       else {
-        _motor.set(ControlMode.PercentOutput, 0.0);
+        stopFeedMotor();
       }
     });
   }
 
+/* 
+  public double calculateLinearLaunchVelocity(double distance, double initialHeight, double center_offset) {
+      double angle = Math.toRadians(75);
+
+      double velocity = ((distance+center_offset)/(Math.cos(angle))) * 
+          Math.sqrt(9.81/
+              (2*((distance+center_offset)*Math.tan(angle)+(initialHeight-ShooterConstants.hubHeight))));
+      
+      return velocity;
+  }
+*/
 }

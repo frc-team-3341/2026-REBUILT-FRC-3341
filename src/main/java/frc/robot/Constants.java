@@ -119,32 +119,15 @@ public final class Constants {
   }
 
   public static final class ShooterConstants {
-
-    public static final double flywheelMomentofInertia = 1.50940645; //Needs to be verified
-
-    public static final double flywheelMass = 0.576834118;//Needs to be verified
-
-    //meters
-    public static final double flywheelDiameter = 0.09;
-
-    public static final double launchAngle = 75;
-
-    //TODO figure out this value
-    public static final double shooterHeight = 0;
-
-    //this is most likely correct, measured in meters from the ground
-    public static final double hubHeight = 1.43;
-
+    public static final double FEEDING_SPEED = 2000;
+    public static final double BACKFEED_SPEED = -2000;
 
     public static InterpolatingDoubleTreeMap speedMap = new InterpolatingDoubleTreeMap();
 
     static{
-      speedMap.put(0.8128, 2500.0);
-      speedMap.put(1.27, 3000.0);
-      speedMap.put(1.8034, 3500.0);
-      speedMap.put(3.0988, 4000.0);
-      speedMap.put(3.4798, 4500.0);
-      speedMap.put(4.0386, 5000.0);
+      //              meters      rpm
+      speedMap.put(0.0, 0.0);
+
     }
   }
 }
