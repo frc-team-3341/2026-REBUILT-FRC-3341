@@ -8,11 +8,11 @@ import frc.robot.RobotContainer;
 import frc.robot.subsystems.Superstructure.FeederState;
 import frc.robot.subsystems.Superstructure.ShooterState;
 import frc.util.ShooterUtil;
-
 import static frc.robot.Constants.ShooterConstants.*;
 
 public class Shooter extends SubsystemBase {
-    
+    private double lastPose = 0.0;
+    private double flywheelRPM = 0.0;
     ShooterIO io;
     ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
 
@@ -56,13 +56,22 @@ public class Shooter extends SubsystemBase {
             case SCORING:
                 return this.run(() -> {
                     Pose2d robotPose = RobotContainer.getPose();
-
+                
                     double distanceToHub = ShooterUtil.getDistanceToHub(robotPose);
 
-                    double flywheelRPM = speedMap.get(distanceToHub);
-
-                    io.setFlywheelRPM(flywheelRPM);
+                if (Math.abs(distanceToHub-lastPose)>0.05) {
+                    System.out.println("UPDATING THE SPEED:" + distanceToHub);
+                   flywheelRPM = speedMap.get(distanceToHub);
+                    lastPose = distanceToHub;
+                }
+                io.setFlywheelRPM(flywheelRPM);
+                //before starting get distance to hub so not storing 0.0 in lastPose
+                }).beforeStarting(() -> {
+                    lastPose = ShooterUtil.getDistanceToHub(RobotContainer.getPose());
+                    //get flywheel spinning to prevent delay
+                    flywheelRPM = speedMap.get(lastPose);
                 });
+                    
             default:
                 return Commands.print("Invalid Shooter State Provided!");
         }
