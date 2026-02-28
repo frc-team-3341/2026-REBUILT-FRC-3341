@@ -82,7 +82,7 @@ public class RobotContainer {
     // new Trigger(() -> joy1.getRightX() > 0.05).whileTrue(climber.rightMotorUp()).onFalse(climber.rightMotorStop());
     // new Trigger(() -> joy1.getRightX() < -0.05).whileTrue(climber.rightMotorUp()).onFalse(climber.rightMotorStop());
     joy1.povUp().onTrue(climber.e());
-    joy1.povDown().onTrue(climber.l());
+    joy1.povDown().onTrue(climber.d());
   }
 
 

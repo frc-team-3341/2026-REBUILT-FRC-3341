@@ -3,23 +3,25 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.subsystems;
-
+import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.PWM;
-import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class Climber extends SubsystemBase {
-    private final SparkMax motorL = new SparkMax(Constants.ClimberConstants.leftMotorPort, MotorType.kBrushless);
-    private final SparkMax motorR = new SparkMax(Constants.ClimberConstants.rightMotorPort, MotorType.kBrushless);
+    private final SparkFlex motorL = new SparkFlex(Constants.ClimberConstants.leftMotorPort, MotorType.kBrushless);
+    private final SparkFlex motorR = new SparkFlex(Constants.ClimberConstants.rightMotorPort, MotorType.kBrushless);
      // creating motor object
      private static Climber instance;
      private boolean isinit = false;
@@ -35,15 +37,18 @@ public class Climber extends SubsystemBase {
      private PWM s4;
      public int climbingPhase;
      public int extendPhase;
+     public int descentPhase;
      
 
   public Climber() {
-    SparkMaxConfig motorConfigL = new SparkMaxConfig(); //configuring sparkmax 
+    SparkFlexConfig motorConfigL = new SparkFlexConfig(); //configuring sparkmax 
     motorL.configure(motorConfigL, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
-    SparkMaxConfig motorConfigR = new SparkMaxConfig(); //configuring sparkmax 
+    SparkFlexConfig motorConfigR = new SparkFlexConfig(); //configuring sparkmax 
     motorR.configure(motorConfigR, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);  // configuring motor 1 
     encoderL = motorL.getEncoder();
     encoderR = motorR.getEncoder();
+    encoderL.setPosition(0);
+    encoderR.setPosition(0);
     isinit = true;
     LsetPoint = 0;
     RsetPoint = 0;
@@ -52,6 +57,7 @@ public class Climber extends SubsystemBase {
     level = 0;
     climbingPhase = 0;
     extendPhase = 0;
+    descentPhase = 0;
     s1 = new PWM(Constants.ClimberConstants.servo1port);
     s2 = new PWM(Constants.ClimberConstants.servo2port);
     s3 = new PWM(Constants.ClimberConstants.servo3port);
@@ -184,10 +190,9 @@ public class Climber extends SubsystemBase {
 
 }
   // starting lifting sequence command for button map
-  public Command l(){
-    return this.runOnce(() -> {
-      climbingPhase = 1;
-    });
+  public void l(){
+    climbingPhase = 1;
+
   }
   // Lift robot up
   public void Lift(){
@@ -209,16 +214,43 @@ public class Climber extends SubsystemBase {
       s4.setPulseTimeMicroseconds(1500);
 
   }
+
+  //descent trigger
+  public Command d(){
+    return this.runOnce(() -> {
+      climbingPhase = 1;
+    });
+  }
   // auto descent
-  public void Descend(){
+  public void Stwech(){
 
       // make sure the hooks are BOTH on the bar
       s1.setPulseTimeMicroseconds(1500);
       s2.setPulseTimeMicroseconds(1500);
+      s3.setPulseTimeMicroseconds(1000);
+      s4.setPulseTimeMicroseconds(1000);
       // lower the bót
       this.setLp(max);
       this.setRp(max);
+
+      level--;
   }
+
+  public void DescendL(){
+    Lock();
+    s1.setPulseTimeMicroseconds(1000);
+    s2.setPulseTimeMicroseconds(1500);
+
+    this.setLp(0);
+  }
+
+  public void DescendR(){
+    s1.setPulseTimeMicroseconds(1500);
+    s2.setPulseTimeMicroseconds(1000);
+
+    this.setRp(0);
+  }
+
 
   public boolean isInit(){
     return isinit;
@@ -229,6 +261,7 @@ public class Climber extends SubsystemBase {
     // This method will be called once per scheduler run
     // pérpetually run move to setpoint if eiþer hook is not at setpoint
     this.moveToSP();
+
     // extension sequence logic
     if (extendPhase == 1){
       System.out.println("sdfghjk");
@@ -238,6 +271,10 @@ public class Climber extends SubsystemBase {
     if (extendPhase == 2 && encoderL.getPosition() < max + 2 && encoderL.getPosition() > max -2){
       System.out.println("asdfghj");
       this.ExtendR();
+      extendPhase  = 3;
+    }
+    if (extendPhase == 3 && encoderR.getPosition() < max + 2 && encoderR.getPosition() > max -2){
+      l();
       extendPhase  = 0;
     }
     // climbing sequence logic
@@ -250,6 +287,18 @@ public class Climber extends SubsystemBase {
       System.out.println("ihohiohi");
       this.Lock();
       climbingPhase = 0;
+    }
+    if (descentPhase == 1){
+      this.DescendL();
+      descentPhase = 2;
+    }
+    if (descentPhase == 2 && encoderL.getPosition() < 2){
+      this.DescendR();
+      descentPhase  = 3;
+    }
+    if (descentPhase == 3 && encoderL.getPosition() < 2){
+      this.Stwech();
+      descentPhase  = 0;
     }
     // special case extend max length for the fi®st rung
     if (level == 0){
