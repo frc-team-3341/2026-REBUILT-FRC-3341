@@ -76,31 +76,36 @@ public class RobotContainer {
     });
     */
 
-    Trigger beamBreakInput = new Trigger(() -> {
+    // Trigger beamBreakInput = new Trigger(() -> {
       
-      return robotIntake.getBeamBreak();
-    });
+    //   return robotIntake.getBeamBreak();
+    // });
     
 
-    Trigger timer = new Trigger(() -> {
-      if(!robotIntake.getBeamBreak()){
-        robotIntake.addCounter(10);
-      }
-      else{
-        robotIntake.setCounter(0);
-      }
+    // Trigger timer = new Trigger(() -> {
+    //   if(!robotIntake.getBeamBreak()){
+    //     robotIntake.addCounter(10);
+    //   }
+    //   else{
+    //     robotIntake.setCounter(0);
+    //   }
 
-      if(robotIntake.getCounter() >= 1000){
-        return false;
-      }
-      else{
-        return true;
-      }
-    });
+    //   if(robotIntake.getCounter() >= 1000){
+    //     return false;
+    //   }
+    //   else{
+    //     return true;
+    //   }
+    // });
 
     
-    Trigger motorOutputOn = (driver_controller.a()).and(timer);
+    //Trigger motorOutputOn = (driver_controller.a()).and(timer);
+
+    Trigger motorOutputOn = driver_controller.a();
     motorOutputOn.onTrue(robotIntake.intakeBall());
+
+    Trigger motorBackwards = driver_controller.b();
+    motorBackwards.onTrue(robotIntake.reverseIntakeBall()).onFalse(robotIntake.stopIntake());
 
    // motorOutputOn.toggleOnTrue(robotIntake.intakeBall());
 
@@ -118,7 +123,9 @@ public class RobotContainer {
     //   return robotIntake.getMotorOn();
     // });
 
-    timer.onFalse(robotIntake.stopIntake());
+ //   timer.onFalse(robotIntake.stopIntake());
+   // timer.onFalse(robotIntake.setMotorCommandOn(false));
+
     driver_controller.a().onTrue(robotIntake.keepOn());
     Trigger keepOn = new Trigger(() -> {
       
