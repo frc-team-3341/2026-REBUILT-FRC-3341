@@ -15,11 +15,16 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
+
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ShooterConstants;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+
+import static frc.robot.Constants.ShooterConstants.speedMap;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 
 
@@ -29,7 +34,7 @@ public class ShooterSubsystem extends SubsystemBase {
   private double targetRPM = 1000;
   private double velocity = 0;
   private int counter = 0;
-
+  private double Distance;
   private final SparkFlexConfig shooterConfig;
   private SparkClosedLoopController closedLoopController;
   private RelativeEncoder relativeEncoder;
@@ -56,24 +61,22 @@ public class ShooterSubsystem extends SubsystemBase {
           .kV(0.00016, ClosedLoopSlot.kSlot0);// found through trial and error <a href="https://docs.google.com/spreadsheets/d/1mUxeWXwDsTIuaJu80DP9HOvX7ygvbocv1wcLSLS03-A/edit?gid=0#gid=0">  
 
     shooter.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    SmartDashboard.putNumber("Distance", 0.0);
   }
 
 
+ @Override
+  public void periodic() {
+  Distance = SmartDashboard.getNumber("Distance", 0.0);
+  SmartDashboard.putNumber("Encoder RPM", relativeEncoder.getVelocity());
+  SmartDashboard.putNumber("Target RPM", targetRPM);
+    }
 
-  public void setVelocity(double v) {
-    targetRPM = (v * 60.0)/ (Math.PI * ShooterConstants.flywheelDiameter);
-    //shooter.setVoltage(2.0);
-    closedLoopController.setSetpoint(targetRPM, ControlType.kVelocity, ClosedLoopSlot.kSlot0);
-  }
 public void setRPM(double rpm) {
   targetRPM = rpm;
   closedLoopController.setSetpoint(rpm,ControlType.kVelocity,ClosedLoopSlot.kSlot0);
 }
-public double getRPM4Vel(double velocity){
-  double rpm = 13.50721*(velocity)*velocity -53.50619*(velocity)+2026.24903;
-  return rpm;
-}
-
+/* 
   public double calculateLinearLaunchVelocity(double distance, double initialHeight, double center_offset) {
       double angle = Math.toRadians(75);
 
@@ -83,35 +86,31 @@ public double getRPM4Vel(double velocity){
       
       return velocity;
   }
-  public Command slowMotor() {
-    return this.runOnce(() -> {
-        while (velocity != 0) {
-          if (velocity > 0) {
-            velocity = velocity - 0.2;
-          }
-          if (velocity < 0) {
-            velocity = 0;
-          }
-          setRPM(velocity*50);
-      }
+*/
 
-    });
-  }
   public Command stopMotor() {
     return this.runOnce(() -> {
         velocity = 0;
-        setRPM(velocity*100);
+        setRPM(velocity);
     });  
   }
-  public Command decrementVel() {
+
+  public Command decrementRPM() {
     return this.runOnce(() -> {
         targetRPM -= 100;
       setRPM(targetRPM);
     });  
   }
-  public Command incrementVel(){
+
+  public Command incrementRPM(){
     return this.runOnce(() -> {
       targetRPM += 100;
+      setRPM(targetRPM);
+    });
+  }
+  public Command Score(){
+    return this.runOnce(() -> {
+      targetRPM = speedMap.get(Distance);
       setRPM(targetRPM);
     });
   }
@@ -127,14 +126,4 @@ public double getRPM4Vel(double velocity){
     });
   }
 
-
-
- @Override
-  public void periodic() {
-  SmartDashboard.putNumber("Target Velocity", velocity);
-  SmartDashboard.putNumber("Encoder RPM", relativeEncoder.getVelocity());
-  SmartDashboard.putNumber("Target RPM", targetRPM);
-    }
-  }
-
-
+}

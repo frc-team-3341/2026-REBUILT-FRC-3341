@@ -5,10 +5,10 @@
 package frc.robot;
 
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
-
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
  * numerical or boolean
@@ -134,5 +134,17 @@ public final class Constants {
 
     //this is most likely correct, measured in meters from the ground
     public static final double hubHeight = 1.43;
+
+
+    public static InterpolatingDoubleTreeMap speedMap = new InterpolatingDoubleTreeMap();
+
+    static{
+      speedMap.put(0.8128, 2500.0);
+      speedMap.put(1.27, 3000.0);
+      speedMap.put(1.8034, 3500.0);
+      speedMap.put(3.0988, 4000.0);
+      speedMap.put(3.4798, 4500.0);
+      speedMap.put(4.0386, 5000.0);
+    }
   }
 }
