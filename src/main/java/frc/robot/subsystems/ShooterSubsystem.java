@@ -94,7 +94,7 @@ public void setRPM(double rpm) {
         setRPM(velocity);
     });  
   }
-  public Command decrementVel() {
+  public Command decrementRPM() {
     return this.runOnce(() -> {
         targetRPM -= 100;
       setRPM(targetRPM);
