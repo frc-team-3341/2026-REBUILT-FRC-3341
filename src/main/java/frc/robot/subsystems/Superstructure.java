@@ -39,6 +39,7 @@ public class Superstructure extends SubsystemBase {
         this.intake = intake;
 
         desiredSuperState = SuperState.IDLE;
+        prevSuperState = SuperState.IDLE;
         desiredIntakeState = IntakeState.IDLE;
         desiredShooterState = ShooterState.IDLE;
         desiredFeederState = FeederState.IDLE;
