@@ -8,7 +8,7 @@ public class ShooterIOSim implements ShooterIO{
 
 
     public ShooterIOSim(FuelSim fuelSim){
-        this.fuelSim=fuelSim;
+        this.fuelSim = fuelSim;
     }
     
     public void updateInputs(ShooterIOInputs inputs) {
