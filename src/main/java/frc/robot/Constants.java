@@ -6,10 +6,10 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
-
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
  * numerical or boolean
@@ -119,5 +119,20 @@ public final class Constants {
 
   public static final class NeoMotorConstants {
     public static final double kFreeSpeedRpm = 5676;
+  }
+
+  public static final class ShooterConstants {
+    public static final int SHOOTER_FLYWHEEL_CAN_ID = 12; //NEED TO SET
+    public static final int FEEDER_CAN_ID = 11;
+    public static final double FEEDING_SPEED = 2000;
+    public static final double BACKFEED_SPEED = -2000;
+
+    public static InterpolatingDoubleTreeMap speedMap = new InterpolatingDoubleTreeMap();
+
+    static{
+      //              meters      rpm
+      speedMap.put(0.0, 0.0);
+
+    }
   }
 }

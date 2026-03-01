@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+
+import frc.robot.subsystems.ShooterSubsystem;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -21,10 +23,7 @@ import frc.robot.Constants.OIConstants;
 import frc.robot.commands.SwerveTeleop;
 import frc.robot.subsystems.DriveSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
-import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
+import frc.robot.Constants.OIConstants;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -47,14 +46,19 @@ public class RobotContainer {
 
   // The driver's controller
   CommandXboxController driver_controller = new CommandXboxController(OIConstants.kDriverControllerPort);
-  CommandJoystick mech_joystick = new CommandJoystick(OIConstants.kMechJoystickPort);
-
+  private final ShooterSubsystem shooter = new ShooterSubsystem();
   private final SwerveTeleop swerveTeleop = new SwerveTeleop(swerve, driver_controller);
 
-  /**
-   * The container for the robot. Contains subsystems, OI devices, and commands.
-   */
+
   public RobotContainer() {
+    // driver_controller.a().onTrue(shooter.incrementRPM());
+    driver_controller.b().onTrue(shooter.stopMotor());
+    // driver_controller.x().onTrue(shooter.decrementRPM());
+    driver_controller.y().onChange(shooter.feed());
+    driver_controller.rightBumper().onTrue(shooter.Score());
+    // driver_controller.leftBumper().onTrue(shooter.backupShooting());
+    //shooter.setRPM(shooter.getRPM4Vel(8.0));
+  
     // Configure the button bindings
     createIntake();
 
@@ -74,10 +78,11 @@ public class RobotContainer {
    * passing it to a
    * {@link JoystickButton}.
    */
+
   private void configureButtonBindings() {
     
     //change this based on what the driver wants for reset heading idk man
-    driver_controller.y().onTrue(swerve.zeroHeading());
+    driver_controller.rightStick().onTrue(swerve.zeroHeading());
     driver_controller.x().whileTrue(swerve.run(()->swerve.drive(1, 0, 0, false))  );
 
   }
