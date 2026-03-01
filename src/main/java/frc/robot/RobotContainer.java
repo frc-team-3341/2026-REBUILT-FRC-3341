@@ -111,8 +111,8 @@ public class RobotContainer {
                         new VisionIOPhotonVisionSim(
                                 VisionConstants.CAMERA_NAMES[0], VisionConstants.CAMERA_TRANSFORMS[0], driveSimulation::getSimulatedDriveTrainPose));
 
-                configureFuelSim();
-                configureFuelSimRobot();
+                // configureFuelSim();
+                // configureFuelSimRobot();
 
                 break;
             default:
@@ -153,7 +153,8 @@ public class RobotContainer {
 
         controller.a().onTrue(
                 AutoBuilder.pathfindToPose(
-                        new Pose2d(13.13, 4.035, Rotation2d.fromDegrees(180)),
+                        // new Pose2d(13.13, 4.035, Rotation2d.fromDegrees(180)),
+                        new Pose2d(2, 3, Rotation2d.fromDegrees(180)),
                         new PathConstraints(3.0, 3.0, Math.toRadians(540), Math.toRadians(720)),
                         0.0
                 )
@@ -193,33 +194,26 @@ public class RobotContainer {
     private void configureFuelSim() {
     fuelsim = new FuelSim();
 
-//     fuelsim.spawnStartingFuel();
-
+//  fuelsim.spawnStartingFuel();
     fuelsim.start();
-    
     fuelsim.enableAirResistance(); // an additional drag force will be applied to fuel in physics update step
-  
-
 
     SmartDashboard.putData(Commands.runOnce(() -> {
             fuelsim.clearFuel();
         //     fuelsim.spawnStartingFuel();
-
     })
     .withName("Reset Fuel")
     .ignoringDisable(true));
-
-
   }
-   private void configureFuelSimRobot() {
-        fuelsim.registerRobot(
-                Dimensions.FULL_WIDTH.in(Meters),
-                Dimensions.FULL_LENGTH.in(Meters),
-                Dimensions.BUMPER_HEIGHT.in(Meters),
-                drive::getPose,
-                drive::getFieldSpeeds);
-        
-    }
+
+        private void configureFuelSimRobot() {
+                fuelsim.registerRobot(
+                        Dimensions.FULL_WIDTH.in(Meters),
+                        Dimensions.FULL_LENGTH.in(Meters),
+                        Dimensions.BUMPER_HEIGHT.in(Meters),
+                        drive::getPose,
+                        drive::getFieldSpeeds);
+        }
 
     public void resetSimulationField() {
         if (Constants.ModeConstants.currentMode != Constants.ModeConstants.Mode.SIM) return;
