@@ -59,6 +59,8 @@ import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.VisionConstants;
 import static frc.robot.Constants.ModeConstants.*;
 
+import java.util.function.Supplier;
+
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a "declarative" paradigm, very
@@ -168,46 +170,59 @@ public class RobotContainer {
         // Default command, normal field-relative drive
         drive.setDefaultCommand(swerveTeleop);
 
-        controller.a().onTrue(
-                superstructure.setSuperState(SuperState.PASSING)
+        
+        Command IDLE = Commands.deferredProxy(
+                () -> superstructure.setSuperState(SuperState.IDLE));
+
+        Command INTAKING = Commands.deferredProxy(
+                () -> superstructure.setSuperState(SuperState.INTAKING));
+
+        Command PASSING = Commands.deferredProxy(
+                () -> superstructure.setSuperState(SuperState.PASSING));
+
+        Command SCORING = Commands.deferredProxy(
+                () -> superstructure.setSuperState(SuperState.SCORING));
+
+        Command REVERSE = Commands.deferredProxy(
+                () -> superstructure.setSuperState(SuperState.REVERSE));
+
+        Command ALIGNING_TOWER_LEFT = Commands.deferredProxy(
+                () -> superstructure.setSuperState(SuperState.ALIGNING_TOWER_LEFT));
+
+        Command ALIGNING_TOWER_RIGHT = Commands.deferredProxy(
+                () -> superstructure.setSuperState(SuperState.ALIGNING_TOWER_RIGHT));
+
+        Command PREVIOUS = Commands.deferredProxy(
+                () -> superstructure.setSuperState(superstructure.getPreviousSuperState())
+        );
+
+        Command PREVIOUS_REVERSE = Commands.deferredProxy(
+                () -> superstructure.setSuperState(superstructure.getPreviousSuperState())
+        );
+
+        Command FEED = Commands.deferredProxy(
+                () -> superstructure.setFeederState(FeederState.FEED)
+        );
+
+        Command STOP_FEED = Commands.deferredProxy(
+                () -> superstructure.setFeederState(FeederState.IDLE)
         );
         
-        controller.b().onTrue(
-                superstructure.setSuperState(SuperState.IDLE)
-        );
+        controller.a().onTrue(PASSING);
+        
+        controller.b().onTrue(IDLE);
 
-        controller.x().onTrue(
-                superstructure.setSuperState(SuperState.SCORING)
-        );
+        controller.x().onTrue(SCORING);
 
-        controller.rightBumper().whileTrue(
-                superstructure.setSuperState(SuperState.INTAKING)
-        )
-        .onFalse(
-                superstructure.setSuperState(superstructure.getPreviousSuperState())
-        );
+        controller.rightBumper().onTrue(INTAKING).onFalse(PREVIOUS);
 
-        controller.leftBumper().whileTrue(
-                superstructure.setSuperState(SuperState.REVERSE)
-        )
-        .onFalse(
-                superstructure.setSuperState(superstructure.getPreviousSuperState())
-        );
+        controller.leftBumper().onTrue(REVERSE).onFalse(PREVIOUS_REVERSE);
 
-        controller.povLeft().onTrue(
-                superstructure.setSuperState(SuperState.ALIGNING_TOWER_LEFT)
-        );
+        controller.povLeft().onTrue(ALIGNING_TOWER_LEFT);
 
-        controller.povRight().onTrue(
-                superstructure.setSuperState(SuperState.ALIGNING_TOWER_RIGHT)
-        );
+        controller.povRight().onTrue(ALIGNING_TOWER_RIGHT);
 
-        controller.rightTrigger().onTrue(
-                superstructure.setFeederState(FeederState.FEED)
-        )
-        .onFalse(
-                superstructure.setFeederState(FeederState.IDLE)
-        );
+        controller.rightTrigger().onTrue(FEED).onFalse(STOP_FEED);
 
 
 

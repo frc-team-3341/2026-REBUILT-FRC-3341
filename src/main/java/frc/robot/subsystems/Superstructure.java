@@ -15,22 +15,22 @@ public class Superstructure extends SubsystemBase {
     Intake intake;
 
     @AutoLogOutput
-    SuperState desiredSuperState;
+    SuperState currentSuperState;
 
     @AutoLogOutput
     SuperState prevSuperState;
 
     @AutoLogOutput
-    IntakeState desiredIntakeState;
+    IntakeState currentIntakeState;
 
     @AutoLogOutput
-    ShooterState desiredShooterState;
+    ShooterState currentShooterState;
 
     @AutoLogOutput
-    FeederState desiredFeederState;
+    FeederState currentFeederState;
 
     @AutoLogOutput
-    SwerveState desiredSwerveState;
+    SwerveState currentSwerveState;
 
 
     public Superstructure(Drive swerve, Shooter shooter, Intake intake) {
@@ -38,83 +38,87 @@ public class Superstructure extends SubsystemBase {
         this.shooter = shooter;
         this.intake = intake;
 
-        desiredSuperState = SuperState.IDLE;
+        currentSuperState = SuperState.IDLE;
         prevSuperState = SuperState.IDLE;
-        desiredIntakeState = IntakeState.IDLE;
-        desiredShooterState = ShooterState.IDLE;
-        desiredFeederState = FeederState.IDLE;
-        desiredSwerveState = SwerveState.MANUAL;
+        currentIntakeState = IntakeState.IDLE;
+        currentShooterState = ShooterState.IDLE;
+        currentFeederState = FeederState.IDLE;
+        currentSwerveState = SwerveState.MANUAL;
     }
 
     public Command setSuperState(SuperState newSuperState) {
+        System.out.println(
+            "Transitioning to the requested SuperState " + 
+            newSuperState + " from the current SuperState " + currentSuperState);
+            
         switch (newSuperState) {
             case IDLE:
                 return Commands.runOnce(() -> {
-                    prevSuperState = desiredSuperState;
-                    desiredSuperState = newSuperState;
+                    prevSuperState = currentSuperState;
+                    currentSuperState = newSuperState;
                 })
-                .alongWith(
+                .andThen(
                     setIntakeState(IntakeState.IDLE),
                     setFeederState(FeederState.IDLE),
                     setShooterState(ShooterState.IDLE),
                     setSwerveState(SwerveState.MANUAL)
                 );
             case INTAKING:
-                switch (desiredSuperState) {
+                switch (currentSuperState) {
                     case PASSING:
                     case REVERSE:
                     case ALIGNING_TOWER_LEFT:
                     case ALIGNING_TOWER_RIGHT:
-                        return setSuperState(desiredSuperState);
+                        return setSuperState(currentSuperState); 
                     case IDLE:
                     case INTAKING:
                     case SCORING:
                         return Commands.runOnce(() -> {
-                            prevSuperState = desiredSuperState;
-                            desiredSuperState = newSuperState;
+                            prevSuperState = currentSuperState;
+                            currentSuperState = newSuperState;
                         })
-                        .alongWith(
+                        .andThen(
                             setIntakeState(IntakeState.INTAKE),
                             setSwerveState(SwerveState.MANUAL),
-                            setShooterState(desiredShooterState)
+                            setShooterState(currentShooterState)
                         );
                     
                 }
             case SCORING:
-                switch (desiredSuperState) {
+                switch (currentSuperState) {
                     case IDLE:
                     case INTAKING:
                     case SCORING:
                     case PASSING:
                     case REVERSE:
                         return Commands.runOnce(() -> {
-                            prevSuperState = desiredSuperState;
-                            desiredSuperState = newSuperState;
+                            prevSuperState = currentSuperState;
+                            currentSuperState = newSuperState;
                         })
-                        .alongWith(
+                        .andThen(
                             setIntakeState(IntakeState.IDLE),
                             setSwerveState(SwerveState.TRACKING_HUB),
                             setShooterState(ShooterState.SCORING)
                         );
                     case ALIGNING_TOWER_LEFT:
                     case ALIGNING_TOWER_RIGHT:
-                        return setSuperState(desiredSuperState);
+                        return setSuperState(currentSuperState);
                 }
             case PASSING:
-                switch (desiredSuperState) {
+                switch (currentSuperState) {
                     case INTAKING:
                     case ALIGNING_TOWER_LEFT:
                     case ALIGNING_TOWER_RIGHT:
-                        return setSuperState(desiredSuperState);
+                        return setSuperState(currentSuperState);
                     case IDLE:
                     case SCORING:
                     case PASSING:
                     case REVERSE:
                         return Commands.runOnce(() -> {
-                            prevSuperState = desiredSuperState;
-                            desiredSuperState = newSuperState;
+                            prevSuperState = currentSuperState;
+                            currentSuperState = newSuperState;
                         })
-                        .alongWith(
+                        .andThen(
                             setIntakeState(IntakeState.INTAKE),
                             setSwerveState(SwerveState.MANUAL),
                             setShooterState(ShooterState.PASSING)
@@ -122,41 +126,41 @@ public class Superstructure extends SubsystemBase {
                     
                 }
             case REVERSE:
-                switch (desiredSuperState) {
+                switch (currentSuperState) {
                     case INTAKING:
                     case ALIGNING_TOWER_LEFT:
                     case ALIGNING_TOWER_RIGHT:
-                        return setSuperState(desiredSuperState);
+                        return setSuperState(currentSuperState);
                     case IDLE:
                     case SCORING:
                     case PASSING:
                     case REVERSE:
                         return Commands.runOnce(() -> {
-                            prevSuperState = desiredSuperState;
-                            desiredSuperState = newSuperState;
+                            prevSuperState = currentSuperState;
+                            currentSuperState = newSuperState;
                         })
-                        .alongWith(
+                        .andThen(
                             setIntakeState(IntakeState.OUTTAKE),
                             setFeederState(FeederState.BACKFEED),
                             setSwerveState(SwerveState.MANUAL),
-                            setShooterState(desiredShooterState)
+                            setShooterState(currentShooterState)
                         );
                 }
             case ALIGNING_TOWER_LEFT:
-                switch (desiredSuperState) {
+                switch (currentSuperState) {
                     case INTAKING:
                     case REVERSE:
-                        return setSuperState(desiredSuperState);
+                        return setSuperState(currentSuperState);
                     case SCORING:
                     case PASSING:
                     case IDLE:
                     case ALIGNING_TOWER_LEFT:    
                     case ALIGNING_TOWER_RIGHT:
                         return Commands.runOnce(() -> {
-                            prevSuperState = desiredSuperState;
-                            desiredSuperState = newSuperState;
+                            prevSuperState = currentSuperState;
+                            currentSuperState = newSuperState;
                         })
-                        .alongWith(
+                        .andThen(
                             setIntakeState(IntakeState.IDLE),
                             setFeederState(FeederState.IDLE),
                             setShooterState(ShooterState.IDLE),
@@ -165,20 +169,20 @@ public class Superstructure extends SubsystemBase {
                     
                 }
             case ALIGNING_TOWER_RIGHT:
-                switch (desiredSuperState) {
+                switch (currentSuperState) {
                     case INTAKING:
                     case REVERSE:
-                        return setSuperState(desiredSuperState);
+                        return setSuperState(currentSuperState);
                     case SCORING:
                     case PASSING:
                     case IDLE:
                     case ALIGNING_TOWER_LEFT:    
                     case ALIGNING_TOWER_RIGHT:
                         return Commands.runOnce(() -> {
-                            prevSuperState = desiredSuperState;
-                            desiredSuperState = newSuperState;
+                            prevSuperState = currentSuperState;
+                            currentSuperState = newSuperState;
                         })
-                        .alongWith(
+                        .andThen(
                             setIntakeState(IntakeState.IDLE),
                             setFeederState(FeederState.IDLE),
                             setShooterState(ShooterState.IDLE),
@@ -192,7 +196,7 @@ public class Superstructure extends SubsystemBase {
     }
 
     public SuperState getCurrentSuperState() {
-        return desiredSuperState;
+        return currentSuperState;
     }
 
     public SuperState getPreviousSuperState() {
@@ -200,23 +204,23 @@ public class Superstructure extends SubsystemBase {
     }
 
     public Command setIntakeState(IntakeState intakeState) {
-        return Commands.runOnce(() -> this.desiredIntakeState = intakeState)
-            .alongWith(intake.handleIntakeTransition(intakeState));
+        return Commands.runOnce(() -> this.currentIntakeState = intakeState)
+            .andThen(intake.handleIntakeTransition(intakeState));
     }
 
     public Command setFeederState(FeederState feederState) {
-        return Commands.runOnce(() -> this.desiredFeederState = feederState)
-            .alongWith(shooter.handleFeederTransition(feederState));
+        return Commands.runOnce(() -> this.currentFeederState = feederState)
+            .andThen(shooter.handleFeederTransition(feederState));
     }
 
     public Command setShooterState(ShooterState shooterState) {
-        return Commands.runOnce(() -> this.desiredShooterState = shooterState)
-            .alongWith(shooter.handleShooterTransitions(shooterState));
+        return Commands.runOnce(() -> this.currentShooterState = shooterState)
+            .andThen(shooter.handleShooterTransitions(shooterState));
     }
 
     public Command setSwerveState(SwerveState swerveState) {
-        return Commands.runOnce(() -> this.desiredSwerveState = swerveState)
-            .alongWith(swerve.handleSwerveTransitions(swerveState));
+        return Commands.runOnce(() -> this.currentSwerveState = swerveState)
+            .andThen(swerve.handleSwerveTransitions(swerveState));
     }
 
     public enum SuperState {
