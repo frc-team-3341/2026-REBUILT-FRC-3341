@@ -279,8 +279,8 @@ public final class Constants {
     public static final double hubHeight = 1.43; 
 
     //TODO NEED TO BE SET
-    public static final int SHOOTER_FLYWHEEL_CAN_ID = 16;
-    public static final int FEEDER_CAN_ID = 15;
+    public static final int SHOOTER_FLYWHEEL_CAN_ID = 12;
+    public static final int FEEDER_CAN_ID = 11;
 
     //TODO THIS IS ARBITRARY
     public static final int shooterCurrentLimit = 25;
@@ -308,8 +308,8 @@ public final class Constants {
 
   public static final class IntakeConstants {
     //TODO NEEDS TO BE SET
-    public static final int INTAKE_CAN_ID = 13;
-    public static final int LIFT_CAN_ID = 14;
+    public static final int INTAKE_CAN_ID = 9;
+    public static final int LIFT_CAN_ID = 10;
 
 
     //TODO THIS IS ARBITRARY
