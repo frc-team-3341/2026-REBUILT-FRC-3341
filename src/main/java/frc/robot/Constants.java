@@ -11,6 +11,7 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
@@ -128,5 +129,19 @@ public final class Constants {
   public static final class FieldConstants {
     public static final Pose2d blueHubCenterPose = new Pose2d(4.633, 4.035, new Rotation2d(0));
     public static final Pose2d redHubCenterPose = new Pose2d(11.907, 4.035, new Rotation2d(0));
+  }
+    public static final class ShooterConstants {
+    public static final int SHOOTER_FLYWHEEL_CAN_ID = 12; //NEED TO SET
+    public static final int FEEDER_CAN_ID = 11;
+    public static final double FEEDING_SPEED = 2000;
+    public static final double BACKFEED_SPEED = -2000;
+
+    public static InterpolatingDoubleTreeMap speedMap = new InterpolatingDoubleTreeMap();
+
+    static{
+      //              meters      rpm
+      speedMap.put(0.0, 0.0);
+
+    }
   }
 }

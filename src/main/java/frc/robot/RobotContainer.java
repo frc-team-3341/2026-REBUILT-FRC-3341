@@ -21,6 +21,7 @@ import frc.robot.Constants.OIConstants;
 import frc.robot.commands.AimDrive;
 import frc.robot.commands.SwerveTeleop;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.ShooterSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -40,9 +41,10 @@ import java.util.List;
 public class RobotContainer {
   // The robot's subsystems
   private final DriveSubsystem swerve = new DriveSubsystem();
-
+  private final ShooterSubsystem shooter = new ShooterSubsystem();
   // The driver's controller
   CommandXboxController driver_controller = new CommandXboxController(OIConstants.kDriverControllerPort);
+
   CommandJoystick mech_joystick = new CommandJoystick(OIConstants.kMechJoystickPort);
 
   private final SwerveTeleop swerveTeleop = new SwerveTeleop(swerve, driver_controller);
@@ -71,6 +73,7 @@ public class RobotContainer {
   private void configureButtonBindings() {
     
     //change this based on what the driver wants for reset heading idk man
+    /* 
     driver_controller.y().onTrue(swerve.zeroHeading());
 
     driver_controller.a().onTrue(swerve.run(() -> swerve.resetOdometry(new Pose2d(0, 0, swerve.getRotation2d()))));
@@ -78,6 +81,13 @@ public class RobotContainer {
     driver_controller.x().onTrue(swerve.runOnce(() -> swerve.setDefaultCommand(aimDrive)));
 
     driver_controller.b().onTrue(swerve.runOnce(() -> swerve.setDefaultCommand(swerveTeleop)));
+    */
+    driver_controller.a().onTrue(shooter.incrementRPM());
+    driver_controller.b().onTrue(shooter.stopMotor());
+    driver_controller.x().onTrue(shooter.decrementRPM());
+    driver_controller.y().onChange(shooter.feed());
+    driver_controller.rightBumper().onTrue(shooter.Score());
+    driver_controller.leftBumper().onTrue(shooter.backupShooting());
   }
 
 
