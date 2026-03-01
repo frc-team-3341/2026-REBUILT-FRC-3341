@@ -27,6 +27,9 @@ import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.subsystems.Intake;
+
 import java.util.List;
 
 /*
@@ -39,6 +42,8 @@ import java.util.List;
 public class RobotContainer {
   // The robot's subsystems
   private final DriveSubsystem swerve = new DriveSubsystem();
+  private Intake robotIntake;
+
 
   // The driver's controller
   CommandXboxController driver_controller = new CommandXboxController(OIConstants.kDriverControllerPort);
@@ -50,6 +55,9 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
+    // Configure the button bindings
+    createIntake();
+
     // Configure the button bindings
     configureButtonBindings();
 
@@ -74,6 +82,76 @@ public class RobotContainer {
 
   }
 
+  
+  public void createIntake(){
+    robotIntake = new Intake();
+
+    /*
+    driver_controller.a().onTrue(robotIntake.intakeBall()).onFalse(robotIntake.stopIntake());
+
+    Trigger beamBreakIntake = new Trigger(() ->{
+      return !robotIntake.getBeamBreak();
+    });
+    */
+
+    // Trigger beamBreakInput = new Trigger(() -> {
+      
+    //   return robotIntake.getBeamBreak();
+    // });
+    
+
+    // Trigger timer = new Trigger(() -> {
+    //   if(!robotIntake.getBeamBreak()){
+    //     robotIntake.addCounter(10);
+    //   }
+    //   else{
+    //     robotIntake.setCounter(0);
+    //   }
+
+    //   if(robotIntake.getCounter() >= 1000){
+    //     return false;
+    //   }
+    //   else{
+    //     return true;
+    //   }
+    // });
+
+    
+    //Trigger motorOutputOn = (driver_controller.a()).and(timer);
+
+    Trigger motorOutputOn = driver_controller.a();
+    motorOutputOn.onTrue(robotIntake.intakeBall());
+
+    Trigger motorBackwards = driver_controller.b();
+    motorBackwards.onTrue(robotIntake.reverseIntakeBall()).onFalse(robotIntake.stopIntake());
+
+   // motorOutputOn.toggleOnTrue(robotIntake.intakeBall());
+
+    // Trigger keepOn = new Trigger(() -> {
+    //   if(driver_controller.a().getAsBoolean()){
+        
+    //     if(robotIntake.getMotorOn()){
+    //       robotIntake.setMotorOn(false);
+    //     }
+    //     else{
+    //       robotIntake.setMotorOn(true);
+    //     }
+    //   }
+    //   System.out.println(robotIntake.getMotorOn());
+    //   return robotIntake.getMotorOn();
+    // });
+
+ //   timer.onFalse(robotIntake.stopIntake());
+   // timer.onFalse(robotIntake.setMotorCommandOn(false));
+
+    driver_controller.a().onTrue(robotIntake.keepOn());
+    Trigger keepOn = new Trigger(() -> {
+      
+      return robotIntake.getMotorOn();
+    });
+   keepOn.toggleOnFalse(robotIntake.stopIntake());
+
+  }
 
   public Command getAutonomousCommand() {
     return null;

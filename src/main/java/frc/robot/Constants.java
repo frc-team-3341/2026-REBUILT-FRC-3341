@@ -52,7 +52,7 @@ public final class Constants {
     // motors on the bottom of the module.
     public static final boolean kFrontLeftDrivingMotorOnBottom = true;
     public static final boolean kRearLeftDrivingMotorOnBottom = false;
-    public static final boolean kFrontRightDrivingMotorOnBottom = true;
+    public static final boolean kFrontRightDrivingMotorOnBottom = false;
     public static final boolean kRearRightDrivingMotorOnBottom = true;
 
     public static final boolean kFrontLeftTurningMotorOnBottom = false;
@@ -74,6 +74,7 @@ public final class Constants {
 
     public static final boolean kGyroReversed = false;
     public static final Rotation2d navxOffset = Rotation2d.fromDegrees(0); //Offsets driving by 90 degrees clockwise
+    public static final int intakeMotorCanId = 10;
   }
 
   public static final class ModuleConstants {
