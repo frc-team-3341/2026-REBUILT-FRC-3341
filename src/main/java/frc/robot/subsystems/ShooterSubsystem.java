@@ -142,10 +142,10 @@ public void stopFeedMotor() {
     return this.runOnce(() ->{
        counter++;
        if (counter%2 == 0) {
-        startFeedMotor();
+        stopFeedMotor();
        }
       else {
-        stopFeedMotor();
+        startFeedMotor();
       }
     });
   }
