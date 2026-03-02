@@ -124,8 +124,8 @@ public final class Constants {
   public static final class ShooterConstants {
     public static final int SHOOTER_FLYWHEEL_CAN_ID = 12; //NEED TO SET
     public static final int FEEDER_CAN_ID = 11;
-    public static final double FEEDING_SPEED = 2000;
-    public static final double BACKFEED_SPEED = -2000;
+    public static final double FEEDING_SPEED = 0.75;
+    public static final double BACKFEED_SPEED = -0.75;
 
     public static InterpolatingDoubleTreeMap speedMap = new InterpolatingDoubleTreeMap();
 

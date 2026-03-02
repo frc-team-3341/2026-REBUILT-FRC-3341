@@ -89,16 +89,16 @@ public class Intake extends SubsystemBase{
     public Command intakeBall() {
         return runOnce(
             () -> {
-                intakeWheel.set(0.75);
-                frontWheel.set(-0.15);
+                intakeWheel.set(0.67);
+                frontWheel.set(-0.75);
         });
     }
 
     public Command reverseIntakeBall() {
         return runOnce(
             () -> {
-                intakeWheel.set(-0.75);
-                frontWheel.set(0.15);
+                intakeWheel.set(-0.67);
+                frontWheel.set(0.75);
         });
     }
     

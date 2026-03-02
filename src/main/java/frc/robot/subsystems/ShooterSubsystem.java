@@ -67,15 +67,6 @@ public class ShooterSubsystem extends SubsystemBase {
         .outputRange(-1, 1, ClosedLoopSlot.kSlot0)
         .feedForward
           .kV(0.00016, ClosedLoopSlot.kSlot0);// found through trial and error <a href="https://docs.google.com/spreadsheets/d/1mUxeWXwDsTIuaJu80DP9HOvX7ygvbocv1wcLSLS03-A/edit?gid=0#gid=0">  
-    
-    feederConfig.closedLoop
-        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-        .p(0.0001, ClosedLoopSlot.kSlot1)//TODO: needs to be set
-        .i(0, ClosedLoopSlot.kSlot1)
-        .d(0, ClosedLoopSlot.kSlot1)
-        .outputRange(-1, 1, ClosedLoopSlot.kSlot1)
-        .feedForward
-          .kV(0.00016, ClosedLoopSlot.kSlot1);
 
 
     shooter.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -100,16 +91,16 @@ public void setRPM(double rpm) {
 }
 
 public void startFeedMotor() {
-  closedLoopFeedController.setSetpoint(FEEDING_SPEED,ControlType.kVelocity,ClosedLoopSlot.kSlot1);
+  feeder.set(FEEDING_SPEED);
 }
 public void startBackFeed() {
-  closedLoopFeedController.setSetpoint(BACKFEED_SPEED,ControlType.kVelocity,ClosedLoopSlot.kSlot1);
+  feeder.set(BACKFEED_SPEED);
 }
 public void stopFeedMotor() {
-  closedLoopFeedController.setSetpoint(0,ControlType.kVelocity,ClosedLoopSlot.kSlot1);
+  feeder.set(0);
 }
 
-  public Command stopMotor() {
+  public Command stopFlywheel() {
     return this.runOnce(() -> {
         velocity = 0;
         setRPM(velocity);
@@ -140,13 +131,13 @@ public void stopFeedMotor() {
   }
   public Command feed(){
     return this.runOnce(() ->{
-       counter++;
-       if (counter%2 == 0) {
-        startFeedMotor();
-       }
-      else {
-        stopFeedMotor();
-      }
+       startFeedMotor();
+    });
+  }
+
+  public Command stopFeed() {
+    return this.runOnce(() -> {
+      stopFeedMotor();
     });
   }
 
