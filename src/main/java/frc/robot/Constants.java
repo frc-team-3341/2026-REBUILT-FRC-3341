@@ -127,6 +127,14 @@ public final class Constants {
     public static final double FEEDING_SPEED = 0.75;
     public static final double BACKFEED_SPEED = -0.75;
 
+    //PID constants for nonweighted flywheels
+    public static final double kP_nw = 0.00001;
+    public static final double kI_nw = 0.0000001;
+    public static final double kD_nw = 0.01;
+
+    //from neo vortex vendor website
+    public static final double kV = 1.0/565;
+
     public static InterpolatingDoubleTreeMap speedMap = new InterpolatingDoubleTreeMap();
 
     static{

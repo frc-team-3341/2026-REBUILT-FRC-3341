@@ -59,7 +59,7 @@ public class RobotContainer {
     configureButtonBindings();
 
     // Configure default commands
-    swerve.setDefaultCommand(swerveTeleop);
+//     swerve.setDefaultCommand(swerveTeleop);
   }
 
   /**
@@ -83,6 +83,10 @@ public class RobotContainer {
     driver_controller.x().onTrue(shooter.backupShooting());
     driver_controller.rightTrigger().onTrue(shooter.feed()).onFalse(shooter.stopFeed());
     driver_controller.y().onTrue(shooter.stopFlywheel());
+
+    driver_controller.rightBumper().onTrue(shooter.incrementRPM());
+
+    driver_controller.leftBumper().onTrue(shooter.decrementRPM());
 
   }
 

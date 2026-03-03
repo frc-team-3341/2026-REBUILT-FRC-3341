@@ -26,7 +26,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
   private final SparkFlex shooter;
   private final SparkFlex feeder;
-  private double targetRPM = 1000;
+  private double targetRPM = 0;
   private double velocity = 0;
   private int counter = 0;
   private double Distance;
@@ -40,8 +40,7 @@ public class ShooterSubsystem extends SubsystemBase {
   public ShooterSubsystem() {
     shooter = new SparkFlex(SHOOTER_FLYWHEEL_CAN_ID, MotorType.kBrushless);
     feeder = new SparkFlex(FEEDER_CAN_ID, MotorType.kBrushless);
-    shooter.setInverted(false);
-    feeder.setInverted(false);
+    
     relativeEncoder = shooter.getEncoder();
     feederEncoder = feeder.getEncoder();
 
@@ -56,17 +55,24 @@ public class ShooterSubsystem extends SubsystemBase {
         .smartCurrentLimit(80)
         .idleMode(IdleMode.kCoast);
 
+    shooterConfig.
+      encoder
+        .inverted(false);
+    feederConfig.
+      encoder
+        .inverted(false);
+
     closedLoopController = shooter.getClosedLoopController();
     closedLoopFeedController = feeder.getClosedLoopController();
 
     shooterConfig.closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-        .p(0.0001, ClosedLoopSlot.kSlot0)
-        .i(0.0000001, ClosedLoopSlot.kSlot0)
-        .d(0, ClosedLoopSlot.kSlot0)
+        .p(kP_nw, ClosedLoopSlot.kSlot0)
+        .i(kI_nw, ClosedLoopSlot.kSlot0)
+        .d(kD_nw, ClosedLoopSlot.kSlot0)
         .outputRange(-1, 1, ClosedLoopSlot.kSlot0)
         .feedForward
-          .kV(0.00016, ClosedLoopSlot.kSlot0);// found through trial and error <a href="https://docs.google.com/spreadsheets/d/1mUxeWXwDsTIuaJu80DP9HOvX7ygvbocv1wcLSLS03-A/edit?gid=0#gid=0">  
+          .kV(kV, ClosedLoopSlot.kSlot0);
 
 
     shooter.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
