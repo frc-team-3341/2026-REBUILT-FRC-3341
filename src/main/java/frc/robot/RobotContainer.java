@@ -59,7 +59,7 @@ public class RobotContainer {
     configureButtonBindings();
 
     // Configure default commands
-//     swerve.setDefaultCommand(swerveTeleop);
+    swerve.setDefaultCommand(swerveTeleop);
   }
 
   /**
@@ -75,18 +75,18 @@ public class RobotContainer {
   private void configureButtonBindings() {
     
     //change this based on what the driver wants for reset heading idk man
-    driver_controller.rightStick().onTrue(swerve.zeroHeading());
+    driver_controller.start().onTrue(swerve.zeroHeading());
 
-    driver_controller.a().onTrue(robotIntake.intakeBall()).onFalse(robotIntake.stopIntake());
-    driver_controller.b().onTrue(robotIntake.reverseIntakeBall()).onFalse(robotIntake.stopIntake());
+    driver_controller.rightBumper().onTrue(robotIntake.intakeBall()).onFalse(robotIntake.stopIntake());
+    driver_controller.leftBumper().onTrue(robotIntake.reverseIntakeBall()).onFalse(robotIntake.stopIntake());
 
     driver_controller.x().onTrue(shooter.backupShooting());
     driver_controller.rightTrigger().onTrue(shooter.feed()).onFalse(shooter.stopFeed());
     driver_controller.y().onTrue(shooter.stopFlywheel());
 
-    driver_controller.rightBumper().onTrue(shooter.incrementRPM());
+    // driver_controller.rightBumper().onTrue(shooter.incrementRPM());
 
-    driver_controller.leftBumper().onTrue(shooter.decrementRPM());
+    // driver_controller.leftBumper().onTrue(shooter.decrementRPM());
 
   }
 

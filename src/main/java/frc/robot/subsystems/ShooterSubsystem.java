@@ -55,13 +55,6 @@ public class ShooterSubsystem extends SubsystemBase {
         .smartCurrentLimit(80)
         .idleMode(IdleMode.kCoast);
 
-    shooterConfig.
-      encoder
-        .inverted(false);
-    feederConfig.
-      encoder
-        .inverted(false);
-
     closedLoopController = shooter.getClosedLoopController();
     closedLoopFeedController = feeder.getClosedLoopController();
 
