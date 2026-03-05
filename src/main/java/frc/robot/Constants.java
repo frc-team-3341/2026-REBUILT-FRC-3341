@@ -132,6 +132,11 @@ public final class Constants {
     public static final double kI_nw = 0.0000001;
     public static final double kD_nw = 0.01;
 
+    //PID constants for weighted flywheels
+    public static final double kP_w = 0;
+    public static final double kI_w = 0;
+    public static final double kD_w = 0;
+
     //from neo vortex vendor website
     public static final double kV = 1.0/565;
 

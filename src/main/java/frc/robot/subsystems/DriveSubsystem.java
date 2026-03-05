@@ -59,7 +59,7 @@ public class DriveSubsystem extends SubsystemBase {
   // Odometry class for tracking robot pose
   SwerveDriveOdometry m_odometry = new SwerveDriveOdometry(
       DriveConstants.kDriveKinematics,
-      Rotation2d.fromDegrees(navx.getYaw()),
+      Rotation2d.fromDegrees(getYaw()),
       new SwerveModulePosition[] {
           m_frontLeft.getPosition(),
           m_frontRight.getPosition(),
@@ -87,7 +87,7 @@ public class DriveSubsystem extends SubsystemBase {
   public void periodic() {
     // Update the odometry in the periodic block
     m_odometry.update(
-        Rotation2d.fromDegrees(navx.getYaw()),
+        Rotation2d.fromDegrees(getYaw()),
         new SwerveModulePosition[] {
             m_frontLeft.getPosition(),
             m_frontRight.getPosition(),
@@ -117,7 +117,7 @@ public class DriveSubsystem extends SubsystemBase {
    */
   public void resetOdometry(Pose2d pose) {
     m_odometry.resetPosition(
-        Rotation2d.fromDegrees(navx.getYaw()),
+        Rotation2d.fromDegrees(getYaw()),
         new SwerveModulePosition[] {
             m_frontLeft.getPosition(),
             m_frontRight.getPosition(),
@@ -179,6 +179,11 @@ public class DriveSubsystem extends SubsystemBase {
     return this.runOnce(()->{
       navx.reset();
     });
+  }
+
+  //MUST BE NEGATIVE PLEASE DO NOT CHANGE
+  public double getYaw() {
+    return -navx.getYaw();
   }
 
   public void stopMotors() {
