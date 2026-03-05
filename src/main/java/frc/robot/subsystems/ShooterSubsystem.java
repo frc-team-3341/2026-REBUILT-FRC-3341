@@ -134,6 +134,12 @@ public void stopFeedMotor() {
     });
   }
 
+  public Command backfeed() {
+    return this.runOnce(() -> {
+      startBackFeed();
+    });
+  }
+
   public Command stopFeed() {
     return this.runOnce(() -> {
       stopFeedMotor();

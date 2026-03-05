@@ -83,6 +83,9 @@ public class RobotContainer {
     driver_controller.x().onTrue(shooter.backupShooting());
     driver_controller.rightTrigger().onTrue(shooter.feed()).onFalse(shooter.stopFeed());
     driver_controller.y().onTrue(shooter.stopFlywheel());
+    driver_controller.leftTrigger().onTrue(shooter.backfeed()).onFalse(shooter.stopFeed());
+    driver_controller.b().onTrue(shooter.incrementRPM());
+    driver_controller.a().onTrue(shooter.decrementRPM());
 
     // driver_controller.rightBumper().onTrue(shooter.incrementRPM());
 

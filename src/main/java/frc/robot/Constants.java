@@ -52,7 +52,7 @@ public final class Constants {
     // motors on the bottom of the module.
     public static final boolean kFrontLeftDrivingMotorOnBottom = true;
     public static final boolean kRearLeftDrivingMotorOnBottom = false;
-    public static final boolean kFrontRightDrivingMotorOnBottom = true;
+    public static final boolean kFrontRightDrivingMotorOnBottom = false;
     public static final boolean kRearRightDrivingMotorOnBottom = true;
 
     public static final boolean kFrontLeftTurningMotorOnBottom = false;
@@ -143,8 +143,11 @@ public final class Constants {
     public static InterpolatingDoubleTreeMap speedMap = new InterpolatingDoubleTreeMap();
 
     static{
+      // this is measured in meters from the CENTER of the hub
       //              meters      rpm
-      speedMap.put(0.0, 0.0);
+      speedMap.put(1.5, 2800.0);
+      speedMap.put(2.0, 3000.0);
+      speedMap.put(2.5, 3300.0);
 
     }
   }
