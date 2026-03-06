@@ -150,7 +150,7 @@ public final class Constants {
       speedMap.put(2.5, 3300.0);
       speedMap.put(3.0, 3550.0);
       speedMap.put(3.5, 3700.0);
-      speedMap.put(4.0, 3900.0);
+      speedMap.put(4.0, 4000.0);
       
 
     }
