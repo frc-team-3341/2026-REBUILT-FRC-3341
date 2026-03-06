@@ -107,13 +107,13 @@ public void stopFeedMotor() {
   }
   public Command decrementRPM() {
     return this.runOnce(() -> {
-        targetRPM -= 100;
+        targetRPM -= 50;
       setRPM(targetRPM);
     });  
   }
   public Command incrementRPM(){
     return this.runOnce(() -> {
-      targetRPM += 100;
+      targetRPM += 50;
       setRPM(targetRPM);
     });
   }
@@ -124,7 +124,7 @@ public void stopFeedMotor() {
   }
   public Command Score(){
     return this.runOnce(() -> {
-      targetRPM = speedMap.get(Distance);
+      targetRPM = speedMap.get(2.91);
       setRPM(targetRPM);
     });
   }

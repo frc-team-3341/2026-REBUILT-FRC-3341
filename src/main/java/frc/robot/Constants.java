@@ -138,7 +138,7 @@ public final class Constants {
     public static final double kD_w = 0;
 
     //from neo vortex vendor website
-    public static final double kV = 1.0/565;
+    public static final double kV = 0.0016;
 
     public static InterpolatingDoubleTreeMap speedMap = new InterpolatingDoubleTreeMap();
 
@@ -148,6 +148,10 @@ public final class Constants {
       speedMap.put(1.5, 2800.0);
       speedMap.put(2.0, 3000.0);
       speedMap.put(2.5, 3300.0);
+      speedMap.put(3.0, 3550.0);
+      speedMap.put(3.5, 3700.0);
+      speedMap.put(4.0, 3900.0);
+      
 
     }
   }
