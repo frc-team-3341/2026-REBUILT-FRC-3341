@@ -51,8 +51,6 @@ public class Shooter extends SubsystemBase {
             case PASSING:
                 return this.runOnce(() -> io.setFlywheelRPM(PASSING_RPM));
 
-            //TODO reimplement this so that flywheelRPM isn't constantly recalculated, only if
-            //there is a significant change in distance
             case SCORING:
                 return this.run(() -> {
                     Pose2d robotPose = RobotContainer.getPose();
@@ -60,8 +58,8 @@ public class Shooter extends SubsystemBase {
                     double distanceToHub = ShooterUtil.getDistanceToHub(robotPose);
 
                 if (Math.abs(distanceToHub-lastPose)>0.05) {
-                    System.out.println("UPDATING THE SPEED:" + distanceToHub);
-                //    flywheelRPM = speedMap.get(distanceToHub);
+                    System.out.println("Updating speed for the distance: " + distanceToHub + " meters from the center of the hub");
+                    flywheelRPM = speedMap.get(distanceToHub);
                     lastPose = distanceToHub;
                 }
                 io.setFlywheelRPM(flywheelRPM);
@@ -69,7 +67,7 @@ public class Shooter extends SubsystemBase {
                 }).beforeStarting(() -> {
                     lastPose = ShooterUtil.getDistanceToHub(RobotContainer.getPose());
                     //get flywheel spinning to prevent delay
-                    // flywheelRPM = speedMap.get(lastPose);
+                    flywheelRPM = speedMap.get(lastPose);
                 });
                     
             default:

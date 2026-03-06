@@ -90,10 +90,10 @@ public final class Constants {
     // These constants configure the location of the motors. The default
     // configuration is with both
     // motors on the bottom of the module.
-    public static final boolean kFrontLeftDrivingMotorOnBottom = false;
-    public static final boolean kRearLeftDrivingMotorOnBottom = true;
+    public static final boolean kFrontLeftDrivingMotorOnBottom = true;
+    public static final boolean kRearLeftDrivingMotorOnBottom = false;
     public static final boolean kFrontRightDrivingMotorOnBottom = false;
-    public static final boolean kRearRightDrivingMotorOnBottom = false;
+    public static final boolean kRearRightDrivingMotorOnBottom = true;  
 
     public static final boolean kFrontLeftTurningMotorOnBottom = false;
     public static final boolean kRearLeftTurningMotorOnBottom = false;
@@ -285,24 +285,30 @@ public final class Constants {
     //TODO THIS IS ARBITRARY
     public static final int shooterCurrentLimit = 25;
 
-    public static final double kP = 0.0001;
+    //PID constants for non-weighted flywheels
+    public static final double kP = 0.00001;
     public static final double kI = 0.0000001;
-    public static final double kD = 0;
+    public static final double kD = 0.01;
 
-    public static final double kV = 0.00016;
+    public static final double kV = 0.0016;
 
     //TODO figure this out
     public static final int PASSING_RPM = 0;
 
-    //TODO more things to set lol (might be the same as the intake speeds)
-    public static final double FEEDING_SPEED = 0;
-    public static final double BACKFEED_SPEED = 0;
+    //values from integration branch
+    public static final double FEEDING_SPEED = 0.75;
+    public static final double BACKFEED_SPEED = -0.75;
 
     public static InterpolatingDoubleTreeMap speedMap = new InterpolatingDoubleTreeMap();
 
-    //put entries into the speed map here
+    //data from integration branch
     static {
-      
+      speedMap.put(1.5, 2800.0);
+      speedMap.put(2.0, 3000.0);
+      speedMap.put(2.5, 3300.0);
+      speedMap.put(3.0, 3550.0);
+      speedMap.put(3.5, 3700.0);
+      speedMap.put(4.0, 4000.0);
     }
   }
 
