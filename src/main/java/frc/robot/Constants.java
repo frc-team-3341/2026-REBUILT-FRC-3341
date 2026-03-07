@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
@@ -142,5 +143,15 @@ public final class Constants {
       speedMap.put(0.0, 0.0);
 
     }
+  }
+    public static final class FieldConstants {
+    public static final Translation2d blueHubCenterPose = new Translation2d(4.633, 4.035);
+    public static final Translation2d redHubCenterPose = new Translation2d(11.907, 4.035);
+
+    public static final Pose2d blueLeftTowerPose = new Pose2d(1.567, 4.180, Rotation2d.fromDegrees(180));
+    public static final Pose2d blueRightTowerPose = new Pose2d(1.567, 3.298, Rotation2d.fromDegrees(180));
+
+    public static final Pose2d redLeftTowerPose = new Pose2d(14.984, 3.901, Rotation2d.fromDegrees(0));
+    public static final Pose2d redRightTowerPose = new Pose2d(14.984, 4.740, Rotation2d.fromDegrees(0));
   }
 }

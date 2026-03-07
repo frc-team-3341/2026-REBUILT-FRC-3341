@@ -16,12 +16,15 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import static frc.robot.Constants.ShooterConstants.*;
 
+import frc.robot.RobotContainer;
+import frc.util.ShooterUtil;
 public class ShooterSubsystem extends SubsystemBase {
 
   private final SparkFlex shooter;
@@ -36,8 +39,10 @@ public class ShooterSubsystem extends SubsystemBase {
   private SparkClosedLoopController closedLoopFeedController;
   private RelativeEncoder relativeEncoder;
   private RelativeEncoder feederEncoder;
-
+  private Pose2d robotPose = new Pose2d();
+  private RobotContainer container = new RobotContainer();
   public ShooterSubsystem() {
+
     shooter = new SparkFlex(SHOOTER_FLYWHEEL_CAN_ID, MotorType.kBrushless);
     feeder = new SparkFlex(FEEDER_CAN_ID, MotorType.kBrushless);
     
@@ -82,6 +87,8 @@ public class ShooterSubsystem extends SubsystemBase {
   SmartDashboard.putNumber("Target RPM", targetRPM);
   SmartDashboard.putBoolean("Feed", (feederEncoder.getVelocity() > 1.0));
   SmartDashboard.putBoolean("BackFeed", (feederEncoder.getVelocity() < -1.0));
+  SmartDashboard.putNumber("Estimated Distance", container.getDistanceToHub());
+
     }
 
 public void setRPM(double rpm) {

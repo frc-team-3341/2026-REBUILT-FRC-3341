@@ -27,6 +27,7 @@ import frc.robot.Constants.OIConstants;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.util.ShooterUtil;
 import frc.robot.subsystems.Intake;
 
 import java.util.List;
@@ -98,5 +99,12 @@ public class RobotContainer {
 
   public Command getAutonomousCommand() {
     return null;
+  }
+  public double getDistanceToHub() {
+
+    Pose2d robotPose = swerve.getPose();
+                  
+    double distanceToHub = ShooterUtil.getDistanceToHub(robotPose);
+    return distanceToHub;
   }
 }
