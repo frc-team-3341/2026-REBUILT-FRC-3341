@@ -93,7 +93,7 @@ public class DriveSubsystem extends SubsystemBase {
   // Odometry class for tracking robot pose
   SwerveDriveOdometry m_odometry = new SwerveDriveOdometry(
       DriveConstants.kDriveKinematics,
-      Rotation2d.fromDegrees(navx.getYaw()),
+      Rotation2d.fromDegrees(getYaw()),
       new SwerveModulePosition[] {
           m_frontLeft.getPosition(),
           m_frontRight.getPosition(),
@@ -157,7 +157,7 @@ private void createSimulationSwerve(Pose2d startingPose) {
     // Initialize pose estimator with starting position
     this.poseEstimator = new SwerveDrivePoseEstimator(
         kinematics,
-        Rotation2d.fromDegrees(navx.getYaw()),
+        Rotation2d.fromDegrees(this.getYaw()),
         new SwerveModulePosition[] {
             m_frontLeft.getPosition(),
             m_frontRight.getPosition(),
@@ -221,10 +221,10 @@ private void createSimulationSwerve(Pose2d startingPose) {
   public PathConstraints getPathFindConstraints(){
     // Create path constraints
     PathConstraints constraints = new PathConstraints(
-        0.7,   // maxVelocityMps
-        0.6,   // maxAccelerationMpsSq
-        Units.degreesToRadians(540.0),
-        Units.degreesToRadians(540.0)
+        0.4,   // maxVelocityMps
+        0.1,   // maxAccelerationMpsSq
+        Units.degreesToRadians(90.0),
+        Units.degreesToRadians(90.0)
     );
     
     return constraints;
@@ -249,30 +249,10 @@ private void createSimulationSwerve(Pose2d startingPose) {
             m_rearLeft.getPosition(),
             m_rearRight.getPosition()
         });
-    
-    SmartDashboard.putNumber("navx angle", navx.getAngle());
-      
 
-    statePublisher.set(getStates());
-  }
-
-  /**
-   * Returns the currently-estimated pose of the robot.
-   *
-   * @return The pose.
-   */
-  public Pose2d getPose() {
-    return m_odometry.getPoseMeters();
-  }
-
-  /**
-   * Resets the odometry to the specified pose.
-   *
-   * @param pose The pose to which to set the odometry.
-   */
-  public void resetOdometry(Pose2d pose) {
-    m_odometry.resetPosition(
-        Rotation2d.fromDegrees(navx.getYaw()),
+    // Update the pose estimator with wheel odometry
+    poseEstimator.update(
+        Rotation2d.fromDegrees(getYaw()),
         new SwerveModulePosition[] {
             m_frontLeft.getPosition(),
             m_frontRight.getPosition(),
@@ -338,9 +318,8 @@ private void createSimulationSwerve(Pose2d startingPose) {
     SmartDashboard.putNumber("PoseEstimator/ErrorFromOdometry", totalError);
     
     // NavX data
-    SmartDashboard.putNumber("NavX/Yaw", navx.getYaw());
+    SmartDashboard.putNumber("NavX/Yaw", this.getYaw());
     SmartDashboard.putNumber("NavX/Angle", navx.getAngle());
-    SmartDashboard.putNumber("NavX/Heading", getHeading());
     
     // Update field widget
     field.setRobotPose(estimatedPose);
@@ -410,7 +389,7 @@ private void createSimulationSwerve(Pose2d startingPose) {
    */
   public void resetOdometry(Pose2d pose) {
     m_odometry.resetPosition(
-        Rotation2d.fromDegrees(navx.getYaw()),
+        Rotation2d.fromDegrees(this.getYaw()),
         new SwerveModulePosition[] {
             m_frontLeft.getPosition(),
             m_frontRight.getPosition(),
@@ -420,7 +399,7 @@ private void createSimulationSwerve(Pose2d startingPose) {
         pose);
     
     poseEstimator.resetPosition(
-        Rotation2d.fromDegrees(navx.getYaw()),
+        Rotation2d.fromDegrees(this.getYaw()),
         new SwerveModulePosition[] {
             m_frontLeft.getPosition(),
             m_frontRight.getPosition(),
@@ -465,16 +444,22 @@ private void createSimulationSwerve(Pose2d startingPose) {
     });
   }
 
+  public Command resetOdo(){
+    return this.runOnce(()->{
+      this.resetOdometry(new Pose2d(0, 0, new Rotation2d(0)));
+    });
+  }
+
+  //MUST BE NEGATIVE PLEASE DO NOT CHANGE
+  public double getYaw() {
+    return -navx.getYaw();
+  }
+
   public void stopMotors() {
     for (int i = 0; i < modules.length; i++) {
       modules[i].setDriveVoltage(0);
       modules[i].setTurnVoltage(0);
     }
-  }
-
-  // Returns the current yaw value (in degrees, from -180 to 180)
-  public double getYaw() {
-    return navx.getYaw();
   }
 
   /** 

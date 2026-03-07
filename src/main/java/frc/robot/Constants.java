@@ -62,7 +62,7 @@ public final class Constants {
     public static final boolean kFrontLeftDrivingMotorOnBottom = true;
     public static final boolean kRearLeftDrivingMotorOnBottom = false;
     public static final boolean kFrontRightDrivingMotorOnBottom = false;
-    public static final boolean kRearRightDrivingMotorOnBottom = false;
+    public static final boolean kRearRightDrivingMotorOnBottom = true;
 
     public static final boolean kFrontLeftTurningMotorOnBottom = false;
     public static final boolean kRearLeftTurningMotorOnBottom = false;
