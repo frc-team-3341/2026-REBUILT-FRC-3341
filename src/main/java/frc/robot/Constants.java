@@ -129,5 +129,9 @@ public final class Constants {
     public static final int servo2port = 2;
     public static final int servo3port = 3;
     public static final int servo4port = 0;
+    public static final int topLimitPortL = 0;
+    public static final int bottomLimitPortL = 1;
+    public static final int topLimitPortR = 2;
+    public static final int bottomLimitPortR = 3;
   }
 }

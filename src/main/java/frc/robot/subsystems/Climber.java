@@ -13,6 +13,7 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.PWM;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -22,7 +23,11 @@ import frc.robot.Constants;
 public class Climber extends SubsystemBase {
     private final SparkFlex motorL = new SparkFlex(Constants.ClimberConstants.leftMotorPort, MotorType.kBrushless);
     private final SparkFlex motorR = new SparkFlex(Constants.ClimberConstants.rightMotorPort, MotorType.kBrushless);
-     // creating motor object
+    private final DigitalInput topLimitL = new DigitalInput(Constants.ClimberConstants.topLimitPortL);
+    private final DigitalInput bottomLimitL = new DigitalInput(Constants.ClimberConstants.bottomLimitPortL);
+    private final DigitalInput topLimitR = new DigitalInput(Constants.ClimberConstants.topLimitPortR);
+    private final DigitalInput bottomLimitR = new DigitalInput(Constants.ClimberConstants.bottomLimitPortR);
+    // creating motor object
      private static Climber instance;
      private boolean isinit = false;
      private double LsetPoint;
@@ -38,6 +43,8 @@ public class Climber extends SubsystemBase {
      public int climbingPhase;
      public int extendPhase;
      public int descentPhase;
+     public int homing;
+     public int maxmax;
      
 
   public Climber() {
@@ -45,6 +52,7 @@ public class Climber extends SubsystemBase {
     motorL.configure(motorConfigL, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
     SparkFlexConfig motorConfigR = new SparkFlexConfig(); //configuring sparkmax 
     motorR.configure(motorConfigR, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);  // configuring motor 1 
+    
     encoderL = motorL.getEncoder();
     encoderR = motorR.getEncoder();
     encoderL.setPosition(0);
@@ -58,6 +66,7 @@ public class Climber extends SubsystemBase {
     climbingPhase = 0;
     extendPhase = 0;
     descentPhase = 0;
+    homing = 0;
     s1 = new PWM(Constants.ClimberConstants.servo1port);
     s2 = new PWM(Constants.ClimberConstants.servo2port);
     s3 = new PWM(Constants.ClimberConstants.servo3port);
@@ -140,6 +149,13 @@ public class Climber extends SubsystemBase {
     motorL.set(0);
     motorR.set(0);
   }
+
+  public void Home(){
+    homing = 1;
+    leftMotorDown();
+    rightMotorDown();
+  }
+
   // starts extension sequence
   public Command e(){
     return this.runOnce(() -> {
@@ -302,6 +318,34 @@ public class Climber extends SubsystemBase {
     } else {
       max = 100;
     }
+    if (homing == 1){
+      if (bottomLimitL.get()){
+        leftMotorStop();
+        encoderL.setPosition(0);
+      }
+      if (bottomLimitR.get()){
+        rightMotorStop();
+        encoderL.setPosition(0);
+      }
+      if (bottomLimitL.get() && bottomLimitR.get()){
+        homing = 2;
+      }
+    }
+
+    if (homing == 2){
+      leftMotorUp();
+      rightMotorUp();
+      if (topLimitL.get()){
+        leftMotorStop();
+      }
+      if (topLimitR.get()){
+        rightMotorStop();
+      }
+      if (topLimitL.get() && topLimitR.get()){
+        homing = 0;
+      }
+    }
+
   }
   
 }
