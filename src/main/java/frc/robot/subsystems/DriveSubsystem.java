@@ -320,7 +320,6 @@ private void createSimulationSwerve(Pose2d startingPose) {
     // NavX data
     SmartDashboard.putNumber("NavX/Yaw", navx.getYaw());
     SmartDashboard.putNumber("NavX/Angle", navx.getAngle());
-    SmartDashboard.putNumber("NavX/Heading", getHeading());
     
     // Update field widget
     field.setRobotPose(estimatedPose);
