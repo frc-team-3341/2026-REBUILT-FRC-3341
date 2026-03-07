@@ -4,14 +4,11 @@
 
 package frc.robot;
 
-<<<<<<< HEAD
 import edu.wpi.first.math.geometry.Pose2d;
-=======
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
->>>>>>> 8f20e844e1f0baf3594415273055db274dea501d
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -111,7 +108,7 @@ public final class Constants {
         public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(4, 4, 8);
         public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
 
-  }
+    }
 
   public static final class ModuleConstants {
     // The EasySwerve module can only be configured with one pinion gears: 12T.
