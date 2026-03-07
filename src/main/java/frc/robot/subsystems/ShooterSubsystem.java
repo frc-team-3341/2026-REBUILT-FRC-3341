@@ -26,7 +26,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
   private final SparkFlex shooter;
   private final SparkFlex feeder;
-  private double targetRPM = 1000;
+  private double targetRPM = 0;
   private double velocity = 0;
   private int counter = 0;
   private double Distance;
@@ -40,8 +40,7 @@ public class ShooterSubsystem extends SubsystemBase {
   public ShooterSubsystem() {
     shooter = new SparkFlex(SHOOTER_FLYWHEEL_CAN_ID, MotorType.kBrushless);
     feeder = new SparkFlex(FEEDER_CAN_ID, MotorType.kBrushless);
-    shooter.setInverted(false);
-    feeder.setInverted(false);
+    
     relativeEncoder = shooter.getEncoder();
     feederEncoder = feeder.getEncoder();
 
@@ -61,21 +60,12 @@ public class ShooterSubsystem extends SubsystemBase {
 
     shooterConfig.closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-        .p(0.0001, ClosedLoopSlot.kSlot0)
-        .i(0.0000001, ClosedLoopSlot.kSlot0)
-        .d(0, ClosedLoopSlot.kSlot0)
+        .p(kP_nw, ClosedLoopSlot.kSlot0)
+        .i(kI_nw, ClosedLoopSlot.kSlot0)
+        .d(kD_nw, ClosedLoopSlot.kSlot0)
         .outputRange(-1, 1, ClosedLoopSlot.kSlot0)
         .feedForward
-          .kV(0.00016, ClosedLoopSlot.kSlot0);// found through trial and error <a href="https://docs.google.com/spreadsheets/d/1mUxeWXwDsTIuaJu80DP9HOvX7ygvbocv1wcLSLS03-A/edit?gid=0#gid=0">  
-    
-    feederConfig.closedLoop
-        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-        .p(0.0001, ClosedLoopSlot.kSlot1)//TODO: needs to be set
-        .i(0, ClosedLoopSlot.kSlot1)
-        .d(0, ClosedLoopSlot.kSlot1)
-        .outputRange(-1, 1, ClosedLoopSlot.kSlot1)
-        .feedForward
-          .kV(0.00016, ClosedLoopSlot.kSlot1);
+          .kV(kV, ClosedLoopSlot.kSlot0);
 
 
     shooter.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -100,16 +90,16 @@ public void setRPM(double rpm) {
 }
 
 public void startFeedMotor() {
-  closedLoopFeedController.setSetpoint(FEEDING_SPEED,ControlType.kVelocity,ClosedLoopSlot.kSlot1);
+  feeder.set(FEEDING_SPEED);
 }
 public void startBackFeed() {
-  closedLoopFeedController.setSetpoint(BACKFEED_SPEED,ControlType.kVelocity,ClosedLoopSlot.kSlot1);
+  feeder.set(BACKFEED_SPEED);
 }
 public void stopFeedMotor() {
-  closedLoopFeedController.setSetpoint(0,ControlType.kVelocity,ClosedLoopSlot.kSlot1);
+  feeder.set(0);
 }
 
-  public Command stopMotor() {
+  public Command stopFlywheel() {
     return this.runOnce(() -> {
         velocity = 0;
         setRPM(velocity);
@@ -117,13 +107,13 @@ public void stopFeedMotor() {
   }
   public Command decrementRPM() {
     return this.runOnce(() -> {
-        targetRPM -= 100;
+        targetRPM -= 50;
       setRPM(targetRPM);
     });  
   }
   public Command incrementRPM(){
     return this.runOnce(() -> {
-      targetRPM += 100;
+      targetRPM += 50;
       setRPM(targetRPM);
     });
   }
@@ -134,19 +124,25 @@ public void stopFeedMotor() {
   }
   public Command Score(){
     return this.runOnce(() -> {
-      targetRPM = speedMap.get(Distance);
+      targetRPM = speedMap.get(2.91);
       setRPM(targetRPM);
     });
   }
   public Command feed(){
     return this.runOnce(() ->{
-       counter++;
-       if (counter%2 == 0) {
-        startFeedMotor();
-       }
-      else {
-        stopFeedMotor();
-      }
+       startFeedMotor();
+    });
+  }
+
+  public Command backfeed() {
+    return this.runOnce(() -> {
+      startBackFeed();
+    });
+  }
+
+  public Command stopFeed() {
+    return this.runOnce(() -> {
+      stopFeedMotor();
     });
   }
 

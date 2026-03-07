@@ -90,16 +90,16 @@ public class DriveSubsystem extends SubsystemBase {
   // The gyro sensor
   private AHRS navx = new AHRS(NavXComType.kMXP_SPI);
 
- // Odometry class for tracking robot pose (wheel odometry only, no vision)
- SwerveDriveOdometry m_odometry = new SwerveDriveOdometry(
-     DriveConstants.kDriveKinematics,
-     Rotation2d.fromDegrees(navx.getYaw()),
-     new SwerveModulePosition[] {
-         m_frontLeft.getPosition(),
-         m_frontRight.getPosition(),
-         m_rearLeft.getPosition(),
-         m_rearRight.getPosition()
-     });
+  // Odometry class for tracking robot pose
+  SwerveDriveOdometry m_odometry = new SwerveDriveOdometry(
+      DriveConstants.kDriveKinematics,
+      Rotation2d.fromDegrees(navx.getYaw()),
+      new SwerveModulePosition[] {
+          m_frontLeft.getPosition(),
+          m_frontRight.getPosition(),
+          m_rearLeft.getPosition(),
+          m_rearRight.getPosition()
+      });
 
 // Add this method to DriveSubsystem
 private void createSimulationSwerve(Pose2d startingPose) {
@@ -242,16 +242,36 @@ private void createSimulationSwerve(Pose2d startingPose) {
   public void periodic() {
     // Update the odometry (wheel encoders + gyro only, no vision)
     m_odometry.update(
-        Rotation2d.fromDegrees(navx.getYaw()),
+        Rotation2d.fromDegrees(getYaw()),
         new SwerveModulePosition[] {
             m_frontLeft.getPosition(),
             m_frontRight.getPosition(),
             m_rearLeft.getPosition(),
             m_rearRight.getPosition()
         });
+    
+    SmartDashboard.putNumber("navx angle", navx.getAngle());
+      
 
-    // Update the pose estimator with wheel odometry
-    poseEstimator.update(
+    statePublisher.set(getStates());
+  }
+
+  /**
+   * Returns the currently-estimated pose of the robot.
+   *
+   * @return The pose.
+   */
+  public Pose2d getPose() {
+    return m_odometry.getPoseMeters();
+  }
+
+  /**
+   * Resets the odometry to the specified pose.
+   *
+   * @param pose The pose to which to set the odometry.
+   */
+  public void resetOdometry(Pose2d pose) {
+    m_odometry.resetPosition(
         Rotation2d.fromDegrees(navx.getYaw()),
         new SwerveModulePosition[] {
             m_frontLeft.getPosition(),
@@ -442,12 +462,6 @@ private void createSimulationSwerve(Pose2d startingPose) {
   public Command zeroHeading() {
     return this.runOnce(()->{
       navx.reset();
-    });
-  }
-
-  public Command resetOdo(){
-    return this.runOnce(()->{
-      this.resetOdometry(new Pose2d(0, 0, new Rotation2d(0)));
     });
   }
 

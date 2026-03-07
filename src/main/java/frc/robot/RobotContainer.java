@@ -37,13 +37,6 @@ public class RobotContainer {
 
 
   public RobotContainer() {
-    // driver_controller.a().onTrue(shooter.incrementRPM());
-    driver_controller.b().onTrue(shooter.stopMotor());
-    // driver_controller.x().onTrue(shooter.decrementRPM());
-    driver_controller.y().onChange(shooter.feed());
-    driver_controller.rightBumper().onTrue(shooter.Score());
-    // driver_controller.leftBumper().onTrue(shooter.backupShooting());
-    //shooter.setRPM(shooter.getRPM4Vel(8.0));
   
     // Configure the button bindings
     createIntake();
@@ -60,79 +53,27 @@ public class RobotContainer {
   private void configureButtonBindings() {
     
     //change this based on what the driver wants for reset heading idk man
-    driver_controller.rightStick().onTrue(swerve.zeroHeading());
-    driver_controller.x().whileTrue(swerve.run(()->swerve.drive(1, 0, 0, false))  );
+    driver_controller.start().onTrue(swerve.zeroHeading());
+
+    driver_controller.rightBumper().onTrue(robotIntake.intakeBall()).onFalse(robotIntake.stopIntake());
+    driver_controller.leftBumper().onTrue(robotIntake.reverseIntakeBall()).onFalse(robotIntake.stopIntake());
+
+    driver_controller.x().onTrue(shooter.backupShooting());
+    driver_controller.rightTrigger().onTrue(shooter.feed()).onFalse(shooter.stopFeed());
+    driver_controller.y().onTrue(shooter.stopFlywheel());
+    driver_controller.leftTrigger().onTrue(shooter.backfeed()).onFalse(shooter.stopFeed());
+    driver_controller.b().onTrue(shooter.incrementRPM());
+    driver_controller.a().onTrue(shooter.decrementRPM());
+
+    // driver_controller.rightBumper().onTrue(shooter.incrementRPM());
+
+    // driver_controller.leftBumper().onTrue(shooter.decrementRPM());
 
   }
 
   
   public void createIntake(){
-    robotIntake = new Intake();
-
-    /*
-    driver_controller.a().onTrue(robotIntake.intakeBall()).onFalse(robotIntake.stopIntake());
-
-    Trigger beamBreakIntake = new Trigger(() ->{
-      return !robotIntake.getBeamBreak();
-    });
-    */
-
-    // Trigger beamBreakInput = new Trigger(() -> {
-      
-    //   return robotIntake.getBeamBreak();
-    // });
-    
-
-    // Trigger timer = new Trigger(() -> {
-    //   if(!robotIntake.getBeamBreak()){
-    //     robotIntake.addCounter(10);
-    //   }
-    //   else{
-    //     robotIntake.setCounter(0);
-    //   }
-
-    //   if(robotIntake.getCounter() >= 1000){
-    //     return false;
-    //   }
-    //   else{
-    //     return true;
-    //   }
-    // });
-
-    
-    //Trigger motorOutputOn = (driver_controller.a()).and(timer);
-
-    Trigger motorOutputOn = driver_controller.a();
-    motorOutputOn.onTrue(robotIntake.intakeBall());
-
-    Trigger motorBackwards = driver_controller.b();
-    motorBackwards.onTrue(robotIntake.reverseIntakeBall()).onFalse(robotIntake.stopIntake());
-
-   // motorOutputOn.toggleOnTrue(robotIntake.intakeBall());
-
-    // Trigger keepOn = new Trigger(() -> {
-    //   if(driver_controller.a().getAsBoolean()){
-        
-    //     if(robotIntake.getMotorOn()){
-    //       robotIntake.setMotorOn(false);
-    //     }
-    //     else{
-    //       robotIntake.setMotorOn(true);
-    //     }
-    //   }
-    //   System.out.println(robotIntake.getMotorOn());
-    //   return robotIntake.getMotorOn();
-    // });
-
- //   timer.onFalse(robotIntake.stopIntake());
-   // timer.onFalse(robotIntake.setMotorCommandOn(false));
-
-    driver_controller.a().onTrue(robotIntake.keepOn());
-    Trigger keepOn = new Trigger(() -> {
-      
-      return robotIntake.getMotorOn();
-    });
-   keepOn.toggleOnFalse(robotIntake.stopIntake());
+    robotIntake = new Intake(); 
 
   }
     // Zero Heading

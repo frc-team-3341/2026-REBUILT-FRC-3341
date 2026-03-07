@@ -156,14 +156,34 @@ public final class Constants {
   public static final class ShooterConstants {
     public static final int SHOOTER_FLYWHEEL_CAN_ID = 12; //NEED TO SET
     public static final int FEEDER_CAN_ID = 11;
-    public static final double FEEDING_SPEED = 2000;
-    public static final double BACKFEED_SPEED = -2000;
+    public static final double FEEDING_SPEED = 0.75;
+    public static final double BACKFEED_SPEED = -0.75;
+
+    //PID constants for nonweighted flywheels
+    public static final double kP_nw = 0.00001;
+    public static final double kI_nw = 0.0000001;
+    public static final double kD_nw = 0.01;
+
+    //PID constants for weighted flywheels
+    public static final double kP_w = 0;
+    public static final double kI_w = 0;
+    public static final double kD_w = 0;
+
+    //from neo vortex vendor website
+    public static final double kV = 0.0016;
 
     public static InterpolatingDoubleTreeMap speedMap = new InterpolatingDoubleTreeMap();
 
     static{
+      // this is measured in meters from the CENTER of the hub
       //              meters      rpm
-      speedMap.put(0.0, 0.0);
+      speedMap.put(1.5, 2800.0);
+      speedMap.put(2.0, 3000.0);
+      speedMap.put(2.5, 3300.0);
+      speedMap.put(3.0, 3550.0);
+      speedMap.put(3.5, 3700.0);
+      speedMap.put(4.0, 4000.0);
+      
 
     }
   }
