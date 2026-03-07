@@ -141,7 +141,6 @@ public class Superstructure extends SubsystemBase {
                         })
                         .andThen(
                             setIntakeState(IntakeState.OUTTAKE),
-                            setFeederState(FeederState.BACKFEED),
                             setSwerveState(SwerveState.MANUAL),
                             setShooterState(currentShooterState)
                         );
