@@ -5,8 +5,12 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+
 public class DistanceSensor extends SubsystemBase {
     private final Counter counter;
+    private final DistanceSensor left = new DistanceSensor(0);
+    private final DistanceSensor right  = new DistanceSensor(1);
+    private final DistanceSensor middle = new DistanceSensor(2);
     //private double distanceMillimeters;
 
     
@@ -30,8 +34,9 @@ public class DistanceSensor extends SubsystemBase {
     @Override
     public void periodic() {
     // This method will be called once per scheduler run
-        SmartDashboard.putNumber("Millimeters Value", getDistanceMM());
-        SmartDashboard.putNumber("Inches Value", getDistanceInches());
+        SmartDashboard.putNumber("Inches Value (Left)", left.getDistanceInches());
+        SmartDashboard.putNumber("Inches Value (Right)", right.getDistanceInches());
+        SmartDashboard.putNumber("Inches Value (Middle)", middle.getDistanceInches());
 
     }
 }
