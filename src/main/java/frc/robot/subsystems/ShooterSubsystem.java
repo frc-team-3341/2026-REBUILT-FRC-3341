@@ -31,7 +31,6 @@ public class ShooterSubsystem extends SubsystemBase {
   private final SparkFlex feeder;
   private double targetRPM = 0;
   private double velocity = 0;
-  private int counter = 0;
   private double Distance;
   private final SparkFlexConfig shooterConfig;
   private final SparkFlexConfig feederConfig;
@@ -40,8 +39,7 @@ public class ShooterSubsystem extends SubsystemBase {
   private RelativeEncoder relativeEncoder;
   private RelativeEncoder feederEncoder;
   private Pose2d robotPose = new Pose2d();
-  private RobotContainer container = new RobotContainer();
-  public ShooterSubsystem() {
+  public ShooterSubsystem(DriveSubsystem driveSubsystem) {
 
     shooter = new SparkFlex(SHOOTER_FLYWHEEL_CAN_ID, MotorType.kBrushless);
     feeder = new SparkFlex(FEEDER_CAN_ID, MotorType.kBrushless);
@@ -77,19 +75,21 @@ public class ShooterSubsystem extends SubsystemBase {
     feeder.configure(feederConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     SmartDashboard.putNumber("Distance", 0.0);
+
+    robotPose = driveSubsystem.getPose();
   }
 
 
  @Override
   public void periodic() {
-  Distance = SmartDashboard.getNumber("Distance", 0.0);
-  SmartDashboard.putNumber("Encoder RPM", relativeEncoder.getVelocity());
-  SmartDashboard.putNumber("Target RPM", targetRPM);
-  SmartDashboard.putBoolean("Feed", (feederEncoder.getVelocity() > 1.0));
-  SmartDashboard.putBoolean("BackFeed", (feederEncoder.getVelocity() < -1.0));
-  SmartDashboard.putNumber("Estimated Distance", container.getDistanceToHub());
+    Distance = SmartDashboard.getNumber("Distance", 0.0);
+    SmartDashboard.putNumber("Encoder RPM", relativeEncoder.getVelocity());
+    SmartDashboard.putNumber("Target RPM", targetRPM);
+    SmartDashboard.putBoolean("Feed", (feederEncoder.getVelocity() > 1.0));
+    SmartDashboard.putBoolean("BackFeed", (feederEncoder.getVelocity() < -1.0));
+    SmartDashboard.putNumber("Estimated Distance", ShooterUtil.getDistanceToHub(robotPose));
 
-    }
+  }
 
 public void setRPM(double rpm) {
   targetRPM = rpm;

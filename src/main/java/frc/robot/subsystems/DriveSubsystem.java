@@ -128,10 +128,10 @@ private void createSimulationSwerve(Pose2d startingPose) {
             DriveConstants.kWheelCOF 
         ));
 
-    mapleSimDrive = new SwerveDriveSimulation(simulationConfig, startingPose);
+    // mapleSimDrive = new SwerveDriveSimulation(simulationConfig, startingPose);
 
     // Register the drivetrain simulation
-    SimulatedArena.getInstance().addDriveTrainSimulation(mapleSimDrive);
+    // SimulatedArena.getInstance().addDriveTrainSimulation(mapleSimDrive);
 }
 
 
@@ -408,10 +408,10 @@ private void createSimulationSwerve(Pose2d startingPose) {
         },
         pose);
 
-    if (Robot.isSimulation() && mapleSimDrive != null) {
-      mapleSimDrive.setSimulationWorldPose(pose);
-      vision.resetSimPose(pose);
-    }
+    // if (Robot.isSimulation() && mapleSimDrive != null) {
+    //   mapleSimDrive.setSimulationWorldPose(pose);
+    //   vision.resetSimPose(pose);
+    // }
   }
 
   /**
@@ -427,7 +427,7 @@ private void createSimulationSwerve(Pose2d startingPose) {
       modules[i].setDesiredState(desiredStates[i]);
     }
 
-    mapleSimDrive.setSimulationWorldPose(new Pose2d(2, 2, new Rotation2d()));
+    // mapleSimDrive.setSimulationWorldPose(new Pose2d(2, 2, new Rotation2d()));
   }
 
   /** Resets the drive encoders to currently read a position of 0. */
