@@ -178,7 +178,10 @@ public final class Constants {
 
     static{
       //              meters      rpm
-      speedMap.put(0.0, 0.0);
+      speedMap.put(2.5, 3300.0);
+      speedMap.put(3.0, 3550.0);
+      speedMap.put(3.5, 3700.0);
+      speedMap.put(4.0, 4000.0);
 
     }
   }
