@@ -109,15 +109,16 @@ public class RobotContainer {
   }
     
   public Command getAutonomousCommand() {
-    // return Commands.sequence(
-    //     AutoBuilder.pathfindToPose(
-    //         new Pose2d(2.0, 2.0, Rotation2d.fromDegrees(0)),
-    //         new PathConstraints(0.5, 0.5, 
-    //             Units.degreesToRadians(360.0), Units.degreesToRadians(360.0)),
-    //         0.0
-    //     )
-    // );
-    return null;
+
+     return Commands.sequence(
+         AutoBuilder.pathfindToPose(
+             new Pose2d(2.030, 4.06, Rotation2d.fromDegrees(0)),
+             new PathConstraints(0.5, 0.5, 
+                 Units.degreesToRadians(360.0), Units.degreesToRadians(360.0)),
+             0.0
+         )
+     );
+    //return null;
   }
   public double getDistanceToHub() {
 

@@ -408,10 +408,10 @@ private void createSimulationSwerve(Pose2d startingPose) {
         },
         pose);
 
-    if (Robot.isSimulation() && mapleSimDrive != null) {
-      mapleSimDrive.setSimulationWorldPose(pose);
-      vision.resetSimPose(pose);
-    }
+    // if (Robot.isSimulation() && mapleSimDrive != null) {
+    //   mapleSimDrive.setSimulationWorldPose(pose);
+    //   vision.resetSimPose(pose);
+    // }
   }
 
   /**
