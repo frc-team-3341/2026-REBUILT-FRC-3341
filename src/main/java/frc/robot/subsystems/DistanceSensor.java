@@ -34,6 +34,7 @@ public class DistanceSensor extends SubsystemBase {
     @Override
     public void periodic() {
     // This method will be called once per scheduler run
+       
         SmartDashboard.putNumber("Inches Value (Left)", left.getDistanceInches());
         SmartDashboard.putNumber("Inches Value (Right)", right.getDistanceInches());
         SmartDashboard.putNumber("Inches Value (Middle)", middle.getDistanceInches());

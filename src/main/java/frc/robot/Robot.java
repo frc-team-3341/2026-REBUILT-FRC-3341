@@ -18,9 +18,6 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   private final RobotContainer m_robotContainer;
-  public final DistanceSensor left = new DistanceSensor(0);
-  public final DistanceSensor right  = new DistanceSensor(1);
-  public final DistanceSensor middle = new DistanceSensor(2);
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.

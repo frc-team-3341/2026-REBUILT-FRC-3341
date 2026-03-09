@@ -29,63 +29,22 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.Subsystem.*;
 
-
-import java.util.List;
-
-/*
- * This class is where the bulk of the robot should be declared.  Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
- * periodic methods (other than the scheduler calls).  Instead, the structure of the robot
- * (including subsystems, commands, and button mappings) should be declared here.
- */
-
 public class RobotContainer {
-  // The robot's subsystemsZ
-  // The driver's controller
-  private final CommandXboxController joy1 = new CommandXboxController(Constants.USBOrder.Zero);
-  private Climber climber = new Climber();
 
+  private final CommandXboxController joy1 = new CommandXboxController(0);
+  private final Climber climber = new Climber();
 
-
-  /**
-   * The container for the robot. Contains subsystems, OI devices, and commands.
-   */
   public RobotContainer() {
-    // Configure the button bindings
     configureButtonBindings();
-
-    // Configure default commands
-    // m_robotDrive.setDefaultCommand(
-    //     // The left stick controls translation of the robot.
-    //     // Turning is controlled by the X axis of the right stick.
-    //     new RunCommand(
-    //         () -> m_robotDrive.drive(
-    //             -MathUtil.applyDeadband(driver_controller.getLeftY(), OIConstants.kDriveDeadband),
-    //             -MathUtil.applyDeadband(driver_controller.getLeftX(), OIConstants.kDriveDeadband),
-    //             -MathUtil.applyDeadband(driver_controller.getRightX(), OIConstants.kDriveDeadband),
-    //             true),
-    //         m_robotDrive));
   }
 
-  /**
-   * Use this method to define your button->command mappings. Buttons can be
-   * created by
-   * instantiating a {@link edu.wpi.first.wpilibj.GenericHID} or one of its
-   * subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then calling
-   * passing it to a
-   * {@link JoystickButton}.
-   */
+  // Button bindings
   private void configureButtonBindings() {
-    // new Trigger(() -> joy1.getLeftX() > 0.05).whileTrue(climber.leftMotorUp()).onFalse(climber.leftMotorStop());
-    // new Trigger(() -> joy1.getLeftX() < -0.05).whileTrue(climber.leftMotorDown()).onFalse(climber.leftMotorStop());
-    // new Trigger(() -> joy1.getRightX() > 0.05).whileTrue(climber.rightMotorUp()).onFalse(climber.rightMotorStop());
-    // new Trigger(() -> joy1.getRightX() < -0.05).whileTrue(climber.rightMotorUp()).onFalse(climber.rightMotorStop());
-    climber.Home();
-    joy1.povUp().onTrue(climber.e());
-    joy1.povDown().onTrue(climber.d());
+    joy1.povUp().whileTrue(climber.leadscrewUp()).onFalse(climber.leadscrewStop()); // d pad up control for going up
+    joy1.povDown().whileTrue(climber.leadscrewDown()).onFalse(climber.leadscrewStop()); //d pad down control for going down
+    joy1.a().onTrue(climber.servoOn()); // a to make the servo engage 
+    joy1.b().onTrue(climber.servoOff()); // b to release the servo 
   }
-
 
   public Command getAutonomousCommand() {
     return null;
