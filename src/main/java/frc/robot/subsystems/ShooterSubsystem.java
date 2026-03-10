@@ -83,7 +83,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
     // Init drive subsystem
     driveSubsystem = drive;
-    robotPose = driveSubsystem.getPose();
+    robotPose = driveSubsystem.getOdometryPose();
 
     
   }
@@ -92,7 +92,7 @@ public class ShooterSubsystem extends SubsystemBase {
  @Override
   public void periodic() {
     // Update Variables
-    robotPose = driveSubsystem.getPose();
+    robotPose = driveSubsystem.getOdometryPose();
     distance = ShooterUtil.getDistanceToHub(robotPose);
     SmartDashboard.putNumber("kP", kP);
     SmartDashboard.putNumber("kI", kI);
