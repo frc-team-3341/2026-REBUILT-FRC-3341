@@ -205,7 +205,7 @@ private void createSimulationSwerve(Pose2d startingPose) {
               this); // Reference to this subsystem to set requirements        
           
           // Put in the name of the auto here
-          autoChooser = AutoBuilder.buildAutoChooser("ShootPath"); //TODO: put name of default auto (String)
+          autoChooser = AutoBuilder.buildAutoChooser("FullAuto1"); //TODO: put name of default auto (String)
           SmartDashboard.putData(autoChooser);
         } catch (Exception e) {
           //If an exception is thrown here we are really in trouble

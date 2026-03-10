@@ -21,9 +21,11 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.util.ShooterUtil;
 import frc.robot.subsystems.Intake;
 
-
+import com.ctre.phoenix6.swerve.SwerveDrivetrain;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathfindingCommand;
+import com.pathplanner.lib.events.EventTrigger;
+import com.pathplanner.lib.path.EventMarker;
 import com.pathplanner.lib.path.PathConstraints;
 
 public class RobotContainer {
@@ -108,9 +110,13 @@ public class RobotContainer {
 
   }
     
+  private void EventMarkers(){
+    new EventTrigger("shoot ball").onTrue(shooter.backupShooting());
+  }
+
   public Command getAutonomousCommand() {
     //path to get ready to shoot
-    
+    /* 
      return Commands.sequence(
          AutoBuilder.pathfindToPose(
              new Pose2d(2.030, 4.06, Rotation2d.fromDegrees(0)),
@@ -118,10 +124,8 @@ public class RobotContainer {
                  Units.degreesToRadians(360.0), Units.degreesToRadians(360.0)),
              0.0
          ));
-    
-
-      
-    //return null;
+    */
+    return swerve.getAutonomousCommand();
   }
   public double getDistanceToHub() {
 
