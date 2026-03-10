@@ -4,17 +4,17 @@
 
 package frc.robot;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -166,12 +166,13 @@ public final class Constants {
     public static final double kD_nw = 0.01;
 
     //PID constants for weighted flywheels
-    public static final double kP_w = 0;
-    public static final double kI_w = 0;
-    public static final double kD_w = 0;
+    public static final double kP_w = 0.000005;
+    public static final double kI_w = 0.0000001;
+    public static final double kD_w = 0.01;
 
     //from neo vortex vendor website
-    public static final double kV = 1.0/565;
+    public static final double kV_nw = 0.0016;
+    public static final double kV_w = 0.0010;
 
     public static InterpolatingDoubleTreeMap speedMap = new InterpolatingDoubleTreeMap();
 

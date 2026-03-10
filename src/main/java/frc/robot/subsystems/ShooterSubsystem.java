@@ -64,12 +64,12 @@ public class ShooterSubsystem extends SubsystemBase {
 
     shooterConfig.closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-        .p(kP_nw, ClosedLoopSlot.kSlot0)
-        .i(kI_nw, ClosedLoopSlot.kSlot0)
-        .d(kD_nw, ClosedLoopSlot.kSlot0)
+        .p(kP_w, ClosedLoopSlot.kSlot0)
+        .i(kI_w, ClosedLoopSlot.kSlot0)
+        .d(kD_w, ClosedLoopSlot.kSlot0)
         .outputRange(-1, 1, ClosedLoopSlot.kSlot0)
         .feedForward
-          .kV(kV, ClosedLoopSlot.kSlot0);
+          .kV(kV_w, ClosedLoopSlot.kSlot0);
 
 
     shooter.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
