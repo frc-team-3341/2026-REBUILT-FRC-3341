@@ -168,7 +168,7 @@ public final class Constants {
     //PID constants for weighted flywheels
     public static final double kP_w = 0.000005;
     public static final double kI_w = 0.0000001;
-    public static final double kD_w = 0.01;
+    public static final double kD_w = 0.02;
 
     //from neo vortex vendor website
     public static final double kV_nw = 0.0016;
@@ -178,8 +178,10 @@ public final class Constants {
 
     static{
       //              meters      rpm
-      speedMap.put(2.5, 3300.0);
-      speedMap.put(3.0, 3550.0);
+      speedMap.put(1.5, 2500.0);
+      speedMap.put(2.0, 2650.0);
+      speedMap.put(2.5, 2850.0);
+      speedMap.put(3.0, 3050.0);
       speedMap.put(3.5, 3700.0);
       speedMap.put(4.0, 4000.0);
 
