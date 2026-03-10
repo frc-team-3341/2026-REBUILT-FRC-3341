@@ -3,7 +3,7 @@
 // the WPILib BSD license file in the root directory of this project.
  
 package frc.robot.subsystems;
-
+import java.lang.Math;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
@@ -16,6 +16,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -23,7 +24,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import static frc.robot.Constants.ShooterConstants.*;
 
-import frc.robot.RobotContainer;
 import frc.util.ShooterUtil;
 public class ShooterSubsystem extends SubsystemBase {
 
@@ -31,15 +31,17 @@ public class ShooterSubsystem extends SubsystemBase {
   private final SparkFlex feeder;
   private double targetRPM = 0;
   private double velocity = 0;
-  private double Distance;
+  private double distance;
+  private double prevdistance = -1;
   private final SparkFlexConfig shooterConfig;
   private final SparkFlexConfig feederConfig;
   private SparkClosedLoopController closedLoopController;
-  private SparkClosedLoopController closedLoopFeedController;
   private RelativeEncoder relativeEncoder;
   private RelativeEncoder feederEncoder;
   private Pose2d robotPose = new Pose2d();
-  public ShooterSubsystem(DriveSubsystem driveSubsystem) {
+  private DriveSubsystem driveSubsystem;
+
+  public ShooterSubsystem(DriveSubsystem drive) {
 
     shooter = new SparkFlex(SHOOTER_FLYWHEEL_CAN_ID, MotorType.kBrushless);
     feeder = new SparkFlex(FEEDER_CAN_ID, MotorType.kBrushless);
@@ -59,7 +61,6 @@ public class ShooterSubsystem extends SubsystemBase {
         .idleMode(IdleMode.kCoast);
 
     closedLoopController = shooter.getClosedLoopController();
-    closedLoopFeedController = feeder.getClosedLoopController();
 
     shooterConfig.closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
@@ -76,18 +77,24 @@ public class ShooterSubsystem extends SubsystemBase {
 
     SmartDashboard.putNumber("Distance", 0.0);
 
+    // Init drive subsystem
+    driveSubsystem = drive;
     robotPose = driveSubsystem.getPose();
+
+    
   }
 
 
  @Override
   public void periodic() {
-    Distance = SmartDashboard.getNumber("Distance", 0.0);
+    // Update Variables
+    robotPose = driveSubsystem.getPose();
+    distance = ShooterUtil.getDistanceToHub(robotPose);
     SmartDashboard.putNumber("Encoder RPM", relativeEncoder.getVelocity());
     SmartDashboard.putNumber("Target RPM", targetRPM);
     SmartDashboard.putBoolean("Feed", (feederEncoder.getVelocity() > 1.0));
     SmartDashboard.putBoolean("BackFeed", (feederEncoder.getVelocity() < -1.0));
-    SmartDashboard.putNumber("Estimated Distance", ShooterUtil.getDistanceToHub(robotPose));
+    SmartDashboard.putNumber("Estimated Distance", distance);
 
   }
 
@@ -129,10 +136,13 @@ public void stopFeedMotor() {
       setRPM(3500);
     });
   }
-  public Command Score(){
+  public Command score(){
     return this.runOnce(() -> {
-      targetRPM = speedMap.get(2.91);
-      setRPM(targetRPM);
+      if (Math.abs(distance - prevdistance) > 0.5){
+        targetRPM = speedMap.get(distance);
+        setRPM(targetRPM);
+        prevdistance = distance;
+      }
     });
   }
   public Command feed(){
