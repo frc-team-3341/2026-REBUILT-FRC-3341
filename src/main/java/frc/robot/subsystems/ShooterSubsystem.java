@@ -40,6 +40,10 @@ public class ShooterSubsystem extends SubsystemBase {
   private RelativeEncoder feederEncoder;
   private Pose2d robotPose = new Pose2d();
   private DriveSubsystem driveSubsystem;
+  private double kP = kP_w;
+  private double kI = kI_w;
+  private double kD = kD_w;
+  private double kV = kV_w;
 
   public ShooterSubsystem(DriveSubsystem drive) {
 
@@ -90,17 +94,45 @@ public class ShooterSubsystem extends SubsystemBase {
     // Update Variables
     robotPose = driveSubsystem.getPose();
     distance = ShooterUtil.getDistanceToHub(robotPose);
+    SmartDashboard.putNumber("kP", kP);
+    SmartDashboard.putNumber("kI", kI);
+    SmartDashboard.putNumber("kD", kD);
+    SmartDashboard.putNumber("kV", kV);
+
+    kP = SmartDashboard.getNumber("kP", kP);
+    kI = SmartDashboard.getNumber("kI", kI);
+    kD = SmartDashboard.getNumber("kD", kD);
+    kV = SmartDashboard.getNumber("kV", kV);
+
     SmartDashboard.putNumber("Encoder RPM", relativeEncoder.getVelocity());
     SmartDashboard.putNumber("Target RPM", targetRPM);
     SmartDashboard.putBoolean("Feed", (feederEncoder.getVelocity() > 1.0));
     SmartDashboard.putBoolean("BackFeed", (feederEncoder.getVelocity() < -1.0));
     SmartDashboard.putNumber("Estimated Distance", distance);
 
+    setP(kP);
+    setI(kI);
+    setD(kD);
+    setkV(kV);
+
   }
 
 public void setRPM(double rpm) {
   targetRPM = rpm;
   closedLoopController.setSetpoint(rpm,ControlType.kVelocity,ClosedLoopSlot.kSlot0);
+}
+
+public void setP(double newP) {
+  shooterConfig.closedLoop.p(newP);
+}
+public void setI(double newI) {
+  shooterConfig.closedLoop.i(newI);
+}
+public void setD(double newD) {
+  shooterConfig.closedLoop.d(newD);
+}
+public void setkV(double newkV) {
+  shooterConfig.closedLoop.feedForward.kV(newkV);
 }
 
 public void startFeedMotor() {

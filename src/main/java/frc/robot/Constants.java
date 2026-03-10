@@ -182,8 +182,10 @@ public final class Constants {
       speedMap.put(2.0, 2650.0);
       speedMap.put(2.5, 2850.0);
       speedMap.put(3.0, 3050.0);
-      speedMap.put(3.5, 3700.0);
-      speedMap.put(4.0, 4000.0);
+      speedMap.put(3.5, 3250.0);
+      speedMap.put(4.0, 3450.0);
+      speedMap.put(4.5, 3650.0);
+      speedMap.put(5.0, 3950.0); //needs to be retested
 
     }
   }
