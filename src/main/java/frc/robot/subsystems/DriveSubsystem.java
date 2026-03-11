@@ -164,7 +164,7 @@ private void createSimulationSwerve(Pose2d startingPose) {
             m_rearLeft.getPosition(),
             m_rearRight.getPosition()
         },
-        new Pose2d() // STARTING POSE 
+        new Pose2d(2.000, 7.000, new Rotation2d()) // STARTING POSE 
     );
     
     SmartDashboard.putData("Field", field);
