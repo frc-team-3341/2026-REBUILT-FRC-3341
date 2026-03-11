@@ -164,7 +164,7 @@ private void createSimulationSwerve(Pose2d startingPose) {
             m_rearLeft.getPosition(),
             m_rearRight.getPosition()
         },
-        new Pose2d() // STARTING POSE 
+        new Pose2d(1.190, 3.739, new Rotation2d()) // STARTING POSE 
     );
     
     SmartDashboard.putData("Field", field);
@@ -205,7 +205,7 @@ private void createSimulationSwerve(Pose2d startingPose) {
               this); // Reference to this subsystem to set requirements        
           
           // Put in the name of the auto here
-          autoChooser = AutoBuilder.buildAutoChooser("name"); //TODO: put name of auto - use as parameter (String)
+          autoChooser = AutoBuilder.buildAutoChooser("testIntakeAuto"); //TODO: put name of auto - use as parameter (String)
           SmartDashboard.putData(autoChooser);
         } catch (Exception e) {
           //If an exception is thrown here we are really in trouble

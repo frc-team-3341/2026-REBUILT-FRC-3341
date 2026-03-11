@@ -20,8 +20,13 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.util.ShooterUtil;
 import frc.robot.subsystems.Intake;
+import com.pathplanner.lib.events.EventTrigger;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
+import static frc.robot.Constants.ShooterConstants.*;
 
-
+import com.ctre.phoenix6.swerve.SwerveDrivetrain;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.path.PathConstraints;
@@ -46,7 +51,7 @@ public class RobotContainer {
     swerve.setDefaultCommand(swerveTeleop);
     
     // Warmup pathfinding (runs in background)
-    PathfindingCommand.warmupCommand().schedule();
+    // PathfindingCommand.warmupCommand().schedule();
   }
 
 
@@ -57,6 +62,12 @@ public class RobotContainer {
             System.out.println("ZEROING HEADING");
         }).andThen(swerve.zeroHeading())
     );
+    
+    new EventTrigger("Intake").onTrue(new SequentialCommandGroup(Commands.runOnce(() -> shooter.startFeedMotor())));
+    new EventTrigger("Shoot").onTrue(new SequentialCommandGroup(shooter.feed(),new WaitCommand(0.5),shooter.stopFeed()));
+    new EventTrigger("Stop Shooter").onTrue(shooter.stopFlywheel());
+
+
     driver_controller.rightBumper().onTrue(robotIntake.intakeBall()).onFalse(robotIntake.stopIntake());
     driver_controller.leftBumper().onTrue(robotIntake.reverseIntakeBall()).onFalse(robotIntake.stopIntake());
 
@@ -117,6 +128,6 @@ public class RobotContainer {
     //         0.0
     //     )
     // );
-    return null;
+    return swerve.getAutonomousCommand();
   }
 }
