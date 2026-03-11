@@ -31,7 +31,7 @@ public class ShooterSubsystem extends SubsystemBase {
   private final SparkFlex feeder;
   private double targetRPM = 0;
   private double velocity = 0;
-  private double distance;
+  private double distance = 0;
   private double prevdistance = -1;
   private final SparkFlexConfig shooterConfig;
   private final SparkFlexConfig feederConfig;
@@ -79,8 +79,6 @@ public class ShooterSubsystem extends SubsystemBase {
     shooter.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     feeder.configure(feederConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-    SmartDashboard.putNumber("Distance", 0.0);
-
     // Init drive subsystem
     driveSubsystem = drive;
     robotPose = driveSubsystem.getOdometryPose();
@@ -92,8 +90,8 @@ public class ShooterSubsystem extends SubsystemBase {
  @Override
   public void periodic() {
     // Update Variables
-    robotPose = driveSubsystem.getOdometryPose();
-    distance = ShooterUtil.getDistanceToHub(robotPose);
+    distance = getHubDistance();
+
     SmartDashboard.putNumber("kP", kP);
     SmartDashboard.putNumber("kI", kI);
     SmartDashboard.putNumber("kD", kD);
@@ -116,6 +114,19 @@ public class ShooterSubsystem extends SubsystemBase {
     setkV(kV);
 
   }
+
+  public double getHubDistance() {
+    //robotPose = driveSubsystem.getPose();
+    // Fallback to odometry pose
+    robotPose = driveSubsystem.getOdometryPose();
+    
+    robotPose = driveSubsystem.getOdometryPose();
+    distance = ShooterUtil.getDistanceToHub(robotPose);
+    prevdistance = distance;
+    return distance;
+    
+  }
+
 
 public void setRPM(double rpm) {
   targetRPM = rpm;
@@ -165,18 +176,17 @@ public void stopFeedMotor() {
   }
   public Command backupShooting(){
     return this.runOnce(() -> {
+      // TODO: change this so the driver can move to a consistent location.
       setRPM(3500);
     });
   }
   public Command score(){
     return this.runOnce(() -> {
-      if (Math.abs(distance - prevdistance) > 0.5){
-        targetRPM = speedMap.get(distance);
-        setRPM(targetRPM);
-        prevdistance = distance;
-      }
+      targetRPM = speedMap.get(getHubDistance());
+      setRPM(targetRPM);
     });
   }
+
   public Command feed(){
     return this.runOnce(() ->{
        startFeedMotor();
