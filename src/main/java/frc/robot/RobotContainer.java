@@ -130,11 +130,4 @@ public class RobotContainer {
     // );
     return swerve.getAutonomousCommand();
   }
-  public double getDistanceToHub() {
-
-    Pose2d robotPose = swerve.getPose();
-                  
-    double distanceToHub = ShooterUtil.getDistanceToHub(robotPose);
-    return distanceToHub;
-  }
 }
