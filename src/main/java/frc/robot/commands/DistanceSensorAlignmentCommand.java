@@ -1,20 +1,21 @@
-package frc.robot.subsystems;
+package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.Command;
 
 
-public class DistanceSensor extends SubsystemBase {
+public class DistanceSensorAlignmentCommand extends Command {
     private final Counter counter;
-    private final DistanceSensor left = new DistanceSensor(0);
-    private final DistanceSensor right  = new DistanceSensor(1);
-    private final DistanceSensor middle = new DistanceSensor(2);
+    private final DistanceSensorAlignmentCommand left = new DistanceSensorAlignmentCommand(0);
+    private final DistanceSensorAlignmentCommand right  = new DistanceSensorAlignmentCommand(1);
+    private final DistanceSensorAlignmentCommand middle = new DistanceSensorAlignmentCommand(2);
     //private double distanceMillimeters;
 
     
-    public DistanceSensor(int dioPort) {
+    public DistanceSensorAlignmentCommand(int dioPort) {
         DigitalInput input = new DigitalInput(dioPort);
         counter = new Counter(input);
         counter.setSemiPeriodMode(true);
@@ -31,13 +32,4 @@ public class DistanceSensor extends SubsystemBase {
         return getDistanceMM() / 25.4;
     }
     
-    @Override
-    public void periodic() {
-    // This method will be called once per scheduler run
-       
-        SmartDashboard.putNumber("Inches Value (Left)", left.getDistanceInches());
-        SmartDashboard.putNumber("Inches Value (Right)", right.getDistanceInches());
-        SmartDashboard.putNumber("Inches Value (Middle)", middle.getDistanceInches());
-
-    }
 }
