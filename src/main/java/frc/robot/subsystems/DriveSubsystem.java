@@ -262,33 +262,87 @@ private void createSimulationSwerve(Pose2d startingPose) {
     );
 
     // // Add vision measurements to pose estimator
-    // var visionEst = vision.getEstimatedGlobalPose();
+    var intakeVisionEst = vision.getIntakeEstimatedGlobalPose();
     
-    // visionEst.ifPresent(est -> {
-    //     // Get the standard deviations based on the quality of the vision estimate
-    //     var estStdDevs = vision.getEstimationStdDevs();
+    intakeVisionEst.ifPresent(est -> {
+        // Get the standard deviations based on the quality of the vision estimate
+        var estStdDevs = vision.getEstimationStdDevs();
         
-    //     // Only add the measurement if std devs are not maxed out (which means rejected)
-    //     if (estStdDevs.get(0, 0) < Double.MAX_VALUE) {
-    //         poseEstimator.addVisionMeasurement(
-    //             est.estimatedPose.toPose2d(), 
-    //             est.timestampSeconds, 
-    //             estStdDevs
-    //         );
+        // Only add the measurement if std devs are not maxed out (which means rejected)
+        if (estStdDevs.get(0, 0) < Double.MAX_VALUE) {
+            poseEstimator.addVisionMeasurement(
+                est.estimatedPose.toPose2d(), 
+                est.timestampSeconds, 
+                estStdDevs
+            );
             
-    //         // Debug: Vision measurement was accepted
-    //         SmartDashboard.putBoolean("Vision/MeasurementAccepted", true);
-    //     } else {
-    //         // Debug: Vision measurement was rejected
-    //         SmartDashboard.putBoolean("Vision/MeasurementAccepted", false);
-    //     }
-    // });
+            // Debug: Vision measurement was accepted
+            SmartDashboard.putBoolean("Vision/MeasurementAccepted", true);
+        } else {
+            // Debug: Vision measurement was rejected
+            SmartDashboard.putBoolean("Vision/MeasurementAccepted", false);
+        }
+    });
     
-    // // If no vision estimate, mark as not accepted
-    // if (visionEst.isEmpty()) {
-    //     SmartDashboard.putBoolean("Vision/MeasurementAccepted", false);
-    // }
+    // If no vision estimate, mark as not accepted
+    if (intakeVisionEst.isEmpty()) {
+        SmartDashboard.putBoolean("Vision/MeasurementAccepted", false);
+    }
+
+    var batteryVisionEst = vision.getBatteryEstimatedGlobalPose();
     
+    batteryVisionEst.ifPresent(est -> {
+        // Get the standard deviations based on the quality of the vision estimate
+        var estStdDevs = vision.getEstimationStdDevs();
+        
+        // Only add the measurement if std devs are not maxed out (which means rejected)
+        if (estStdDevs.get(0, 0) < Double.MAX_VALUE) {
+            poseEstimator.addVisionMeasurement(
+                est.estimatedPose.toPose2d(), 
+                est.timestampSeconds, 
+                estStdDevs
+            );
+            
+            // Debug: Vision measurement was accepted
+            SmartDashboard.putBoolean("Vision/MeasurementAccepted", true);
+        } else {
+            // Debug: Vision measurement was rejected
+            SmartDashboard.putBoolean("Vision/MeasurementAccepted", false);
+        }
+    });
+    
+    // If no vision estimate, mark as not accepted
+    if (batteryVisionEst.isEmpty()) {
+        SmartDashboard.putBoolean("Vision/MeasurementAccepted", false);
+    }
+  
+    var shooterVisionEst = vision.getShooterEstimatedGlobalPose();
+    
+    shooterVisionEst.ifPresent(est -> {
+        // Get the standard deviations based on the quality of the vision estimate
+        var estStdDevs = vision.getEstimationStdDevs();
+        
+        // Only add the measurement if std devs are not maxed out (which means rejected)
+        if (estStdDevs.get(0, 0) < Double.MAX_VALUE) {
+            poseEstimator.addVisionMeasurement(
+                est.estimatedPose.toPose2d(), 
+                est.timestampSeconds, 
+                estStdDevs
+            );
+            
+            // Debug: Vision measurement was accepted
+            SmartDashboard.putBoolean("Vision/MeasurementAccepted", true);
+        } else {
+            // Debug: Vision measurement was rejected
+            SmartDashboard.putBoolean("Vision/MeasurementAccepted", false);
+        }
+    });
+    
+    // If no vision estimate, mark as not accepted
+    if (shooterVisionEst.isEmpty()) {
+        SmartDashboard.putBoolean("Vision/MeasurementAccepted", false);
+    }
+
     // Odometry pose (wheel encoders + gyro only)
     Pose2d odometryPose = m_odometry.getPoseMeters();
     SmartDashboard.putString("Odometry/Pose", 

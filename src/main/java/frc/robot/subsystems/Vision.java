@@ -24,8 +24,15 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 import java.util.List;
 
 public class Vision {
-    private final PhotonCamera frontCamera;
-    private final PhotonPoseEstimator frontCamPhotonEstimator;
+    private final PhotonCamera intakeCamera;
+    private final PhotonCamera batteryCamera;
+    private final PhotonCamera shooterCamera;
+
+    private PhotonCamera[] cameras;
+
+    private final PhotonPoseEstimator intakePhotonPoseEstimator;
+    private final PhotonPoseEstimator batteryPhotonPoseEstimator;
+    private final PhotonPoseEstimator shooterPhotonPoseEstimator;
     private Matrix<N3, N1> curStdDevs = kSingleTagStdDevs;
 
     // Simulation
@@ -33,17 +40,35 @@ public class Vision {
     private VisionSystemSim visionSim;
 
     public Vision() {
-        frontCamera = new PhotonCamera(frontCameraName);
+        intakeCamera = new PhotonCamera(intakeCameraName);
+        batteryCamera = new PhotonCamera(batteryCameraName);
+        shooterCamera = new PhotonCamera(shooterCameraName);
         
+        cameras = new PhotonCamera[] {intakeCamera, batteryCamera, shooterCamera};
+
         // Create PhotonPoseEstimator with MULTI_TAG_PNP_ON_COPROCESSOR as primary strategy
-        frontCamPhotonEstimator = new PhotonPoseEstimator(
+        intakePhotonPoseEstimator = new PhotonPoseEstimator(
             kTagLayout, 
             PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-            robotToFrontCam
+            robotToIntakeCam
         );
-        
+        batteryPhotonPoseEstimator = new PhotonPoseEstimator(
+            kTagLayout, 
+            PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+            robotToIntakeCam
+        );
+        shooterPhotonPoseEstimator = new PhotonPoseEstimator(
+            kTagLayout, 
+            PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+            robotToIntakeCam
+        );
+    
         // Set fallback strategy
-        frontCamPhotonEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
+        intakePhotonPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
+
+        batteryPhotonPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
+        
+        shooterPhotonPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
 
         // ----- Simulation ------
         if (Robot.isSimulation()) {
@@ -60,47 +85,137 @@ public class Vision {
             cameraProp.setLatencyStdDevMs(15);
             // Create a PhotonCameraSim which will update the linked PhotonCamera's values with visible
             // targets.
-            cameraSim = new PhotonCameraSim(frontCamera, cameraProp);
+            cameraSim = new PhotonCameraSim(intakeCamera, cameraProp);
             // Add the simulated camera to view the targets on this simulated field.
-            visionSim.addCamera(cameraSim, robotToFrontCam);
+            visionSim.addCamera(cameraSim, robotToIntakeCam);
 
             cameraSim.enableDrawWireframe(true);
         }
     }
 
-    /**
-     * Get the estimated robot pose from the front camera.
+        /**
+     * Get the estimated robot pose from the intake camera.
      * This method processes all unread results and returns the most recent estimate.
      * 
      * @return Optional containing the estimated robot pose, or empty if no valid estimate
      */
-    public Optional<EstimatedRobotPose> getEstimatedGlobalPose() {
-        var result = frontCamera.getLatestResult();
+    public Optional<EstimatedRobotPose> getIntakeEstimatedGlobalPose() {
         
-        // Only process if we have targets
-        if (!result.hasTargets()) {
-            curStdDevs = kSingleTagStdDevs;
-            return Optional.empty();
+        // var result = intakeCamera.getLatestResult();
+        Optional<EstimatedRobotPose> visionEst = Optional.empty();
+
+        for (var result : intakeCamera.getAllUnreadResults()) {
+            // // Only process if we have targets
+            // if (!result.hasTargets()) {
+            // curStdDevs = kSingleTagStdDevs;
+            // return Optional.empty();
+            // }
+            
+            // Update the pose estimator with the latest result
+            visionEst = intakePhotonPoseEstimator.update(result);
+        
+            // Update standard deviations based on the estimate quality
+            updateEstimationStdDevs(visionEst, result.getTargets());
         }
         
-        // Update the pose estimator with the latest result
-        Optional<EstimatedRobotPose> visionEst = frontCamPhotonEstimator.update(result);
+
         
-        // Update standard deviations based on the estimate quality
-        updateEstimationStdDevs(visionEst, result.getTargets());
+        // // Debug output
+        // if (visionEst.isPresent()) {
+        //     SmartDashboard.putString("Vision/EstimatedPose", 
+        //         String.format("(%.2f, %.2f, %.2f°)", 
+        //             visionEst.get().estimatedPose.getX(),
+        //             visionEst.get().estimatedPose.getY(),
+        //             visionEst.get().estimatedPose.getRotation().toRotation2d().getDegrees()));
+        //     SmartDashboard.putNumber("Vision/NumTargets", result.getTargets().size());
+        //     SmartDashboard.putNumber("Vision/Timestamp", visionEst.get().timestampSeconds);
+        // } else {
+        //     SmartDashboard.putString("Vision/EstimatedPose", "No Estimate");
+        // }
         
-        // Debug output
-        if (visionEst.isPresent()) {
-            SmartDashboard.putString("Vision/EstimatedPose", 
-                String.format("(%.2f, %.2f, %.2f°)", 
-                    visionEst.get().estimatedPose.getX(),
-                    visionEst.get().estimatedPose.getY(),
-                    visionEst.get().estimatedPose.getRotation().toRotation2d().getDegrees()));
-            SmartDashboard.putNumber("Vision/NumTargets", result.getTargets().size());
-            SmartDashboard.putNumber("Vision/Timestamp", visionEst.get().timestampSeconds);
-        } else {
-            SmartDashboard.putString("Vision/EstimatedPose", "No Estimate");
+        return visionEst;
+    }
+        /**
+     * Get the estimated robot pose from the battery camera.
+     * This method processes all unread results and returns the most recent estimate.
+     * 
+     * @return Optional containing the estimated robot pose, or empty if no valid estimate
+     */
+    public Optional<EstimatedRobotPose> getBatteryEstimatedGlobalPose() {
+        
+        // var result = intakeCamera.getLatestResult();
+        Optional<EstimatedRobotPose> visionEst = Optional.empty();
+
+        for (var result : batteryCamera.getAllUnreadResults()) {
+            // // Only process if we have targets
+            // if (!result.hasTargets()) {
+            // curStdDevs = kSingleTagStdDevs;
+            // return Optional.empty();
+            // }
+
+            // Update the pose estimator with the latest result
+            visionEst = batteryPhotonPoseEstimator.update(result);
+        
+            // Update standard deviations based on the estimate quality
+            updateEstimationStdDevs(visionEst, result.getTargets());
         }
+        
+
+        
+        // // Debug output
+        // if (visionEst.isPresent()) {
+        //     SmartDashboard.putString("Vision/EstimatedPose", 
+        //         String.format("(%.2f, %.2f, %.2f°)", 
+        //             visionEst.get().estimatedPose.getX(),
+        //             visionEst.get().estimatedPose.getY(),
+        //             visionEst.get().estimatedPose.getRotation().toRotation2d().getDegrees()));
+        //     SmartDashboard.putNumber("Vision/NumTargets", result.getTargets().size());
+        //     SmartDashboard.putNumber("Vision/Timestamp", visionEst.get().timestampSeconds);
+        // } else {
+        //     SmartDashboard.putString("Vision/EstimatedPose", "No Estimate");
+        // }
+        
+        return visionEst;
+    }
+        /**
+     * Get the estimated robot pose from the shooter camera.
+     * This method processes all unread results and returns the most recent estimate.
+     * 
+     * @return Optional containing the estimated robot pose, or empty if no valid estimate
+     */
+    public Optional<EstimatedRobotPose> getShooterEstimatedGlobalPose() {
+        
+        // var result = intakeCamera.getLatestResult();
+        Optional<EstimatedRobotPose> visionEst = Optional.empty();
+
+        for (var result : shooterCamera.getAllUnreadResults()) {
+            // // Only process if we have targets
+            // if (!result.hasTargets()) {
+            // curStdDevs = kSingleTagStdDevs;
+            // return Optional.empty();
+            // }
+            
+            // Update the pose estimator with the latest result
+            visionEst = shooterPhotonPoseEstimator.update(result);
+        
+            // Update standard deviations based on the estimate quality
+            updateEstimationStdDevs(visionEst, result.getTargets());
+        }
+        
+
+        
+        // // Debug output
+        // if (visionEst.isPresent()) {
+        //     SmartDashboard.putString("Vision/EstimatedPose", 
+        //         String.format("(%.2f, %.2f, %.2f°)", 
+        //             visionEst.get().estimatedPose.getX(),
+        //             visionEst.get().estimatedPose.getY(),
+        //             visionEst.get().estimatedPose.getRotation().toRotation2d().getDegrees()));
+        //     SmartDashboard.putNumber("Vision/NumTargets", result.getTargets().size());
+        //     SmartDashboard.putNumber("Vision/Timestamp", visionEst.get().timestampSeconds);
+        // } else {
+        //     SmartDashboard.putString("Vision/EstimatedPose", "No Estimate");
+        // }
         
         return visionEst;
     }
@@ -130,7 +245,7 @@ public class Vision {
 
         // Precalculation - see how many tags we found, and calculate an average-distance metric
         for (var tgt : targets) {
-            var tagPose = frontCamPhotonEstimator.getFieldTags().getTagPose(tgt.getFiducialId());
+            var tagPose = intakePhotonPoseEstimator.getFieldTags().getTagPose(tgt.getFiducialId());
             if (tagPose.isEmpty()) continue;
             numTags++;
             avgDist += tagPose.get().toPose2d().getTranslation()
