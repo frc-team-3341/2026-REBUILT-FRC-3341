@@ -1,5 +1,7 @@
 package frc.robot.commands;
 
+import java.util.function.BooleanSupplier;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -24,9 +26,12 @@ public class SwerveTeleop extends Command{
 
     double rotInput;
 
-    public SwerveTeleop(DriveSubsystem swerve, CommandXboxController cont) {
+    BooleanSupplier aimDriveSupplier;
+
+    public SwerveTeleop(DriveSubsystem swerve, CommandXboxController cont, BooleanSupplier aimDriveSupplier) {
         this.swerve = swerve;
         this.cont = cont;
+        this.aimDriveSupplier = aimDriveSupplier;
 
         addRequirements(swerve);
     }
@@ -52,7 +57,14 @@ public class SwerveTeleop extends Command{
 
         rotInput *= DriveConstants.kMaxAngularSpeed;
 
-        swerve.drive(xInput, yInput, rotInput, true);
+        if (aimDriveSupplier.getAsBoolean()) {
+            swerve.aimDrive(xInput, yInput);
+        }
+
+        else {
+            swerve.drive(xInput, yInput, rotInput, true);
+        }
+        
 
     }
 

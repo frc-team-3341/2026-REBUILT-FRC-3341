@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.path.PathConstraints;
+
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
@@ -85,7 +87,6 @@ public final class Constants {
 
     public static final boolean kGyroReversed = false;
     public static final Rotation2d navxOffset = Rotation2d.fromDegrees(0); //Offsets driving by 90 degrees clockwise
-    public static final int intakeMotorCanId = 10;
 
     public static final double kRobotMassKg = 54.43; // TODO: Adjust to your robot's mass
     public static final double kWheelCOF = 1.2; // TODO: Coefficient of friction (from pathplanner settings)
@@ -159,6 +160,8 @@ public final class Constants {
     public static final double kPYController = 1;
     public static final double kPThetaController = 1;
 
+    public static final PathConstraints PATH_CONSTRAINTS = new PathConstraints(3.0, 3.0, Math.PI, Math.PI);
+
     // Constraint for the motion profiled robot angle controller
     public static final TrapezoidProfile.Constraints kThetaControllerConstraints = new TrapezoidProfile.Constraints(
         kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
@@ -169,10 +172,15 @@ public final class Constants {
   }
 
   public static final class ShooterConstants {
-    public static final int SHOOTER_FLYWHEEL_CAN_ID = 12; //NEED TO SET
+    public static final int SHOOTER_FLYWHEEL_CAN_ID = 12; 
     public static final int FEEDER_CAN_ID = 11;
+
     public static final double FEEDING_SPEED = 0.75;
     public static final double BACKFEED_SPEED = -0.75;
+
+    public static final double PASSING_RPM = 0;
+
+    public static final int shooterCurrentLimit = 40;
 
     //PID constants for nonweighted flywheels
     public static final double kP_nw = 0.00001;
@@ -202,6 +210,13 @@ public final class Constants {
       speedMap.put(5.0, 3950.0); //needs to be retested
 
     }
+  }
+
+  public static final class IntakeConstants {
+    public static final int INTAKE_CAN_ID = 9;
+    public static final int LIFT_CAN_ID = 10;
+
+    public static final int intakeCurrentLimit = 40;
   }
     public static final class FieldConstants {
     public static final Translation2d blueHubCenterPose = new Translation2d(4.633, 4.035);

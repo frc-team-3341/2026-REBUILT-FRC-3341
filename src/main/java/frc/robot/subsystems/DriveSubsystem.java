@@ -20,6 +20,7 @@ import com.pathplanner.lib.path.PathConstraints;
 import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -37,11 +38,17 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.ModuleConstants;
 import frc.robot.Robot;
+import frc.robot.subsystems.Superstructure.SwerveState;
+import frc.util.ShooterUtil;
+
+import static frc.util.ClimberUtil.getTowerPoses;
 
 public class DriveSubsystem extends SubsystemBase {
   // Create EasySwerveModules
@@ -82,6 +89,9 @@ public class DriveSubsystem extends SubsystemBase {
   private SwerveDriveKinematics kinematics;
   private SwerveDrivePoseEstimator poseEstimator;
   private Vision vision;
+  private boolean aimDriveEnabled;
+
+  PIDController aimDriveController = new PIDController(0.1, 0, 0.05);
   
   private SwerveDriveSimulation mapleSimDrive;
   private final Field2d field = new Field2d();
@@ -170,6 +180,14 @@ private void createSimulationSwerve(Pose2d startingPose) {
     SmartDashboard.putData("Field", field);
 
     createAuto();
+
+    aimDriveEnabled = false;
+
+    //this is required to stop the robot from tweaking when going from -179 to 179
+    aimDriveController.enableContinuousInput(-180, 180);
+
+    //Set tolerance to prevent pid controller oscillation
+    aimDriveController.setTolerance(1.0);
         
     // Initialize simulation if in simulation mode
     if (Robot.isSimulation()) {
@@ -216,6 +234,36 @@ private void createSimulationSwerve(Pose2d startingPose) {
 
   public Command getAutonomousCommand() {
       return autoChooser.getSelected();
+  }
+
+  //might want to move this into a separate file in the future
+    public Command handleSwerveTransitions(SwerveState desiredState) {
+        switch (desiredState) {
+            case MANUAL:
+                return Commands.runOnce(() -> aimDriveEnabled = false);
+
+            case TRACKING_HUB:
+                return Commands.runOnce(() -> aimDriveEnabled = true);
+
+            case ALIGNING_TOWER_LEFT:
+                return getTowerPoses() != null ? AutoBuilder.pathfindToPose(
+                    getTowerPoses()[0], AutoConstants.PATH_CONSTRAINTS, 0)
+                    : Commands.print("No alliance selected, cannot run alignment command!")
+                    .alongWith(handleSwerveTransitions(SwerveState.MANUAL));
+
+            case ALIGNING_TOWER_RIGHT:
+                return getTowerPoses() != null ? AutoBuilder.pathfindToPose(
+                    getTowerPoses()[1], AutoConstants.PATH_CONSTRAINTS, 0)
+                    : Commands.print("No alliance selected, cannot run alignment command!")
+                    .alongWith(handleSwerveTransitions(SwerveState.MANUAL));
+
+            default:
+                return Commands.print("Invalid Swerve State Provided!");
+        }
+    }
+  
+  public boolean aimDriveEnabled() {
+    return aimDriveEnabled;
   }
 
   public PathConstraints getPathFindConstraints(){
@@ -416,6 +464,29 @@ private void createSimulationSwerve(Pose2d startingPose) {
       DriveConstants.kDriveKinematics.toSwerveModuleStates(robotSpeeds);
     
     setModuleStates(swerveModuleStates);
+  }
+
+      public void aimDrive(double xSpeed, double ySpeed) { 
+
+      Pose2d currentPose = getPose();
+
+      Translation2d hubCenterPose = ShooterUtil.getHubTranslation2d();
+
+      //end method if there is no alliance selected cuz this should only be used on the field
+      if (hubCenterPose == null) {
+        return;
+      }
+      
+      double theta;
+
+      double xDisplacement = (hubCenterPose.getX() - currentPose.getX()); 
+      double yDisplacement = (hubCenterPose.getY() - currentPose.getY());
+
+      theta = Math.toDegrees(Math.atan2(yDisplacement, xDisplacement)); 
+      
+      double rotOutput = aimDriveController.calculate(getRotation().getDegrees(), theta); 
+
+      drive(xSpeed, ySpeed, rotOutput, true);
   }
 
   /**

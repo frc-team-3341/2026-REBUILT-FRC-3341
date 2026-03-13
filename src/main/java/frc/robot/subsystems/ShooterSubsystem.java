@@ -20,30 +20,31 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import static frc.robot.Constants.ShooterConstants.*;
-
+import frc.robot.Configs;
+import frc.robot.RobotContainer;
+import frc.robot.subsystems.Superstructure.FeederState;
+import frc.robot.subsystems.Superstructure.ShooterState;
 import frc.util.ShooterUtil;
 public class ShooterSubsystem extends SubsystemBase {
 
   private final SparkFlex shooter;
   private final SparkFlex feeder;
+
   private double targetRPM = 0;
-  private double velocity = 0;
   private double distance = 0;
-  private double prevdistance = -1;
-  private final SparkFlexConfig shooterConfig;
-  private final SparkFlexConfig feederConfig;
+  private double prevDistance = -1;
+
   private SparkClosedLoopController closedLoopController;
+
   private RelativeEncoder relativeEncoder;
   private RelativeEncoder feederEncoder;
+
   private Pose2d robotPose = new Pose2d();
   private DriveSubsystem driveSubsystem;
-  private double kP = kP_w;
-  private double kI = kI_w;
-  private double kD = kD_w;
-  private double kV = kV_w;
 
   public ShooterSubsystem(DriveSubsystem drive) {
 
@@ -53,31 +54,11 @@ public class ShooterSubsystem extends SubsystemBase {
     relativeEncoder = shooter.getEncoder();
     feederEncoder = feeder.getEncoder();
 
-    shooterConfig = new SparkFlexConfig();
-    feederConfig = new SparkFlexConfig();
-
-    feederConfig
-        .smartCurrentLimit(80)
-        .idleMode(IdleMode.kBrake);
-
-    shooterConfig
-        .smartCurrentLimit(80)
-        .idleMode(IdleMode.kCoast);
-
     closedLoopController = shooter.getClosedLoopController();
 
-    shooterConfig.closedLoop
-        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-        .p(kP_w, ClosedLoopSlot.kSlot0)
-        .i(kI_w, ClosedLoopSlot.kSlot0)
-        .d(kD_w, ClosedLoopSlot.kSlot0)
-        .outputRange(-1, 1, ClosedLoopSlot.kSlot0)
-        .feedForward
-          .kV(kV_w, ClosedLoopSlot.kSlot0);
 
-
-    shooter.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    feeder.configure(feederConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    shooter.configure(Configs.Shooter.FLYWHEEL_CONFIG, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    feeder.configure(Configs.Shooter.FEEDER_CONFIG, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     // Init drive subsystem
     driveSubsystem = drive;
@@ -92,26 +73,11 @@ public class ShooterSubsystem extends SubsystemBase {
     // Update Variables
     distance = getHubDistance();
 
-    SmartDashboard.putNumber("kP", kP);
-    SmartDashboard.putNumber("kI", kI);
-    SmartDashboard.putNumber("kD", kD);
-    SmartDashboard.putNumber("kV", kV);
-
-    kP = SmartDashboard.getNumber("kP", kP);
-    kI = SmartDashboard.getNumber("kI", kI);
-    kD = SmartDashboard.getNumber("kD", kD);
-    kV = SmartDashboard.getNumber("kV", kV);
-
     SmartDashboard.putNumber("Encoder RPM", relativeEncoder.getVelocity());
     SmartDashboard.putNumber("Target RPM", targetRPM);
     SmartDashboard.putBoolean("Feed", (feederEncoder.getVelocity() > 1.0));
     SmartDashboard.putBoolean("BackFeed", (feederEncoder.getVelocity() < -1.0));
     SmartDashboard.putNumber("Estimated Distance", distance);
-
-    setP(kP);
-    setI(kI);
-    setD(kD);
-    setkV(kV);
 
   }
 
@@ -122,88 +88,100 @@ public class ShooterSubsystem extends SubsystemBase {
     
     robotPose = driveSubsystem.getOdometryPose();
     distance = ShooterUtil.getDistanceToHub(robotPose);
-    prevdistance = distance;
+    prevDistance = distance;
     return distance;
     
   }
 
 
-public void setRPM(double rpm) {
-  targetRPM = rpm;
-  closedLoopController.setSetpoint(rpm,ControlType.kVelocity,ClosedLoopSlot.kSlot0);
+public void setFlywheelRPM(double RPM) {
+  targetRPM = RPM;
+  closedLoopController.setSetpoint(targetRPM, ControlType.kVelocity, ClosedLoopSlot.kSlot0);
 }
 
-public void setP(double newP) {
-  shooterConfig.closedLoop.p(newP);
-}
-public void setI(double newI) {
-  shooterConfig.closedLoop.i(newI);
-}
-public void setD(double newD) {
-  shooterConfig.closedLoop.d(newD);
-}
-public void setkV(double newkV) {
-  shooterConfig.closedLoop.feedForward.kV(newkV);
+public void stopFlywheel() {
+  targetRPM = 0;
+  closedLoopController.setSetpoint(targetRPM, ControlType.kVelocity, ClosedLoopSlot.kSlot0);
 }
 
-public void startFeedMotor() {
+public void feed() {
   feeder.set(FEEDING_SPEED);
 }
-public void startBackFeed() {
+public void backfeed() {
   feeder.set(BACKFEED_SPEED);
 }
-public void stopFeedMotor() {
+public void stopFeed() {
   feeder.set(0);
 }
 
-  public Command stopFlywheel() {
-    return this.runOnce(() -> {
-        velocity = 0;
-        setRPM(velocity);
-    });  
-  }
   public Command decrementRPM() {
     return this.runOnce(() -> {
         targetRPM -= 50;
-      setRPM(targetRPM);
+      setFlywheelRPM(targetRPM);
     });  
   }
   public Command incrementRPM(){
     return this.runOnce(() -> {
       targetRPM += 50;
-      setRPM(targetRPM);
+      setFlywheelRPM(targetRPM);
     });
   }
   public Command backupShooting(){
     return this.runOnce(() -> {
       // TODO: change this so the driver can move to a consistent location.
-      setRPM(3500);
-    });
-  }
-  public Command score(){
-    return this.runOnce(() -> {
-      targetRPM = speedMap.get(getHubDistance());
-      setRPM(targetRPM);
+      setFlywheelRPM(3500);
     });
   }
 
-  public Command feed(){
-    return this.runOnce(() ->{
-       startFeedMotor();
-    });
-  }
+  public Command handleFeederTransition(FeederState desiredState) {
+        switch (desiredState) {
+            case IDLE:
+                return Commands.runOnce(() -> this.stopFeed());
 
-  public Command backfeed(){
-    return this.runOnce(() -> {
-      startBackFeed();
-    });
-  }
+            case FEED:
+                return Commands.runOnce(() -> this.feed());
 
-  public Command stopFeed() {
-    return this.runOnce(() -> {
-      stopFeedMotor();
-    });
-  }
+            case BACKFEED:
+                return Commands.runOnce(() -> this.backfeed());
+                
+            default:
+                return Commands.print("Invalid Feeder State Provided!");
+
+        }
+    }
+
+    //TODO finish ts
+    public Command handleShooterTransitions(ShooterState desiredState) {
+        switch (desiredState) {
+            case IDLE:
+                return this.runOnce(() -> this.stopFlywheel());
+
+            case PASSING:
+                return this.runOnce(() -> this.setFlywheelRPM(PASSING_RPM));
+
+            case SCORING:
+                return this.run(() -> {
+                
+                  double distanceToHub = ShooterUtil.getDistanceToHub(robotPose);
+
+                  if (Math.abs(distanceToHub-prevDistance)>0.05) {
+                    System.out.println("Updating speed for the distance: " + distanceToHub + " meters from the center of the hub");
+                    targetRPM = speedMap.get(distanceToHub);
+                    prevDistance = distanceToHub;
+                  }
+
+                  this.setFlywheelRPM(targetRPM);
+                  //before starting get distance to hub so not storing 0.0 in lastPose
+                  }).beforeStarting(() -> {
+                    prevDistance = ShooterUtil.getDistanceToHub(robotPose);
+                    //get flywheel spinning to prevent delay
+                    targetRPM = speedMap.get(prevDistance);
+                  });
+                    
+            default:
+                return Commands.print("Invalid Shooter State Provided!");
+        }
+    }
 
 /* 
   public double calculateLinearLaunchVelocity(double distance, double initialHeight, double center_offset) {

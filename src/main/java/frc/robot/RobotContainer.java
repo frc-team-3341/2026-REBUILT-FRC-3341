@@ -2,6 +2,9 @@ package frc.robot;
 
 
 import frc.robot.subsystems.ShooterSubsystem;
+import frc.robot.subsystems.Superstructure;
+import frc.robot.subsystems.Superstructure.FeederState;
+import frc.robot.subsystems.Superstructure.SuperState;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
@@ -34,20 +37,24 @@ import com.pathplanner.lib.path.PathConstraints;
 public class RobotContainer {
   private final Vision vision = new Vision();
   private final DriveSubsystem swerve = new DriveSubsystem(vision);
-  private Intake robotIntake;
+  private Intake intake = new Intake();
 
   
   CommandXboxController driver_controller = new CommandXboxController(OIConstants.kDriverControllerPort);
   private final ShooterSubsystem shooter = new ShooterSubsystem(swerve);
-  private final SwerveTeleop swerveTeleop = new SwerveTeleop(swerve, driver_controller);
+  private final SwerveTeleop swerveTeleop;
+  private final Superstructure superstructure;
 
 
   public RobotContainer() {
-    // Configure the button bindings
-    createIntake();
 
     // Configure the button bindings
     configureButtonBindings();
+    
+    swerveTeleop = new SwerveTeleop(swerve, driver_controller, swerve::aimDriveEnabled);
+
+    superstructure = new Superstructure(swerve, shooter, intake);
+
     swerve.setDefaultCommand(swerveTeleop);
     
     // Warmup pathfinding (runs in background)
@@ -62,21 +69,66 @@ public class RobotContainer {
             System.out.println("ZEROING HEADING");
         }).andThen(swerve.zeroHeading())
     );
-    
-    new EventTrigger("Intake").onTrue(new SequentialCommandGroup(Commands.runOnce(() -> shooter.startFeedMotor())));
-    new EventTrigger("Shoot").onTrue(new SequentialCommandGroup(shooter.feed(),new WaitCommand(0.5),shooter.stopFeed()));
-    new EventTrigger("Stop Shooter").onTrue(shooter.stopFlywheel());
+
+    Command IDLE = Commands.deferredProxy(
+          () -> superstructure.setSuperState(SuperState.IDLE));
+
+    Command INTAKING = Commands.deferredProxy(
+          () -> superstructure.setSuperState(SuperState.INTAKING));
+
+    Command PASSING = Commands.deferredProxy(
+          () -> superstructure.setSuperState(SuperState.PASSING));
+
+    Command SCORING = Commands.deferredProxy(
+          () -> superstructure.setSuperState(SuperState.SCORING));
+
+    Command REVERSE = Commands.deferredProxy(
+          () -> superstructure.setSuperState(SuperState.REVERSE));
+
+    Command ALIGNING_TOWER_LEFT = Commands.deferredProxy(
+          () -> superstructure.setSuperState(SuperState.ALIGNING_TOWER_LEFT));
+
+    Command ALIGNING_TOWER_RIGHT = Commands.deferredProxy(
+          () -> superstructure.setSuperState(SuperState.ALIGNING_TOWER_RIGHT));
+
+    Command PREVIOUS = Commands.deferredProxy(
+          () -> superstructure.setSuperState(superstructure.getPreviousSuperState()));
+
+    Command PREVIOUS_REVERSE = Commands.deferredProxy(
+          () -> superstructure.setSuperState(superstructure.getPreviousSuperState()));
+
+    Command FEED = Commands.deferredProxy(
+          () -> superstructure.setFeederState(FeederState.FEED));
+
+    Command STOP_FEED = Commands.deferredProxy(
+          () -> superstructure.setFeederState(FeederState.IDLE));
+        
+    driver_controller.a().onTrue(PASSING);
+        
+    driver_controller.b().onTrue(IDLE);
+
+    driver_controller.x().onTrue(SCORING);
+
+    driver_controller.rightBumper().onTrue(INTAKING).onFalse(PREVIOUS);
+
+    driver_controller.leftBumper().onTrue(REVERSE).onFalse(PREVIOUS_REVERSE);
+
+    driver_controller.povLeft().onTrue(ALIGNING_TOWER_LEFT);
+
+    driver_controller.povRight().onTrue(ALIGNING_TOWER_RIGHT);
+
+    driver_controller.rightTrigger().onTrue(FEED).onFalse(STOP_FEED);
 
 
-    driver_controller.rightBumper().onTrue(robotIntake.intakeBall()).onFalse(robotIntake.stopIntake());
-    driver_controller.leftBumper().onTrue(robotIntake.reverseIntakeBall()).onFalse(robotIntake.stopIntake());
+    // driver_controller.rightBumper().onTrue(robotIntake.intakeBall()).onFalse(robotIntake.stopIntake());
+    // driver_controller.leftBumper().onTrue(robotIntake.reverseIntakeBall()).onFalse(robotIntake.stopIntake());
 
-    driver_controller.x().onTrue(shooter.backupShooting());
-    driver_controller.rightTrigger().onTrue(shooter.feed()).onFalse(shooter.stopFeed());
-    driver_controller.y().onTrue(shooter.stopFlywheel());
-    driver_controller.leftTrigger().onTrue(shooter.backfeed()).onFalse(shooter.stopFeed());
-    driver_controller.b().onTrue(shooter.incrementRPM());
-    driver_controller.a().onTrue(shooter.decrementRPM());
+    // driver_controller.x().onTrue(shooter.backupShooting());
+    // driver_controller.rightTrigger().onTrue(shooter.feed()).onFalse(shooter.stopFeed());
+    // driver_controller.y().onTrue(shooter.stopFlywheel());
+    // driver_controller.leftTrigger().onTrue(shooter.backfeed()).onFalse(shooter.stopFeed());
+    // driver_controller.b().onTrue(shooter.incrementRPM());
+    // driver_controller.a().onTrue(shooter.decrementRPM());
 
     // driver_controller.rightBumper().onTrue(shooter.incrementRPM());
     // driver_controller.leftBumper().onTrue(shooter.decrementRPM());
@@ -112,11 +164,6 @@ public class RobotContainer {
     // driver_controller.leftBumper().onTrue(
     //     swerve.resetOdo()
     // );
-  }
-
-  public void createIntake() {
-    robotIntake = new Intake(); 
-
   }
     
   public Command getAutonomousCommand() {

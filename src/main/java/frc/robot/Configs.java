@@ -4,8 +4,11 @@ import com.revrobotics.spark.config.AbsoluteEncoderConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkFlexConfig;
 
 import frc.robot.Constants.ModuleConstants;
+import static frc.robot.Constants.IntakeConstants.*;
+import static frc.robot.Constants.ShooterConstants.*;
 
 public final class Configs {
   public static final class EasySwerveModule {
@@ -62,6 +65,50 @@ public final class Configs {
           // longer route.
           .positionWrappingEnabled(true)
           .positionWrappingInputRange(0, turningFactor);
+    }
+  }
+    public static final class Shooter {
+    public static final SparkFlexConfig FLYWHEEL_CONFIG = new SparkFlexConfig();
+
+    //TODO needs to be configured
+    public static final SparkFlexConfig FEEDER_CONFIG = new SparkFlexConfig();
+
+    static {
+      FLYWHEEL_CONFIG
+        .idleMode(IdleMode.kCoast)
+        .smartCurrentLimit(shooterCurrentLimit);
+      
+      FLYWHEEL_CONFIG
+        .closedLoop
+        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+        .pid(kP_w, kI_w, kD_w)
+        .outputRange(-1, 1)
+        .feedForward
+          .kV(kV_w);
+
+      FEEDER_CONFIG
+        .idleMode(IdleMode.kBrake)
+        .smartCurrentLimit(shooterCurrentLimit);
+
+    }
+  }
+
+  public static final class Intake {
+    public static final SparkFlexConfig INTAKE_CONFIG = new SparkFlexConfig();
+    public static final SparkFlexConfig LIFT_CONFIG = new SparkFlexConfig();
+
+    static {
+      INTAKE_CONFIG
+        .idleMode(IdleMode.kBrake)
+        .smartCurrentLimit(intakeCurrentLimit);
+        
+      INTAKE_CONFIG
+        .encoder
+        .inverted(true);
+      
+      LIFT_CONFIG
+        .idleMode(IdleMode.kBrake)
+        .smartCurrentLimit(intakeCurrentLimit);
     }
   }
 }
