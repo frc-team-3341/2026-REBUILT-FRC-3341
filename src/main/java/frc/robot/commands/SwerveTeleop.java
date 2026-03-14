@@ -4,6 +4,7 @@ import java.util.function.BooleanSupplier;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants;
@@ -62,7 +63,7 @@ public class SwerveTeleop extends Command{
         }
 
         else {
-            swerve.drive(xInput, yInput, rotInput, true);
+            swerve.drive(new ChassisSpeeds(xInput, yInput, rotInput), true);
         }
         
 

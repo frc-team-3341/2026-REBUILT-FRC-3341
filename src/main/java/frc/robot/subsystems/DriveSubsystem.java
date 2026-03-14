@@ -36,6 +36,7 @@ import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -437,34 +438,55 @@ private void createSimulationSwerve(Pose2d startingPose) {
    * @param speeds Robot-relative ChassisSpeeds
    */
   public void driveRobotRelative(ChassisSpeeds speeds) {
-    drive(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond, false); //NOT field relative - it's robot relative
+    drive(
+      new ChassisSpeeds(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond), false); //NOT field relative - it's robot relative
   }
 
-  /**
-   * Method to drive the robot using joystick info.
-   *
-   * @param xSpeed        Speed of the robot in the x direction (forward).
-   * @param ySpeed        Speed of the robot in the y direction (sideways).
-   * @param rot           Angular rate of the robot.
-   * @param fieldRelative Whether the provided x and y speeds are relative to the
-   *                      field.
-   */
-  public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
-    // Convert the commanded speeds into the correct units for the drivetrain
+  // /**
+  //  * Method to drive the robot using joystick info.
+  //  *
+  //  * @param xSpeed        Speed of the robot in the x direction (forward).
+  //  * @param ySpeed        Speed of the robot in the y direction (sideways).
+  //  * @param rot           Angular rate of the robot.
+  //  * @param fieldRelative Whether the provided x and y speeds are relative to the
+  //  *                      field.
+  //  */
+  // public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
+  //   // Convert the commanded speeds into the correct units for the drivetrain
 
-    ChassisSpeeds robotSpeeds = fieldRelative
-            ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot,
-                navx.getRotation2d())
-            : new ChassisSpeeds(xSpeed, ySpeed, rot);
+  //   ChassisSpeeds robotSpeeds = fieldRelative
+  //           ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot,
+  //               navx.getRotation2d())
+  //           : new ChassisSpeeds(xSpeed, ySpeed, rot);
 
-    //Test with discretization asap
-    // robotSpeeds = ChassisSpeeds.discretize(robotSpeeds, 0.02);
+  //   //Test with discretization asap
+  //   // robotSpeeds = ChassisSpeeds.discretize(robotSpeeds, 0.02);
 
-    SwerveModuleState[] swerveModuleStates = 
-      DriveConstants.kDriveKinematics.toSwerveModuleStates(robotSpeeds);
+  //   SwerveModuleState[] swerveModuleStates = 
+  //     DriveConstants.kDriveKinematics.toSwerveModuleStates(robotSpeeds);
     
-    setModuleStates(swerveModuleStates);
-  }
+  //   setModuleStates(swerveModuleStates);
+  // }
+
+  public void drive(ChassisSpeeds speeds, boolean fieldRelative) {
+        if (fieldRelative) {
+            if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red) {
+                speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+                    speeds, getRotation().plus(new Rotation2d(Math.PI)));
+            }
+            else {
+                speeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds, getRotation());
+            }
+        }
+        
+        //need to test discretize asap
+        // speeds = ChassisSpeeds.discretize(speeds, 0.02);
+
+        SwerveModuleState[] moduleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(speeds);
+        SwerveDriveKinematics.desaturateWheelSpeeds(moduleStates, DriveConstants.kMaxSpeedMetersPerSecond);
+
+        setModuleStates(moduleStates);
+    }
 
       public void aimDrive(double xSpeed, double ySpeed) { 
 
@@ -486,7 +508,7 @@ private void createSimulationSwerve(Pose2d startingPose) {
       
       double rotOutput = aimDriveController.calculate(getRotation().getDegrees(), theta); 
 
-      drive(xSpeed, ySpeed, rotOutput, true);
+      drive(new ChassisSpeeds(xSpeed, ySpeed, rotOutput), true);
   }
 
   /**
