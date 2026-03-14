@@ -30,7 +30,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.Subsystem.*;
 
 public class RobotContainer {
-
+//Amogh Hongal was here first
   private final CommandXboxController joy1 = new CommandXboxController(0);
   private final Climber climber = new Climber();
 
@@ -45,7 +45,7 @@ public class RobotContainer {
     joy1.a().onTrue(climber.servoOn()); // a to make the servo engage 
     joy1.b().onTrue(climber.servoOff()); // b to release the servo 
   }
-
+//Ethan Dhakal was here
   public Command getAutonomousCommand() {
     return null;
   }

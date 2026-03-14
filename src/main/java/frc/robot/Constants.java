@@ -123,15 +123,29 @@ public final class Constants {
   }
 
   public static final class ClimberConstants {
-    public static final int leftMotorPort = 2;
-    public static final int rightMotorPort = 3;
-    public static final int servo1port = 1;
-    public static final int servo2port = 2;
-    public static final int servo3port = 3;
-    public static final int servo4port = 0;
-    public static final int topLimitPortL = 0;
-    public static final int bottomLimitPortL = 1;
-    public static final int topLimitPortR = 2;
-    public static final int bottomLimitPortR = 3;
+    public static final int driver_controller = 0;
+    public static final int servo_pwm_channel = 0;
+
+    public static final int climber_motor_can_id = 10;
+    public static final double encoder_counts_fully_travel = 100.0;
+    public static final double top_position_rotations = 50.0;
+    public static final double L1_climb_position_rotations=10;
+    public static final double homing_speed = 0.2;
+    public static final double ascend_speed = 0.5;
+    public static final double descend_speed = -0.5;
+    public static final double climb_pull_speed = -0.6;
+    public static final int servo_hook_down = 0;
+    public static final int servo_hook_forward = 90;
+
+    //public static final int leftMotorPort = 2;
+    //public static final int rightMotorPort = 3;
+    // public static final int servo1port = 1;
+    // public static final int servo2port = 2;
+    // public static final int servo3port = 3;
+    // public static final int servo4port = 0;
+    // public static final int topLimitPortL = 0;
+    // public static final int bottomLimitPortL = 1;
+    // public static final int topLimitPortR = 2;
+    // public static final int bottomLimitPortR = 3;
   }
 }

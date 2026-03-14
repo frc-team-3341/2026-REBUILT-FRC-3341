@@ -9,9 +9,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 public class DistanceSensorAlignmentCommand extends Command {
     private final Counter counter;
-    private final DistanceSensorAlignmentCommand left = new DistanceSensorAlignmentCommand(0);
-    private final DistanceSensorAlignmentCommand right  = new DistanceSensorAlignmentCommand(1);
-    private final DistanceSensorAlignmentCommand middle = new DistanceSensorAlignmentCommand(2);
     //private double distanceMillimeters;
 
     

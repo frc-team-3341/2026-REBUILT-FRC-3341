@@ -14,7 +14,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.commands.ClimberServoCommand;
+import frc.robot.commands.DistanceSensorAlignmentCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import frc.robot.subsystems.DriveSubsystem;
 
 public class Climber extends SubsystemBase {
 
@@ -30,28 +35,34 @@ public class Climber extends SubsystemBase {
     private static final double SOFT_LIMIT_TOP = 95.0; // need to test the values for soft limits top and bottom
     private static final double SOFT_LIMIT_BOTTOM = 2.0; 
 
+    public DistanceSensorAlignmentCommand rightSensor = new DistanceSensorAlignmentCommand(9);
+    public DistanceSensorAlignmentCommand middleSensor = new DistanceSensorAlignmentCommand(2);
+    public DistanceSensorAlignmentCommand leftSensor = new DistanceSensorAlignmentCommand(7);
+    
+
     public Climber() {
-    servo = new ClimberServoCommand();
-    servo.setAngle(0);
+        servo = new ClimberServoCommand();
+        servo.setAngle(0);
 
-    SparkFlexConfig config = new SparkFlexConfig();
-    config.idleMode(IdleMode.kBrake);
-    config.softLimit
-        .forwardSoftLimit(SOFT_LIMIT_TOP)
-        .forwardSoftLimitEnabled(true)
-        .reverseSoftLimit(SOFT_LIMIT_BOTTOM)
-        .reverseSoftLimitEnabled(true);
-    config.limitSwitch
-        .forwardLimitSwitchEnabled(true)
-        .reverseLimitSwitchEnabled(true);
+        SparkFlexConfig config = new SparkFlexConfig();
+        config.idleMode(IdleMode.kBrake);
+        config.softLimit
+            .forwardSoftLimit(SOFT_LIMIT_TOP)
+            .forwardSoftLimitEnabled(true)
+            .reverseSoftLimit(SOFT_LIMIT_BOTTOM)
+            .reverseSoftLimitEnabled(true);
+        config.limitSwitch
+            .forwardLimitSwitchEnabled(true)
+            .reverseLimitSwitchEnabled(true);
 
-    leadscrewMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
-    encoder = leadscrewMotor.getEncoder();
-    encoder.setPosition(0);
+        leadscrewMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        encoder = leadscrewMotor.getEncoder();
+        encoder.setPosition(0);
 
-    topLimitSwitch = leadscrewMotor.getForwardLimitSwitch();
-    bottomLimitSwitch = leadscrewMotor.getReverseLimitSwitch();
-}
+        topLimitSwitch = leadscrewMotor.getForwardLimitSwitch();
+        bottomLimitSwitch = leadscrewMotor.getReverseLimitSwitch();
+
+    }
 
     // Leadscrew movement
     public Command leadscrewUp() {
@@ -115,6 +126,64 @@ public class Climber extends SubsystemBase {
         encoder.setPosition(0);
     }
 
+    public Command alignToTower(DriveSubsystem drive) {
+        Timer searchTimer = new Timer();
+        return this.run(() -> {
+            boolean middle = middleSensor.getDistanceInches() >=0 && middleSensor.getDistanceInches() <=15;
+            boolean left = leftSensor.getDistanceInches() >= 0 && leftSensor.getDistanceInches() < 15;
+            boolean right = rightSensor.getDistanceInches() >=0 && rightSensor.getDistanceInches() <15;
+
+            if(middleSensor.getDistanceInches() >= 10 || leftSensor.getDistanceInches() >=10 || rightSensor.getDistanceInches() >=10) {
+                drive.drive(new ChassisSpeeds(0.3,0,0), false);
+            }
+            else if(middle == true) {
+                drive.drive(new ChassisSpeeds(0,0,0), false);
+            }
+            else if (right == true) {
+                searchTimer.stop();
+                searchTimer.reset();
+                drive.drive(new ChassisSpeeds(0,0.3,0), false);
+            }
+            else if(left == true) {
+                searchTimer.stop();
+                searchTimer.reset();
+                drive.drive(new ChassisSpeeds(0,-0.3,0), false);
+            }
+            else {
+                if(!searchTimer.isRunning()) {
+                    searchTimer.start();
+                }
+                double tim = searchTimer.get();
+                if(tim < 1) {
+                    drive.drive(new ChassisSpeeds(0,-0.3, 0), false);
+                }
+                else if(tim < 2) {
+                    drive.drive(new ChassisSpeeds(0,0.3,0), false);
+                }
+                else if(tim<3) {
+                    drive.drive(new ChassisSpeeds(0,0.3,0), false);
+                }
+                else {
+                    drive.drive(new ChassisSpeeds(0,0,0), false);
+                }
+
+            }
+
+        }) 
+        .until(() -> middleSensor.getDistanceInches() >=0 && middleSensor.getDistanceInches() < 10)
+        .finallyDo(() -> drive.drive(new ChassisSpeeds(0,0,0), false));
+    }
+
+    public Command moveForward(DriveSubsystem drive) {
+        return this.run(() -> {
+            drive.drive(new ChassisSpeeds(0.3, 0,0), false);
+        })
+        .until(() -> middleSensor.getDistanceMM() <= 7.9375)
+        .finallyDo(() -> {
+            drive.drive(new ChassisSpeeds(0,0,0), false);
+        });
+    }
+//AMOGH WAS COOKING HERE
     @Override
     public void periodic() {
         // Hard stop using encoder and limit switches
@@ -128,5 +197,6 @@ public class Climber extends SubsystemBase {
         SmartDashboard.putNumber("Position", encoder.getPosition());
         SmartDashboard.putBoolean("TopLimitSwitch", topLimitSwitch.isPressed());
         SmartDashboard.putBoolean("BottomLimitSwitch", bottomLimitSwitch.isPressed());
+        
     }
 }
