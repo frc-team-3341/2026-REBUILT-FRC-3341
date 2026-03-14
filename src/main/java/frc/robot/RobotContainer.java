@@ -94,7 +94,7 @@ public class RobotContainer {
     //     })
     // );
     
-    // // Pathfinding test - press A
+    // Pathfinding test - press A
     // driver_controller.a().onTrue(
     //     AutoBuilder.pathfindToPose(
     //         new Pose2d(1.5, 1.0, Rotation2d.fromDegrees(0)),
@@ -107,6 +107,19 @@ public class RobotContainer {
     //         0.0  // end velocity
     //     )
     // );
+
+    driver_controller.b().onTrue(
+        AutoBuilder.pathfindToPose(
+            new Pose2d(1.5, 4, Rotation2d.fromDegrees(0)),
+            new PathConstraints(
+                0.2,  // max velocity
+                0.2,  // max acceleration
+                Units.degreesToRadians(90.0),
+                Units.degreesToRadians(90.0)
+            ),
+            0.0  // end velocity
+        )
+    );
     
     // // Reset Odoemtry to (0, 0) - Press Left Bumper
     // driver_controller.leftBumper().onTrue(
