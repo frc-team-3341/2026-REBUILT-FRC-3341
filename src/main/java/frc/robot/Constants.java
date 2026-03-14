@@ -96,12 +96,12 @@ public final class Constants {
         public static final String intakeCameraName = "pterodactyl";
         
         //set these
-        public static final String batteryCameraName = "";
-        public static final String shooterCameraName = "";
+        public static final String batteryCameraName = "Tupandactylus Imperator";
+        public static final String shooterCameraName = "Quetzalcoatlus";
         
-        private static final double intakeCamPitch = Units.degreesToRadians(25.0); //TODO: for testing, check what the camera pitch is
-        private static final double batteryCamPitch = Units.degreesToRadians(25.0); //TODO do ts
-        private static final double shooterCamPitch = Units.degreesToRadians(25.0); //TODO do ts
+        private static final double intakeCamPitch = Units.degreesToRadians(15.0); //TODO: for testing, check what the camera pitch is
+        private static final double batteryCamPitch = Units.degreesToRadians(15.0); //TODO do ts
+        private static final double shooterCamPitch = Units.degreesToRadians(15.0); //TODO do ts
         // See https://docs.wpilib.org/en/stable/docs/software/basic-programming/coordinate-system.html#robot-coordinate-system
         // for why these values the way they are. In short x is positive towards the front, y is positive to left, z is positive to the sky
         //set these lolxd
