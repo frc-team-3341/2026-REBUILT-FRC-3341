@@ -13,8 +13,6 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import static frc.robot.Constants.IntakeConstants.*;
 
-import java.io.ObjectInputFilter.Config;
-
 public class Intake extends SubsystemBase{
     private SparkFlex liftWheel;
     private SparkFlex intakeWheel;

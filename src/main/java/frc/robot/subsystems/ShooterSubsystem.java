@@ -84,7 +84,6 @@ public class ShooterSubsystem extends SubsystemBase {
   public double getHubDistance() {
     //robotPose = driveSubsystem.getPose();
     // Fallback to odometry pose
-    robotPose = driveSubsystem.getOdometryPose();
     
     robotPose = driveSubsystem.getOdometryPose();
     distance = ShooterUtil.getDistanceToHub(robotPose);
@@ -150,7 +149,6 @@ public void stopFeed() {
         }
     }
 
-    //TODO finish ts
     public Command handleShooterTransitions(ShooterState desiredState) {
         switch (desiredState) {
             case IDLE:
