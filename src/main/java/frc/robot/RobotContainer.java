@@ -71,50 +71,48 @@ public class RobotContainer {
     new EventTrigger("Shoot").onTrue(new SequentialCommandGroup(shooter.feed(),new WaitCommand(0.5),shooter.stopFeed()));
     new EventTrigger("Stop Shooter").onTrue(shooter.stopFlywheel());
 
-    driver_controller.x().onTrue(
+    driver_controller.a().onTrue(
       Commands.runOnce(() -> aimDriveSupplier = !aimDriveSupplier)
     );
 
 
-    // driver_controller.rightBumper().onTrue(robotIntake.intakeBall()).onFalse(robotIntake.stopIntake());
-    // driver_controller.leftBumper().onTrue(robotIntake.reverseIntakeBall()).onFalse(robotIntake.stopIntake());
+    driver_controller.rightBumper().onTrue(robotIntake.intakeBall()).onFalse(robotIntake.stopIntake());
+    driver_controller.leftBumper().onTrue(robotIntake.reverseIntakeBall()).onFalse(robotIntake.stopIntake());
 
-    // driver_controller.x().onTrue(shooter.backupShooting());
-    // driver_controller.rightTrigger().onTrue(shooter.feed()).onFalse(shooter.stopFeed());
-    // driver_controller.y().onTrue(shooter.stopFlywheel());
-    // driver_controller.leftTrigger().onTrue(shooter.backfeed()).onFalse(shooter.stopFeed());
-    // driver_controller.b().onTrue(shooter.incrementRPM());
-    // driver_controller.a().onTrue(shooter.decrementRPM());
+    driver_controller.x().onTrue(shooter.score());
+    driver_controller.rightTrigger().onTrue(shooter.feed()).onFalse(shooter.stopFeed());
+    driver_controller.y().onTrue(shooter.stopFlywheel());
+    driver_controller.leftTrigger().onTrue(shooter.backfeed()).onFalse(shooter.stopFeed());
 
-    // driver_controller.rightBumper().onTrue(shooter.incrementRPM());
-    // driver_controller.leftBumper().onTrue(shooter.decrementRPM());
+    driver_controller.rightBumper().onTrue(shooter.incrementRPM());
+    driver_controller.leftBumper().onTrue(shooter.decrementRPM());
 
     // --------------------------------------------------------------------
     //         AUTO TESTING BINDINGS (uncomment when testing auto)
     // --------------------------------------------------------------------------
     
-    // Emergency Cancel all commands - press B
-    driver_controller.b().onTrue(
-        Commands.runOnce(() -> {
-            System.out.println("EMERGENCY CANCEL");
-            CommandScheduler.getInstance().cancelAll();
-            swerve.stopMotors();
-        })
-    );
+    // // Emergency Cancel all commands - press B
+    // driver_controller.b().onTrue(
+    //     Commands.runOnce(() -> {
+    //         System.out.println("EMERGENCY CANCEL");
+    //         CommandScheduler.getInstance().cancelAll();
+    //         swerve.stopMotors();
+    //     })
+    // );
     
-    // Pathfinding test - press A
-    driver_controller.a().onTrue(
-        AutoBuilder.pathfindToPose(
-            new Pose2d(1.5, 1.0, Rotation2d.fromDegrees(0)),
-            new PathConstraints(
-                0.3,  // max velocity
-                0.3,  // max acceleration
-                Units.degreesToRadians(90.0),
-                Units.degreesToRadians(90.0)
-            ),
-            0.0  // end velocity
-        )
-    );
+    // // Pathfinding test - press A
+    // driver_controller.a().onTrue(
+    //     AutoBuilder.pathfindToPose(
+    //         new Pose2d(1.5, 1.0, Rotation2d.fromDegrees(0)),
+    //         new PathConstraints(
+    //             0.3,  // max velocity
+    //             0.3,  // max acceleration
+    //             Units.degreesToRadians(90.0),
+    //             Units.degreesToRadians(90.0)
+    //         ),
+    //         0.0  // end velocity
+    //     )
+    // );
 
     // driver_controller.b().onTrue(
     //     AutoBuilder.pathfindToPose(
@@ -129,10 +127,10 @@ public class RobotContainer {
     //     )
     // );
     
-    // Reset Odoemtry to (0, 0) - Press Left Bumper
-    driver_controller.leftBumper().onTrue(
-        swerve.resetOdo()
-    );
+    // // Reset Odoemtry to (0, 0) - Press Left Bumper
+    // driver_controller.leftBumper().onTrue(
+    //     swerve.resetOdo()
+    // );
   }
 
   public void createIntake() {

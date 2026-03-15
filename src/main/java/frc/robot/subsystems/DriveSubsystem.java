@@ -36,6 +36,8 @@ import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.PowerDistribution;
+import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -91,6 +93,7 @@ public class DriveSubsystem extends SubsystemBase {
   private SendableChooser<Command> autoChooser = new SendableChooser<>();
   // The gyro sensor
   private AHRS navx = new AHRS(NavXComType.kMXP_SPI);
+  PowerDistribution pdh = new PowerDistribution(23, ModuleType.kRev);
 
    PIDController aimDriveController = new PIDController(0.05, 0, 0);
 
@@ -170,13 +173,15 @@ private void createSimulationSwerve(Pose2d startingPose) {
         },
         new Pose2d(1, 1, new Rotation2d()) // STARTING POSE 
     );
-      //this is required to stop the robot from tweaking when going from -179 to 179
-      aimDriveController.enableContinuousInput(-180, 180);
+    //this is required to stop the robot from tweaking when going from -179 to 179
+    aimDriveController.enableContinuousInput(-180, 180);
 
-      //Set tolerance to prevent pid controller oscillation
-      aimDriveController.setTolerance(5.0);
+    //Set tolerance to prevent pid controller oscillation
+    aimDriveController.setTolerance(5.0);
     
     SmartDashboard.putData("Field", field);
+
+    pdh.setSwitchableChannel(true);
 
     createAuto();
         

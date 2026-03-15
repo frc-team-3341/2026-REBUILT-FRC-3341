@@ -96,7 +96,7 @@ public final class Constants {
         
         //set these
         public static final String batteryCameraName = "Pterodactyl";
-        public static final String shooterCameraName = "";
+        public static final String shooterCameraName = "Quetzalcoatlus";
         
         private static final double intakeCamPitch = Units.degreesToRadians(15.0); //TODO: for testing, check what the camera pitch is
         private static final double batteryCamPitch = Units.degreesToRadians(15.0); //TODO do ts
@@ -193,13 +193,13 @@ public final class Constants {
     static{
       //              meters      rpm
       speedMap.put(1.5, 2400.0);
-      speedMap.put(2.0, 2650.0);
-      speedMap.put(2.5, 2850.0);
-      speedMap.put(3.0, 2900.0);
-      speedMap.put(3.5, 3050.0);
-      speedMap.put(4.0, 3300.0);
-      speedMap.put(4.5, 3550.0);
-      speedMap.put(5.0, 3950.0); //needs to be retested
+      speedMap.put(2.0, 2500.0);
+      speedMap.put(2.5, 2650.0);
+      speedMap.put(3.0, 2850.0);
+      speedMap.put(3.5, 2900.0);
+      speedMap.put(4.0, 3050.0);
+      speedMap.put(4.5, 3300.0);
+      speedMap.put(5.0, 3550.0); //needs to be retested
 
     }
   }
