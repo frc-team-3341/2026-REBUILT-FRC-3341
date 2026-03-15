@@ -116,11 +116,11 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   public double getHubDistance() {
-    //robotPose = driveSubsystem.getPose();
+    robotPose = driveSubsystem.getPose();
     // Fallback to odometry pose
-    robotPose = driveSubsystem.getOdometryPose();
+    // robotPose = driveSubsystem.getOdometryPose();
     
-    robotPose = driveSubsystem.getOdometryPose();
+    // robotPose = driveSubsystem.getOdometryPose();
     distance = ShooterUtil.getDistanceToHub(robotPose);
     prevdistance = distance;
     return distance;
@@ -177,7 +177,7 @@ public void stopFeedMotor() {
   public Command backupShooting(){
     return this.runOnce(() -> {
       // TODO: change this so the driver can move to a consistent location.
-      setRPM(3500);
+      setRPM(3050);
     });
   }
   public Command score(){

@@ -92,7 +92,7 @@ public final class Constants {
 
   }
       public static final class VisionConstants {
-        public static final String intakeCameraName = "pterodactyl";
+        public static final String intakeCameraName = "Tupandactylus Imperator";
         
         //set these
         public static final String batteryCameraName = "";
@@ -180,25 +180,25 @@ public final class Constants {
     public static final double kD_nw = 0.01;
 
     //PID constants for weighted flywheels
-    public static final double kP_w = 0.000005;
+    public static final double kP_w = 0.0000003;
     public static final double kI_w = 0.0000001;
     public static final double kD_w = 0.02;
 
     //from neo vortex vendor website
     public static final double kV_nw = 0.0016;
-    public static final double kV_w = 0.0010;
+    public static final double kV_w = 0.0009;
 
     public static InterpolatingDoubleTreeMap speedMap = new InterpolatingDoubleTreeMap();
 
     static{
       //              meters      rpm
-      speedMap.put(1.5, 2500.0);
+      speedMap.put(1.5, 2400.0);
       speedMap.put(2.0, 2650.0);
       speedMap.put(2.5, 2850.0);
-      speedMap.put(3.0, 3050.0);
-      speedMap.put(3.5, 3250.0);
-      speedMap.put(4.0, 3450.0);
-      speedMap.put(4.5, 3650.0);
+      speedMap.put(3.0, 2900.0);
+      speedMap.put(3.5, 3050.0);
+      speedMap.put(4.0, 3300.0);
+      speedMap.put(4.5, 3550.0);
       speedMap.put(5.0, 3950.0); //needs to be retested
 
     }
