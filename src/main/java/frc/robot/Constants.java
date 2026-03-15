@@ -95,17 +95,17 @@ public final class Constants {
         public static final String intakeCameraName = "Tupandactylus Imperator";
         
         //set these
-        public static final String batteryCameraName = "";
+        public static final String batteryCameraName = "Pterodactyl";
         public static final String shooterCameraName = "";
         
-        private static final double intakeCamPitch = Units.degreesToRadians(25.0); //TODO: for testing, check what the camera pitch is
-        private static final double batteryCamPitch = Units.degreesToRadians(25.0); //TODO do ts
-        private static final double shooterCamPitch = Units.degreesToRadians(25.0); //TODO do ts
+        private static final double intakeCamPitch = Units.degreesToRadians(15.0); //TODO: for testing, check what the camera pitch is
+        private static final double batteryCamPitch = Units.degreesToRadians(15.0); //TODO do ts
+        private static final double shooterCamPitch = Units.degreesToRadians(15.0); //TODO do ts
         // See https://docs.wpilib.org/en/stable/docs/software/basic-programming/coordinate-system.html#robot-coordinate-system
         // for why these values the way they are. In short x is positive towards the front, y is positive to left, z is positive to the sky
         //set these lolxd
         public static final Transform3d robotToIntakeCam =
-                new Transform3d(new Translation3d(Units.inchesToMeters(12.75), Units.inchesToMeters(0), Units.inchesToMeters(12.5)), new Rotation3d(0, intakeCamPitch, 0));
+                new Transform3d(new Translation3d(Units.inchesToMeters(13.5), Units.inchesToMeters(15.5), Units.inchesToMeters(23.875)), new Rotation3d(0, intakeCamPitch, 0));
         
         public static final Transform3d robotToBatteryCam =
                 new Transform3d(new Translation3d(Units.inchesToMeters(12.75), Units.inchesToMeters(0), Units.inchesToMeters(12.5)), new Rotation3d(0, batteryCamPitch, 0));

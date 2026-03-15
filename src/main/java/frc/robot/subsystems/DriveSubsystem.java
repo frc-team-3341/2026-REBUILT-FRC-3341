@@ -20,6 +20,7 @@ import com.pathplanner.lib.path.PathConstraints;
 import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -42,6 +43,7 @@ import frc.robot.Constants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.ModuleConstants;
 import frc.robot.Robot;
+import frc.util.ShooterUtil;
 
 public class DriveSubsystem extends SubsystemBase {
   // Create EasySwerveModules
@@ -89,6 +91,8 @@ public class DriveSubsystem extends SubsystemBase {
   private SendableChooser<Command> autoChooser = new SendableChooser<>();
   // The gyro sensor
   private AHRS navx = new AHRS(NavXComType.kMXP_SPI);
+
+   PIDController aimDriveController = new PIDController(0.05, 0, 0);
 
   // Odometry class for tracking robot pose
   SwerveDriveOdometry m_odometry = new SwerveDriveOdometry(
@@ -164,8 +168,13 @@ private void createSimulationSwerve(Pose2d startingPose) {
             m_rearLeft.getPosition(),
             m_rearRight.getPosition()
         },
-        new Pose2d(1.190, 3.739, new Rotation2d()) // STARTING POSE 
+        new Pose2d(1, 1, new Rotation2d()) // STARTING POSE 
     );
+      //this is required to stop the robot from tweaking when going from -179 to 179
+      aimDriveController.enableContinuousInput(-180, 180);
+
+      //Set tolerance to prevent pid controller oscillation
+      aimDriveController.setTolerance(5.0);
     
     SmartDashboard.putData("Field", field);
 
@@ -263,6 +272,8 @@ private void createSimulationSwerve(Pose2d startingPose) {
 
     // // Add vision measurements to pose estimator
     var intakeVisionEst = vision.getIntakeEstimatedGlobalPose();
+
+    SmartDashboard.putBoolean("nishk jimik shah",intakeVisionEst.isPresent());
     
     intakeVisionEst.ifPresent(est -> {
         // Get the standard deviations based on the quality of the vision estimate
@@ -379,7 +390,7 @@ private void createSimulationSwerve(Pose2d startingPose) {
     field.setRobotPose(estimatedPose);
     
     // Publish to NetworkTables for AdvantageScope or other tools
-    // poseEstimatorPublisher.set(estimatedPose);
+    poseEstimatorPublisher.set(estimatedPose);
     odometryPublisher.set(odometryPose);
   }
 
@@ -416,6 +427,32 @@ private void createSimulationSwerve(Pose2d startingPose) {
       DriveConstants.kDriveKinematics.toSwerveModuleStates(robotSpeeds);
     
     setModuleStates(swerveModuleStates);
+  }
+
+        public void aimDrive(double xSpeed, double ySpeed) { 
+
+      Pose2d currentPose = getPose();
+
+      Translation2d hubCenterPose = ShooterUtil.getHubTranslation2d();
+
+      //end method if there is no alliance selected cuz this should only be used on the field
+      if (hubCenterPose == null) {
+        return;
+      }
+      
+      double theta;
+
+      double xDisplacement = (hubCenterPose.getX() - currentPose.getX()); 
+      double yDisplacement = (hubCenterPose.getY() - currentPose.getY());
+
+      theta = Math.toDegrees(Math.atan2(yDisplacement, xDisplacement)); 
+
+      //This needs to be flipped by 180 because the front is the intake side, but we want the shooter side facing the hub
+      theta += 180;
+      
+      double rotOutput = aimDriveController.calculate(getRotation().getDegrees(), theta); 
+
+      drive(xSpeed, ySpeed, rotOutput, true);
   }
 
   /**
