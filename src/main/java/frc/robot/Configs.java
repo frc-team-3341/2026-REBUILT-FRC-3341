@@ -102,9 +102,9 @@ public final class Configs {
         .idleMode(IdleMode.kBrake)
         .smartCurrentLimit(intakeCurrentLimit);
         
-      INTAKE_CONFIG
-        .encoder
-        .inverted(true);
+      // INTAKE_CONFIG
+        // .encoder
+        // .inverted(true);
       
       LIFT_CONFIG
         .idleMode(IdleMode.kBrake)

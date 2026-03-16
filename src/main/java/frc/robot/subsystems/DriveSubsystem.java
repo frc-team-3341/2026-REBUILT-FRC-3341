@@ -92,7 +92,7 @@ public class DriveSubsystem extends SubsystemBase {
   private Vision vision;
   private boolean aimDriveEnabled;
 
-  PIDController aimDriveController = new PIDController(0.1, 0, 0.05);
+  PIDController aimDriveController = new PIDController(0.05, 0, 0);
   
   private SwerveDriveSimulation mapleSimDrive;
   private final Field2d field = new Field2d();
@@ -188,7 +188,7 @@ private void createSimulationSwerve(Pose2d startingPose) {
     aimDriveController.enableContinuousInput(-180, 180);
 
     //Set tolerance to prevent pid controller oscillation
-    aimDriveController.setTolerance(1.0);
+    aimDriveController.setTolerance(5.0);
         
     // Initialize simulation if in simulation mode
     if (Robot.isSimulation()) {
@@ -428,7 +428,7 @@ private void createSimulationSwerve(Pose2d startingPose) {
     field.setRobotPose(estimatedPose);
     
     // Publish to NetworkTables for AdvantageScope or other tools
-    // poseEstimatorPublisher.set(estimatedPose);
+    poseEstimatorPublisher.set(estimatedPose);
     odometryPublisher.set(odometryPose);
   }
 
@@ -505,6 +505,8 @@ private void createSimulationSwerve(Pose2d startingPose) {
       double yDisplacement = (hubCenterPose.getY() - currentPose.getY());
 
       theta = Math.toDegrees(Math.atan2(yDisplacement, xDisplacement)); 
+
+      theta += 180;
       
       double rotOutput = aimDriveController.calculate(getRotation().getDegrees(), theta); 
 

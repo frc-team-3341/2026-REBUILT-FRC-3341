@@ -82,10 +82,10 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   public double getHubDistance() {
-    //robotPose = driveSubsystem.getPose();
+    robotPose = driveSubsystem.getPose();
     // Fallback to odometry pose
     
-    robotPose = driveSubsystem.getOdometryPose();
+    // robotPose = driveSubsystem.getOdometryPose();
     distance = ShooterUtil.getDistanceToHub(robotPose);
     prevDistance = distance;
     return distance;
