@@ -56,6 +56,11 @@ public class ShooterSubsystem extends SubsystemBase {
     shooterConfig = new SparkFlexConfig();
     feederConfig = new SparkFlexConfig();
 
+    SmartDashboard.putNumber("kP", kP);
+    SmartDashboard.putNumber("ki", kI);
+    SmartDashboard.putNumber("kd", kD);
+    SmartDashboard.putNumber("kV", kV);
+
     feederConfig
         .smartCurrentLimit(80)
         .idleMode(IdleMode.kBrake);
@@ -91,11 +96,6 @@ public class ShooterSubsystem extends SubsystemBase {
   public void periodic() {
     // Update Variables
     distance = getHubDistance();
-
-    SmartDashboard.putNumber("kP", kP);
-    SmartDashboard.putNumber("kI", kI);
-    SmartDashboard.putNumber("kD", kD);
-    SmartDashboard.putNumber("kV", kV);
 
     kP = SmartDashboard.getNumber("kP", kP);
     kI = SmartDashboard.getNumber("kI", kI);
