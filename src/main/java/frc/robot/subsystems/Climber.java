@@ -127,28 +127,41 @@ public class Climber extends SubsystemBase {
 
     // public Command alignToTower(DriveSubsystem drive) {
     //     Timer searchTimer = new Timer();
+    //     int negOneMiddleCounter =0;
+    //     int negOneRightCounter = 0;
+    //     int negOneLeftCounter = 0;
     //     return this.run(() -> {
     //         boolean middle = middleSensor.getDistanceInches() >=0 && middleSensor.getDistanceInches() <=15;
     //         boolean left = leftSensor.getDistanceInches() >= 0 && leftSensor.getDistanceInches() < 15;
     //         boolean right = rightSensor.getDistanceInches() >=0 && rightSensor.getDistanceInches() <15;
-
-    //         if(middleSensor.getDistanceInches() >= 10 || leftSensor.getDistanceInches() >=10 || rightSensor.getDistanceInches() >=10) {
-    //             drive.drive(new ChassisSpeeds(0.3,0,0), false);
+    //         if(middle == false) {
+    //             negOneMiddleCounter +=1;
     //         }
-    //         else if(middle == true) {
+    //         if(left == false) {
+    //             negOneLeftCounter +=1;
+    //         }
+    //         if(right == false) {
+    //             negOneRightCounter+=1;
+    //         }
+
+
+    //         if(middle == true) {
     //             drive.drive(new ChassisSpeeds(0,0,0), false);
+    //             negOneMiddleCounter = 0;
     //         }
     //         else if (right == true) {
     //             searchTimer.stop();
     //             searchTimer.reset();
     //             drive.drive(new ChassisSpeeds(0,0.3,0), false);
+    //             negOneLeftCounter = 0;
     //         }
     //         else if(left == true) {
     //             searchTimer.stop();
     //             searchTimer.reset();
     //             drive.drive(new ChassisSpeeds(0,-0.3,0), false);
+    //             negOneRightCounter = 0;
     //         }
-    //         else {
+    //         else if (negOneMiddleCounter>25 && negOneLeftCounter >25 && negOneRightCounter >25){
     //             if(!searchTimer.isRunning()) {
     //                 searchTimer.start();
     //             }
