@@ -4,6 +4,8 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkFlexConfig;
+import com.revrobotics.spark.config.LimitSwitchConfig.Behavior;
+import com.revrobotics.spark.config.LimitSwitchConfig.Type;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
@@ -19,11 +21,11 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import frc.robot.subsystems.DriveSubsystem;
+// import frc.robot.subsystems.DriveSubsystem;
 
 public class Climber extends SubsystemBase {
 
-    private final SparkFlex leadscrewMotor = new SparkFlex(14, MotorType.kBrushless); // need to check new CAN id's for the new robot
+    private final SparkFlex leadscrewMotor = new SparkFlex(13, MotorType.kBrushless); // need to check new CAN id's for the new robot
     private final RelativeEncoder encoder;
     private final SparkLimitSwitch topLimitSwitch; // need to check the channels for the limit switches
     private final SparkLimitSwitch bottomLimitSwitch;
@@ -46,14 +48,14 @@ public class Climber extends SubsystemBase {
 
         SparkFlexConfig config = new SparkFlexConfig();
         config.idleMode(IdleMode.kBrake);
-        config.softLimit
-            .forwardSoftLimit(SOFT_LIMIT_TOP)
-            .forwardSoftLimitEnabled(true)
-            .reverseSoftLimit(SOFT_LIMIT_BOTTOM)
-            .reverseSoftLimitEnabled(true);
+        // config.softLimit
+            // .forwardSoftLimit(SOFT_LIMIT_TOP)
+            // .forwardSoftLimitEnabled(true)
+            // .reverseSoftLimit(SOFT_LIMIT_BOTTOM)
+            // .reverseSoftLimitEnabled(true);
         config.limitSwitch
-            .forwardLimitSwitchEnabled(true)
-            .reverseLimitSwitchEnabled(true);
+            .forwardLimitSwitchType(Type.kNormallyClosed)
+            .reverseLimitSwitchType(Type.kNormallyClosed);
 
         leadscrewMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
         encoder = leadscrewMotor.getEncoder();
@@ -67,17 +69,14 @@ public class Climber extends SubsystemBase {
     // Leadscrew movement
     public Command leadscrewUp() {
         return this.runOnce(() -> {
-            if (encoder.getPosition() < SOFT_LIMIT_TOP && !topLimitSwitch.isPressed()) {
-                leadscrewMotor.set(SPEED);
-            }
+            leadscrewMotor.set(SPEED);
         });
     }
 
     public Command leadscrewDown() {
         return this.runOnce(() -> {
-            if (encoder.getPosition() > SOFT_LIMIT_BOTTOM && !bottomLimitSwitch.isPressed()) {
-                leadscrewMotor.set(-SPEED);
-            }
+            leadscrewMotor.set(-SPEED);
+            
         });
     }
 
@@ -126,63 +125,63 @@ public class Climber extends SubsystemBase {
         encoder.setPosition(0);
     }
 
-    public Command alignToTower(DriveSubsystem drive) {
-        Timer searchTimer = new Timer();
-        return this.run(() -> {
-            boolean middle = middleSensor.getDistanceInches() >=0 && middleSensor.getDistanceInches() <=15;
-            boolean left = leftSensor.getDistanceInches() >= 0 && leftSensor.getDistanceInches() < 15;
-            boolean right = rightSensor.getDistanceInches() >=0 && rightSensor.getDistanceInches() <15;
+    // public Command alignToTower(DriveSubsystem drive) {
+    //     Timer searchTimer = new Timer();
+    //     return this.run(() -> {
+    //         boolean middle = middleSensor.getDistanceInches() >=0 && middleSensor.getDistanceInches() <=15;
+    //         boolean left = leftSensor.getDistanceInches() >= 0 && leftSensor.getDistanceInches() < 15;
+    //         boolean right = rightSensor.getDistanceInches() >=0 && rightSensor.getDistanceInches() <15;
 
-            if(middleSensor.getDistanceInches() >= 10 || leftSensor.getDistanceInches() >=10 || rightSensor.getDistanceInches() >=10) {
-                drive.drive(new ChassisSpeeds(0.3,0,0), false);
-            }
-            else if(middle == true) {
-                drive.drive(new ChassisSpeeds(0,0,0), false);
-            }
-            else if (right == true) {
-                searchTimer.stop();
-                searchTimer.reset();
-                drive.drive(new ChassisSpeeds(0,0.3,0), false);
-            }
-            else if(left == true) {
-                searchTimer.stop();
-                searchTimer.reset();
-                drive.drive(new ChassisSpeeds(0,-0.3,0), false);
-            }
-            else {
-                if(!searchTimer.isRunning()) {
-                    searchTimer.start();
-                }
-                double tim = searchTimer.get();
-                if(tim < 1) {
-                    drive.drive(new ChassisSpeeds(0,-0.3, 0), false);
-                }
-                else if(tim < 2) {
-                    drive.drive(new ChassisSpeeds(0,0.3,0), false);
-                }
-                else if(tim<3) {
-                    drive.drive(new ChassisSpeeds(0,0.3,0), false);
-                }
-                else {
-                    drive.drive(new ChassisSpeeds(0,0,0), false);
-                }
+    //         if(middleSensor.getDistanceInches() >= 10 || leftSensor.getDistanceInches() >=10 || rightSensor.getDistanceInches() >=10) {
+    //             drive.drive(new ChassisSpeeds(0.3,0,0), false);
+    //         }
+    //         else if(middle == true) {
+    //             drive.drive(new ChassisSpeeds(0,0,0), false);
+    //         }
+    //         else if (right == true) {
+    //             searchTimer.stop();
+    //             searchTimer.reset();
+    //             drive.drive(new ChassisSpeeds(0,0.3,0), false);
+    //         }
+    //         else if(left == true) {
+    //             searchTimer.stop();
+    //             searchTimer.reset();
+    //             drive.drive(new ChassisSpeeds(0,-0.3,0), false);
+    //         }
+    //         else {
+    //             if(!searchTimer.isRunning()) {
+    //                 searchTimer.start();
+    //             }
+    //             double tim = searchTimer.get();
+    //             if(tim < 1) {
+    //                 drive.drive(new ChassisSpeeds(0,-0.3, 0), false);
+    //             }
+    //             else if(tim < 2) {
+    //                 drive.drive(new ChassisSpeeds(0,0.3,0), false);
+    //             }
+    //             else if(tim<3) {
+    //                 drive.drive(new ChassisSpeeds(0,0.3,0), false);
+    //             }
+    //             else {
+    //                 drive.drive(new ChassisSpeeds(0,0,0), false);
+    //             }
 
-            }
+    //         }
 
-        }) 
-        .until(() -> middleSensor.getDistanceInches() >=0 && middleSensor.getDistanceInches() < 10)
-        .finallyDo(() -> drive.drive(new ChassisSpeeds(0,0,0), false));
-    }
+    //     }) 
+    //     .until(() -> middleSensor.getDistanceInches() >=0 && middleSensor.getDistanceInches() < 10)
+    //     .finallyDo(() -> drive.drive(new ChassisSpeeds(0,0,0), false));
+    // }
 
-    public Command moveForward(DriveSubsystem drive) {
-        return this.run(() -> {
-            drive.drive(new ChassisSpeeds(0.3, 0,0), false);
-        })
-        .until(() -> middleSensor.getDistanceMM() <= 7.9375)
-        .finallyDo(() -> {
-            drive.drive(new ChassisSpeeds(0,0,0), false);
-        });
-    }
+    // public Command moveForward(DriveSubsystem drive) {
+    //     return this.run(() -> {
+    //         drive.drive(new ChassisSpeeds(0.3, 0,0), false);
+    //     })
+    //     .until(() -> middleSensor.getDistanceMM() <= 7.9375)
+    //     .finallyDo(() -> {
+    //         drive.drive(new ChassisSpeeds(0,0,0), false);
+    //     });
+    // }
 //AMOGH WAS COOKING HERE
     @Override
     public void periodic() {

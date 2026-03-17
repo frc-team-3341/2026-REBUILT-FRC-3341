@@ -40,8 +40,8 @@ public class RobotContainer {
 
   // Button bindings
   private void configureButtonBindings() {
-    joy1.povUp().whileTrue(climber.leadscrewUp()).onFalse(climber.leadscrewStop()); // d pad up control for going up
-    joy1.povDown().whileTrue(climber.leadscrewDown()).onFalse(climber.leadscrewStop()); //d pad down control for going down
+    joy1.povUp().onTrue(climber.leadscrewUp()).onFalse(climber.leadscrewStop()); // d pad up control for going up
+    joy1.povDown().onTrue(climber.leadscrewDown()).onFalse(climber.leadscrewStop()); //d pad down control for going down
     joy1.a().onTrue(climber.servoOn()); // a to make the servo engage 
     joy1.b().onTrue(climber.servoOff()); // b to release the servo 
   }

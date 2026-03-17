@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class ClimberServoCommand extends Command{
     public static PWM pwm;
     public ClimberServoCommand() {
-        pwm = new PWM(3);
+        pwm = new PWM(0);
         pwm.setBoundsMicroseconds(2500,0,1500,0,500);
         pwm.setPeriodMultiplier(PWM.PeriodMultiplier.k1X);
         pwm.setPosition(0);
