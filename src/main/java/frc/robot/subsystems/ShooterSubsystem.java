@@ -182,7 +182,7 @@ public void stopFeedMotor() {
   }
   public Command score(){
     return this.runOnce(() -> {
-      targetRPM = speedMap.get(getHubDistance());
+      targetRPM = speedMap.get(3.25);
       setRPM(targetRPM);
     });
   }

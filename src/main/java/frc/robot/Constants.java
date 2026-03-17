@@ -198,7 +198,7 @@ public final class Constants {
       speedMap.put(3.0, 3050.0);
 
       //recollect these
-      speedMap.put(3.5, 2900.0);
+      speedMap.put(3.5, 3300.0);
       speedMap.put(4.0, 3050.0);
       speedMap.put(4.5, 3300.0);
       speedMap.put(5.0, 3550.0); //needs to be retested

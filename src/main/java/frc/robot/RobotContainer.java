@@ -71,21 +71,21 @@ public class RobotContainer {
     new EventTrigger("Shoot").onTrue(new SequentialCommandGroup(shooter.feed(),new WaitCommand(0.5),shooter.stopFeed()));
     new EventTrigger("Stop Shooter").onTrue(shooter.stopFlywheel());
 
-    driver_controller.a().onTrue(
-      Commands.runOnce(() -> aimDriveSupplier = !aimDriveSupplier)
-    );
+    // driver_controller.a().onTrue(
+    //   Commands.runOnce(() -> aimDriveSupplier = !aimDriveSupplier)
+    // );
 
 
     driver_controller.rightBumper().onTrue(robotIntake.intakeBall()).onFalse(robotIntake.stopIntake());
     driver_controller.leftBumper().onTrue(robotIntake.reverseIntakeBall()).onFalse(robotIntake.stopIntake());
 
-    driver_controller.x().onTrue(shooter.score());
+    driver_controller.x().onTrue(shooter.backupShooting());
     driver_controller.rightTrigger().onTrue(shooter.feed()).onFalse(shooter.stopFeed());
     driver_controller.y().onTrue(shooter.stopFlywheel());
     driver_controller.leftTrigger().onTrue(shooter.backfeed()).onFalse(shooter.stopFeed());
 
-    // driver_controller.rightBumper().onTrue(shooter.incrementRPM());
-    // driver_controller.leftBumper().onTrue(shooter.decrementRPM());
+    driver_controller.b().onTrue(shooter.incrementRPM());
+    driver_controller.a().onTrue(shooter.decrementRPM());
 
     // --------------------------------------------------------------------
     //         AUTO TESTING BINDINGS (uncomment when testing auto)
