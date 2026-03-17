@@ -127,50 +127,47 @@ public class Climber extends SubsystemBase {
 
     // public Command alignToTower(DriveSubsystem drive) {
     //     Timer searchTimer = new Timer();
-    //     int negOneMiddleCounter =0;
-    //     int negOneRightCounter = 0;
-    //     int negOneLeftCounter = 0;
+    //     int[] negOneMiddleCounter ={0};
+    //     int[] negOneRightCounter = {0};
+    //     int[] negOneLeftCounter = {0};
     //     return this.run(() -> {
-    //         boolean middle = middleSensor.getDistanceInches() >=0 && middleSensor.getDistanceInches() <=15;
-    //         boolean left = leftSensor.getDistanceInches() >= 0 && leftSensor.getDistanceInches() < 15;
-    //         boolean right = rightSensor.getDistanceInches() >=0 && rightSensor.getDistanceInches() <15;
+    //         boolean middle = middleSensor.getDistanceInches() > 0 && middleSensor.getDistanceInches() <=12;
+    //         boolean left = leftSensor.getDistanceInches() > 0 && leftSensor.getDistanceInches() <= 12;
+    //         boolean right = rightSensor.getDistanceInches() > 0 && rightSensor.getDistanceInches() <= 12;
     //         if(middle == false) {
-    //             negOneMiddleCounter +=1;
+    //             negOneMiddleCounter[0] +=1;
     //         }
     //         if(left == false) {
-    //             negOneLeftCounter +=1;
+    //             negOneLeftCounter[0] +=1;
     //         }
     //         if(right == false) {
-    //             negOneRightCounter+=1;
+    //             negOneRightCounter[0]+=1;
     //         }
 
 
     //         if(middle == true) {
     //             drive.drive(new ChassisSpeeds(0,0,0), false);
-    //             negOneMiddleCounter = 0;
+    //             negOneMiddleCounter[0] = 0;
     //         }
     //         else if (right == true) {
     //             searchTimer.stop();
     //             searchTimer.reset();
     //             drive.drive(new ChassisSpeeds(0,0.3,0), false);
-    //             negOneLeftCounter = 0;
+    //             negOneRightCounter[0] = 0;
     //         }
     //         else if(left == true) {
     //             searchTimer.stop();
     //             searchTimer.reset();
     //             drive.drive(new ChassisSpeeds(0,-0.3,0), false);
-    //             negOneRightCounter = 0;
+    //             negOneLeftCounter[0] = 0;
     //         }
-    //         else if (negOneMiddleCounter>25 && negOneLeftCounter >25 && negOneRightCounter >25){
+    //         else if (negOneMiddleCounter[0]>25 && negOneLeftCounter[0] >25 && negOneRightCounter[0] >25){
     //             if(!searchTimer.isRunning()) {
     //                 searchTimer.start();
     //             }
     //             double tim = searchTimer.get();
     //             if(tim < 1) {
     //                 drive.drive(new ChassisSpeeds(0,-0.3, 0), false);
-    //             }
-    //             else if(tim < 2) {
-    //                 drive.drive(new ChassisSpeeds(0,0.3,0), false);
     //             }
     //             else if(tim<3) {
     //                 drive.drive(new ChassisSpeeds(0,0.3,0), false);
@@ -182,7 +179,7 @@ public class Climber extends SubsystemBase {
     //         }
 
     //     }) 
-    //     .until(() -> middleSensor.getDistanceInches() >=0 && middleSensor.getDistanceInches() < 10)
+    //     .until(() -> middleSensor.getDistanceInches() > 0 && middleSensor.getDistanceInches() <= 12)
     //     .finallyDo(() -> drive.drive(new ChassisSpeeds(0,0,0), false));
     // }
 
