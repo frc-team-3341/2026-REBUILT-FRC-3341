@@ -177,7 +177,7 @@ private void createSimulationSwerve(Pose2d startingPose) {
     aimDriveController.enableContinuousInput(-180, 180);
 
     //Set tolerance to prevent pid controller oscillation
-    aimDriveController.setTolerance(5.0);
+    aimDriveController.setTolerance(0.5);
     
     SmartDashboard.putData("Field", field);
 

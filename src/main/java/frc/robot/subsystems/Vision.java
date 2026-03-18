@@ -7,6 +7,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Robot;
@@ -34,6 +36,10 @@ public class Vision {
     private final PhotonPoseEstimator batteryPhotonPoseEstimator;
     private final PhotonPoseEstimator shooterPhotonPoseEstimator;
     private Matrix<N3, N1> curStdDevs = kSingleTagStdDevs;
+
+    private final StructPublisher<Pose2d> intakePoseEstimatorPublisher;
+    private final StructPublisher<Pose2d> shooterPoseEstimatorPublisher;
+    private final StructPublisher<Pose2d> batteryPoseEstimatorPublisher;
 
     // Simulation
     private PhotonCameraSim cameraSim;
@@ -69,6 +75,15 @@ public class Vision {
         batteryPhotonPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
         
         shooterPhotonPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
+
+        intakePoseEstimatorPublisher = NetworkTableInstance.getDefault()
+        .getStructTopic("/PoseEstimator/IntakePose", Pose2d.struct).publish();
+
+        shooterPoseEstimatorPublisher = NetworkTableInstance.getDefault()
+        .getStructTopic("/PoseEstimator/ShooterPose", Pose2d.struct).publish();
+
+        batteryPoseEstimatorPublisher = NetworkTableInstance.getDefault()
+        .getStructTopic("/PoseEstimator/BatteryPose", Pose2d.struct).publish();
 
         // ----- Simulation ------
         if (Robot.isSimulation()) {
@@ -116,6 +131,12 @@ public class Vision {
         
             // Update standard deviations based on the estimate quality
             updateEstimationStdDevs(visionEst, result.getTargets());
+
+            if (visionEst.isPresent()) {
+            intakePoseEstimatorPublisher.set(new Pose2d(visionEst.get().estimatedPose.getX(), 
+                visionEst.get().estimatedPose.getY(), new Rotation2d(visionEst.get().estimatedPose.getRotation().getMeasureZ())));
+            }
+            
         }
         
 
@@ -158,6 +179,11 @@ public class Vision {
         
             // Update standard deviations based on the estimate quality
             updateEstimationStdDevs(visionEst, result.getTargets());
+
+            if (visionEst.isPresent()) {
+            batteryPoseEstimatorPublisher.set(new Pose2d(visionEst.get().estimatedPose.getX(), 
+                visionEst.get().estimatedPose.getY(), new Rotation2d(visionEst.get().estimatedPose.getRotation().getMeasureZ())));
+            }
         }
         
 
@@ -200,6 +226,12 @@ public class Vision {
         
             // Update standard deviations based on the estimate quality
             updateEstimationStdDevs(visionEst, result.getTargets());
+
+            if (visionEst.isPresent()) {
+                shooterPoseEstimatorPublisher.set(new Pose2d(visionEst.get().estimatedPose.getX(), 
+                visionEst.get().estimatedPose.getY(), new Rotation2d(visionEst.get().estimatedPose.getRotation().getMeasureZ())));
+            }
+            
         }
         
 

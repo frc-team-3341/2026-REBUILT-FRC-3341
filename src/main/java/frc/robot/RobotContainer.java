@@ -79,7 +79,7 @@ public class RobotContainer {
     driver_controller.rightBumper().onTrue(robotIntake.intakeBall()).onFalse(robotIntake.stopIntake());
     driver_controller.leftBumper().onTrue(robotIntake.reverseIntakeBall()).onFalse(robotIntake.stopIntake());
 
-    driver_controller.x().onTrue(shooter.backupShooting());
+    driver_controller.x().onTrue(shooter.score());
     driver_controller.rightTrigger().onTrue(shooter.feed()).onFalse(shooter.stopFeed());
     driver_controller.y().onTrue(shooter.stopFlywheel());
     driver_controller.leftTrigger().onTrue(shooter.backfeed()).onFalse(shooter.stopFeed());
