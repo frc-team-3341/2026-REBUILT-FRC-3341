@@ -106,13 +106,13 @@ public final class Constants {
         // for why these values the way they are. In short x is positive towards the front, y is positive to left, z is positive to the sky
         //set these lolxd
         public static final Transform3d robotToIntakeCam =
-                new Transform3d(new Translation3d(Units.inchesToMeters(12.75), Units.inchesToMeters(0), Units.inchesToMeters(12.5)), new Rotation3d(0, intakeCamPitch, 0));
+                new Transform3d(new Translation3d(Units.inchesToMeters(11.8), Units.inchesToMeters(7.2), Units.inchesToMeters(25.9)), new Rotation3d(0, intakeCamPitch, 0));
         
         public static final Transform3d robotToBatteryCam =
-                new Transform3d(new Translation3d(Units.inchesToMeters(12.75), Units.inchesToMeters(0), Units.inchesToMeters(12.5)), new Rotation3d(0, batteryCamPitch, 0));
+                new Transform3d(new Translation3d(Units.inchesToMeters(-0.6), Units.inchesToMeters(13.3), Units.inchesToMeters(27.6)), new Rotation3d(0, batteryCamPitch, 0));
 
         public static final Transform3d robotToShooterCam =
-                new Transform3d(new Translation3d(Units.inchesToMeters(12.75), Units.inchesToMeters(0), Units.inchesToMeters(12.5)), new Rotation3d(0, shooterCamPitch, 0));
+                new Transform3d(new Translation3d(Units.inchesToMeters(-12.8), Units.inchesToMeters(5.1), Units.inchesToMeters(27.3)), new Rotation3d(0, shooterCamPitch, 0));
 
         // The layout of the AprilTags on the field
         public static final AprilTagFieldLayout kTagLayout =
@@ -175,12 +175,12 @@ public final class Constants {
     public static final int SHOOTER_FLYWHEEL_CAN_ID = 12; 
     public static final int FEEDER_CAN_ID = 11;
 
-    public static final double FEEDING_SPEED = 0.75;
-    public static final double BACKFEED_SPEED = -0.75;
-
     public static final double PASSING_RPM = 3500;
 
     public static final int shooterCurrentLimit = 40;
+
+    public static final double FEEDING_SPEED = 0.50;
+    public static final double BACKFEED_SPEED = -0.50;
 
     //PID constants for nonweighted flywheels
     public static final double kP_nw = 0.00001;
@@ -200,14 +200,16 @@ public final class Constants {
 
     static{
       //              meters      rpm
-      speedMap.put(1.5, 2500.0);
-      speedMap.put(2.0, 2650.0);
-      speedMap.put(2.5, 2850.0);
-      speedMap.put(3.0, 3050.0);
-      speedMap.put(3.5, 3250.0);
-      speedMap.put(4.0, 3450.0);
-      speedMap.put(4.5, 3650.0);
-      speedMap.put(5.0, 3950.0); //needs to be retested
+      speedMap.put(1.5, 2450.0);
+      speedMap.put(2.0, 2550.0);
+      speedMap.put(2.5, 2700.0);
+      speedMap.put(3.0, 2900.0);
+
+      //recollect these
+      speedMap.put(3.5, 3100.0);
+      // speedMap.put(4.0, 3050.0);
+      // speedMap.put(4.5, 3300.0);
+      // speedMap.put(5.0, 3550.0); //needs to be retested
 
     }
   }
