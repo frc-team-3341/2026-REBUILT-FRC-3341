@@ -39,7 +39,8 @@ import edu.wpi.first.units.Units;
 public class ShooterSubsystem extends SubsystemBase {
 
   private final SparkFlex shooter;
-  private final SparkFlex feeder;
+  private final SparkFlex bottomFeeder;
+  private final SparkFlex topFeeder;
 
   private double targetRPM = 0;
   private double distance = 0;
@@ -48,7 +49,6 @@ public class ShooterSubsystem extends SubsystemBase {
   private SparkClosedLoopController closedLoopController;
 
   private RelativeEncoder relativeEncoder;
-  private RelativeEncoder feederEncoder;
 
   private Pose2d robotPose = new Pose2d();
   private DriveSubsystem driveSubsystem;
@@ -58,17 +58,17 @@ public class ShooterSubsystem extends SubsystemBase {
   public ShooterSubsystem(DriveSubsystem drive, Vision vision) {
 
     shooter = new SparkFlex(SHOOTER_FLYWHEEL_CAN_ID, MotorType.kBrushless);
-    feeder = new SparkFlex(FEEDER_CAN_ID, MotorType.kBrushless);
+    bottomFeeder = new SparkFlex(BOTTOMFEEDER_CAN_ID, MotorType.kBrushless);
+    topFeeder = new SparkFlex(TOPFEEDER_CAN_ID, MotorType.kBrushless);
     
     relativeEncoder = shooter.getEncoder();
-    feederEncoder = feeder.getEncoder();
 
     closedLoopController = shooter.getClosedLoopController();
 
 
     shooter.configure(Configs.Shooter.FLYWHEEL_CONFIG, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    feeder.configure(Configs.Shooter.FEEDER_CONFIG, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-
+    bottomFeeder.configure(Configs.Shooter.FEEDER_CONFIG, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    topFeeder.configure(Configs.Shooter.FEEDER_CONFIG, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     // Init drive subsystem
     driveSubsystem = drive;
     robotPose = driveSubsystem.getOdometryPose();
@@ -82,10 +82,7 @@ public class ShooterSubsystem extends SubsystemBase {
     // Update Variables
     distance = getHubDistance();
 
-    SmartDashboard.putNumber("Encoder RPM", relativeEncoder.getVelocity());
     SmartDashboard.putNumber("Target RPM", targetRPM);
-    SmartDashboard.putBoolean("Feed", (feederEncoder.getVelocity() > 1.0));
-    SmartDashboard.putBoolean("BackFeed", (feederEncoder.getVelocity() < -1.0));
     SmartDashboard.putNumber("Estimated Distance", distance);
     SmartDashboard.putBoolean("Can Shoot?", canShoot());
 
@@ -143,13 +140,13 @@ public void stopFlywheel() {
 }
 
 public void feed() {
-  feeder.set(FEEDING_SPEED);
+  bottomFeeder.set(FEEDING_SPEED);
 }
 public void backfeed() {
-  feeder.set(BACKFEED_SPEED);
+  bottomFeeder.set(BACKFEED_SPEED);
 }
 public void stopFeed() {
-  feeder.set(0);
+  bottomFeeder.set(0);
 }
 
   public Command decrementRPM() {
@@ -191,7 +188,7 @@ public void stopFeed() {
     public Command handleShooterTransitions(ShooterState desiredState) {
         switch (desiredState) {
             case IDLE:
-                return this.runOnce(() -> this.stopFlywheel());
+                return this.runOnce(() -> this.stopFlywheel()).alongWith(Commands.runOnce(() -> topFeeder.set(0)));
 
             case PASSING:
                 return this.runOnce(() -> this.setFlywheelRPM(PASSING_RPM));
@@ -208,12 +205,16 @@ public void stopFeed() {
                   }
 
                   this.setFlywheelRPM(targetRPM);
-                  //before starting get distance to hub so not storing 0.0 in lastPose
-                  }).beforeStarting(() -> {
-                    prevDistance = ShooterUtil.getDistanceToHub(robotPose);
-                    //get flywheel spinning to prevent delay
-                    targetRPM = speedMap.get(prevDistance);
-                  });
+                })
+                  .alongWith(Commands.runOnce(() -> topFeeder.set(FEEDING_SPEED)));
+                
+                  // //before starting get distance to hub so not storing 0.0 in lastPose
+                  // }).beforeStarting(() -> {
+                  //   prevDistance = ShooterUtil.getDistanceToHub(robotPose);
+                  //   //get flywheel spinning to prevent delay
+                  //   targetRPM = speedMap.get(prevDistance);
+                  // });
+                  
                     
             default:
                 return Commands.print("Invalid Shooter State Provided!");

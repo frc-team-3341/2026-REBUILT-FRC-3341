@@ -173,7 +173,8 @@ public final class Constants {
 
   public static final class ShooterConstants {
     public static final int SHOOTER_FLYWHEEL_CAN_ID = 12; 
-    public static final int FEEDER_CAN_ID = 11;
+    public static final int BOTTOMFEEDER_CAN_ID = 11;
+    public static final int TOPFEEDER_CAN_ID = 14;
 
     public static final double PASSING_RPM = 3500;
 
