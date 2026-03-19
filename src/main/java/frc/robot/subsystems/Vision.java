@@ -5,6 +5,7 @@ import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -324,6 +325,29 @@ public class Vision {
      */
     public Matrix<N3, N1> getEstimationStdDevs() {
         return curStdDevs;
+    }
+    /**
+     * Get location of hub apriltag relative to the shooter camera 
+     * @return Optional containing a transform3d of the apriltag on the hub
+     */
+    public Optional<Transform3d> getHubApriltagLocation() {
+        var results = shooterCamera.getLatestResult();
+        if (results.hasTargets()) {
+            for (var tgt: results.getTargets()) {
+                int id = tgt.getFiducialId();
+                // Apriltags of hubs: 9,10,25,26
+                // The right apriltag should be enough to figure out if you are inline
+                if (id == 9) {
+                    Transform3d targetTransform = tgt.getBestCameraToTarget();
+                    return Optional.of(targetTransform);
+                }
+                if (id == 26) {
+                    Transform3d targetTransform = tgt.getBestCameraToTarget();
+                    return Optional.of(targetTransform);
+                }
+            }
+        }
+        return Optional.empty();
     }
 
     // ----- Simulation -----

@@ -21,7 +21,7 @@ public class RobotContainer {
 
   
   CommandXboxController driver_controller = new CommandXboxController(OIConstants.kDriverControllerPort);
-  private final ShooterSubsystem shooter = new ShooterSubsystem(swerve);
+  private final ShooterSubsystem shooter = new ShooterSubsystem(swerve, vision);
   private final SwerveTeleop swerveTeleop;
   private final Superstructure superstructure;
 

@@ -4,6 +4,9 @@
  
 package frc.robot.subsystems;
 import java.lang.Math;
+
+import org.opencv.features2d.FlannBasedMatcher;
+
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
@@ -18,17 +21,21 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Meter;
 import static frc.robot.Constants.ShooterConstants.*;
 import frc.robot.Configs;
-import frc.robot.RobotContainer;
 import frc.robot.subsystems.Superstructure.FeederState;
 import frc.robot.subsystems.Superstructure.ShooterState;
 import frc.util.ShooterUtil;
+import edu.wpi.first.units.Units;
+
 public class ShooterSubsystem extends SubsystemBase {
 
   private final SparkFlex shooter;
@@ -45,8 +52,10 @@ public class ShooterSubsystem extends SubsystemBase {
 
   private Pose2d robotPose = new Pose2d();
   private DriveSubsystem driveSubsystem;
+  private Vision visionSubsystem;
 
-  public ShooterSubsystem(DriveSubsystem drive) {
+
+  public ShooterSubsystem(DriveSubsystem drive, Vision vision) {
 
     shooter = new SparkFlex(SHOOTER_FLYWHEEL_CAN_ID, MotorType.kBrushless);
     feeder = new SparkFlex(FEEDER_CAN_ID, MotorType.kBrushless);
@@ -63,8 +72,8 @@ public class ShooterSubsystem extends SubsystemBase {
     // Init drive subsystem
     driveSubsystem = drive;
     robotPose = driveSubsystem.getOdometryPose();
-
-    
+    // Vision subsystem
+    visionSubsystem = vision;    
   }
 
 
@@ -78,6 +87,7 @@ public class ShooterSubsystem extends SubsystemBase {
     SmartDashboard.putBoolean("Feed", (feederEncoder.getVelocity() > 1.0));
     SmartDashboard.putBoolean("BackFeed", (feederEncoder.getVelocity() < -1.0));
     SmartDashboard.putNumber("Estimated Distance", distance);
+    SmartDashboard.putBoolean("Can Shoot?", canShoot());
 
   }
 
@@ -90,6 +100,35 @@ public class ShooterSubsystem extends SubsystemBase {
     prevDistance = distance;
     return distance;
     
+  }
+
+  public Boolean canShoot() {
+    /*
+     * Conditions to shoot
+     * RPM difference between shooter and target rpm is < 150
+     * The shooter is aligned with both apriltags
+     */
+    if (Math.abs(relativeEncoder.getVelocity() - targetRPM) > 150) {
+      return false;
+    }
+    if (visionSubsystem.getHubApriltagLocation().isPresent()) {
+      Transform3d hubLocation = visionSubsystem.getHubApriltagLocation().get();
+      // Check if horizontal translation is more than setpoint 
+      SmartDashboard.putString("Robot Offset to Hub", hubLocation.getMeasureY().toShortString());
+      SmartDashboard.putNumber("Robot Angle Offset to Hub", hubLocation.getRotation().getAngle());
+
+      if (hubLocation.getMeasureY().in(Meter) > 0.5) {
+        return false;
+      }
+      if (hubLocation.getRotation().getMeasureY().in(Degrees) > 40) {
+        return false;
+      }
+    }
+    else {
+      return false;
+    }
+    return true;
+
   }
 
 
