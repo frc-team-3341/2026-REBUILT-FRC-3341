@@ -88,6 +88,7 @@ public class ShooterSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Estimated Distance", distance);
     SmartDashboard.putNumber("encoder rpm", relativeEncoder.getVelocity());
     // SmartDashboard.putBoolean("Can Shoot?", canShoot());
+    SmartDashboard.putNumber("I accumulation", closedLoopController.getIAccum());
     SmartDashboard.putNumber("Topfeed RPM", topEncoder.getVelocity());
 
     SmartDashboard.putNumber("motor output", topFeeder.getAppliedOutput());

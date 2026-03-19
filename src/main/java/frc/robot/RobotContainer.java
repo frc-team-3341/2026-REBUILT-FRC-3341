@@ -110,8 +110,8 @@ public class RobotContainer {
     driver_controller.b().onTrue(shooter.incrementRPM());
     driver_controller.a().onTrue(shooter.decrementRPM());
 
-    driver_controller.rightBumper().onTrue(shooter.incrementRPM());
-    driver_controller.leftBumper().onTrue(shooter.decrementRPM());
+//     driver_controller.rightBumper().onTrue(shooter.incrementRPM());
+//     driver_controller.leftBumper().onTrue(shooter.decrementRPM());
 
     // --------------------------------------------------------------------
     //         AUTO TESTING BINDINGS (uncomment when testing auto)

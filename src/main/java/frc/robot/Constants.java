@@ -180,8 +180,8 @@ public final class Constants {
 
     public static final int shooterCurrentLimit = 80;
 
-    public static final double FEEDING_SPEED = 0.75;
-    public static final double BACKFEED_SPEED = -0.75;
+    public static final double FEEDING_SPEED = 0.50;
+    public static final double BACKFEED_SPEED = -0.50;
 
     //PID constants for nonweighted flywheels
     public static final double kP_nw = 0.00001;
@@ -201,13 +201,13 @@ public final class Constants {
 
     static{
       //              meters      rpm
-      speedMap.put(1.5, 2450.0);
+      speedMap.put(1.5, 2400.0);
       speedMap.put(2.0, 2550.0);
       speedMap.put(2.5, 2700.0);
       speedMap.put(3.0, 2900.0);
 
       //recollect these
-      speedMap.put(3.5, 3100.0);
+      speedMap.put(3.5, 3050.0);
       // speedMap.put(4.0, 3050.0);
       // speedMap.put(4.5, 3300.0);
       // speedMap.put(5.0, 3550.0); //needs to be retested
