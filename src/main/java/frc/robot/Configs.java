@@ -103,8 +103,12 @@ public final class Configs {
         .smartCurrentLimit(intakeCurrentLimit);
         
       // INTAKE_CONFIG
-        // .encoder
-        // .inverted(true);
+      //   .closedLoop
+      //   .feedbackSensor(FeedbackSensor.kPrimaryEncoder);
+      
+      // INTAKE_CONFIG
+      //   .encoder
+      //   .inverted(true);
       
       LIFT_CONFIG
         .idleMode(IdleMode.kBrake)

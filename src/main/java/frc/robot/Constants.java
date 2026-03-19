@@ -178,10 +178,10 @@ public final class Constants {
 
     public static final double PASSING_RPM = 3500;
 
-    public static final int shooterCurrentLimit = 40;
+    public static final int shooterCurrentLimit = 80;
 
-    public static final double FEEDING_SPEED = 0.50;
-    public static final double BACKFEED_SPEED = -0.50;
+    public static final double FEEDING_SPEED = 0.75;
+    public static final double BACKFEED_SPEED = -0.75;
 
     //PID constants for nonweighted flywheels
     public static final double kP_nw = 0.00001;
@@ -219,7 +219,10 @@ public final class Constants {
     public static final int INTAKE_CAN_ID = 9;
     public static final int LIFT_CAN_ID = 10;
 
-    public static final int intakeCurrentLimit = 40;
+    public static final double INTAKE_SPEED = 0.75;
+    public static final double LIFT_SPEED = 0.67;
+
+    public static final int intakeCurrentLimit = 80;
   }
     public static final class FieldConstants {
     public static final Translation2d blueHubCenterPose = new Translation2d(4.633, 4.035);

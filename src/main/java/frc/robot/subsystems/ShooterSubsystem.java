@@ -49,6 +49,7 @@ public class ShooterSubsystem extends SubsystemBase {
   private SparkClosedLoopController closedLoopController;
 
   private RelativeEncoder relativeEncoder;
+  private RelativeEncoder topEncoder;
 
   private Pose2d robotPose = new Pose2d();
   private DriveSubsystem driveSubsystem;
@@ -62,6 +63,7 @@ public class ShooterSubsystem extends SubsystemBase {
     topFeeder = new SparkFlex(TOPFEEDER_CAN_ID, MotorType.kBrushless);
     
     relativeEncoder = shooter.getEncoder();
+    topEncoder = topFeeder.getEncoder();
 
     closedLoopController = shooter.getClosedLoopController();
 
@@ -84,7 +86,11 @@ public class ShooterSubsystem extends SubsystemBase {
 
     SmartDashboard.putNumber("Target RPM", targetRPM);
     SmartDashboard.putNumber("Estimated Distance", distance);
-    SmartDashboard.putBoolean("Can Shoot?", canShoot());
+    SmartDashboard.putNumber("encoder rpm", relativeEncoder.getVelocity());
+    // SmartDashboard.putBoolean("Can Shoot?", canShoot());
+    SmartDashboard.putNumber("Topfeed RPM", topEncoder.getVelocity());
+
+    SmartDashboard.putNumber("motor output", topFeeder.getAppliedOutput());
 
   }
 
@@ -99,34 +105,34 @@ public class ShooterSubsystem extends SubsystemBase {
     
   }
 
-  public Boolean canShoot() {
-    /*
-     * Conditions to shoot
-     * RPM difference between shooter and target rpm is < 150
-     * The shooter is aligned with both apriltags
-     */
-    if (Math.abs(relativeEncoder.getVelocity() - targetRPM) > 150) {
-      return false;
-    }
-    if (visionSubsystem.getHubApriltagLocation().isPresent()) {
-      Transform3d hubLocation = visionSubsystem.getHubApriltagLocation().get();
-      // Check if horizontal translation is more than setpoint 
-      SmartDashboard.putString("Robot Offset to Hub", hubLocation.getMeasureY().toShortString());
-      SmartDashboard.putNumber("Robot Angle Offset to Hub", hubLocation.getRotation().getAngle());
+  // public Boolean canShoot() {
+  //   /*
+  //    * Conditions to shoot
+  //    * RPM difference between shooter and target rpm is < 150
+  //    * The shooter is aligned with both apriltags
+  //    */
+  //   if (Math.abs(relativeEncoder.getVelocity() - targetRPM) > 150) {
+  //     return false;
+  //   }
+  //   if (visionSubsystem.getHubApriltagLocation().isPresent()) {
+  //     Transform3d hubLocation = visionSubsystem.getHubApriltagLocation().get();
+  //     // Check if horizontal translation is more than setpoint 
+  //     SmartDashboard.putString("Robot Offset to Hub", hubLocation.getMeasureY().toShortString());
+  //     SmartDashboard.putNumber("Robot Angle Offset to Hub", hubLocation.getRotation().getAngle());
 
-      if (hubLocation.getMeasureY().in(Meter) > 0.5) {
-        return false;
-      }
-      if (hubLocation.getRotation().getMeasureY().in(Degrees) > 40) {
-        return false;
-      }
-    }
-    else {
-      return false;
-    }
-    return true;
+  //     if (hubLocation.getMeasureY().in(Meter) > 0.5) {
+  //       return false;
+  //     }
+  //     if (hubLocation.getRotation().getMeasureY().in(Degrees) > 40) {
+  //       return false;
+  //     }
+  //   }
+  //   else {
+  //     return false;
+  //   }
+  //   return true;
 
-  }
+  // }
 
 
 public void setFlywheelRPM(double RPM) {
@@ -149,6 +155,10 @@ public void stopFeed() {
   bottomFeeder.set(0);
 }
 
+public void stopTopFeed() {
+  topFeeder.set(0);
+}
+
   public Command decrementRPM() {
     return this.runOnce(() -> {
         targetRPM -= 50;
@@ -164,7 +174,8 @@ public void stopFeed() {
   public Command backupShooting(){
     return this.runOnce(() -> {
       // TODO: change this so the driver can move to a consistent location.
-      setFlywheelRPM(3500);
+      topFeeder.set(FEEDING_SPEED);
+      setFlywheelRPM(2700);
     });
   }
 
