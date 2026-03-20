@@ -89,37 +89,37 @@ public class RobotContainer {
     Command STOP_FEED_2 = Commands.deferredProxy(
           () -> superstructure.setFeederState(FeederState.IDLE));
         
-//     driver_controller.a().onTrue(PASSING);
+    driver_controller.a().onTrue(PASSING);
         
-//     driver_controller.b().onTrue(IDLE);
+    driver_controller.b().onTrue(IDLE);
 
-//     driver_controller.x().onTrue(SCORING);
+    driver_controller.x().onTrue(SCORING);
 
-//     driver_controller.rightBumper().onTrue(INTAKING).onFalse(PREVIOUS);
+    driver_controller.rightBumper().onTrue(INTAKING).onFalse(PREVIOUS);
 
-//     driver_controller.leftBumper().onTrue(REVERSE).onFalse(PREVIOUS_REVERSE);
+    driver_controller.leftBumper().onTrue(REVERSE).onFalse(PREVIOUS_REVERSE);
 
-//     driver_controller.povLeft().onTrue(ALIGNING_TOWER_LEFT);
+    driver_controller.povLeft().onTrue(ALIGNING_TOWER_LEFT);
 
-//     driver_controller.povRight().onTrue(ALIGNING_TOWER_RIGHT);
+    driver_controller.povRight().onTrue(ALIGNING_TOWER_RIGHT);
 
-//     driver_controller.rightTrigger().onTrue(FEED).onFalse(STOP_FEED);
+    driver_controller.rightTrigger().onTrue(FEED).onFalse(STOP_FEED);
 
-//     driver_controller.leftTrigger().onTrue(BACKFEED).onFalse(STOP_FEED_2);
+    driver_controller.leftTrigger().onTrue(BACKFEED).onFalse(STOP_FEED_2);
        
-//     driver_controller.y().onTrue(shooter.backupShooting());
+    driver_controller.y().onTrue(shooter.backupShooting());
 
 
 
-    driver_controller.rightBumper().onTrue(Commands.runOnce(() -> intake.intake())).onFalse(Commands.runOnce(() -> intake.stopIntake()));
-    driver_controller.leftBumper().onTrue(Commands.runOnce(() -> intake.reverseIntake())).onFalse(Commands.runOnce(() -> intake.stopIntake()));
+    // driver_controller.rightBumper().onTrue(Commands.runOnce(() -> intake.intake())).onFalse(Commands.runOnce(() -> intake.stopIntake()));
+    // driver_controller.leftBumper().onTrue(Commands.runOnce(() -> intake.reverseIntake())).onFalse(Commands.runOnce(() -> intake.stopIntake()));
 
-    driver_controller.x().onTrue(shooter.backupShooting());
-    driver_controller.rightTrigger().onTrue(Commands.runOnce(() -> shooter.feed())).onFalse(Commands.runOnce(() -> shooter.stopFeed()));
-    driver_controller.y().onTrue(Commands.runOnce(() -> shooter.stopFlywheel()).alongWith(Commands.runOnce(() -> shooter.stopTopFeed())));
-    driver_controller.leftTrigger().onTrue(Commands.runOnce(() -> shooter.backfeed())).onFalse(Commands.runOnce(() -> shooter.stopFeed()));
-    driver_controller.b().onTrue(shooter.incrementRPM());
-    driver_controller.a().onTrue(shooter.decrementRPM());
+    // driver_controller.x().onTrue(shooter.score());
+    // driver_controller.rightTrigger().onTrue(Commands.runOnce(() -> shooter.feed())).onFalse(Commands.runOnce(() -> shooter.stopFeed()));
+    // driver_controller.y().onTrue(Commands.runOnce(() -> shooter.stopFlywheel()).alongWith(Commands.runOnce(() -> shooter.stopTopFeed())));
+    // driver_controller.leftTrigger().onTrue(Commands.runOnce(() -> shooter.backfeed())).onFalse(Commands.runOnce(() -> shooter.stopFeed()));
+    // driver_controller.b().onTrue(shooter.incrementRPM());
+    // driver_controller.a().onTrue(shooter.decrementRPM());
 
 //     driver_controller.rightBumper().onTrue(shooter.incrementRPM());
 //     driver_controller.leftBumper().onTrue(shooter.decrementRPM());

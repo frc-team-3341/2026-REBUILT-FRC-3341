@@ -180,6 +180,13 @@ public void stopTopFeed() {
     });
   }
 
+  public Command score() {
+    return this.runOnce(() -> {
+      topFeeder.set(FEEDING_SPEED);
+      setFlywheelRPM(speedMap.get(getHubDistance()));
+    });
+  }
+
   public Command handleFeederTransition(FeederState desiredState) {
         switch (desiredState) {
             case IDLE:
@@ -210,10 +217,13 @@ public void stopTopFeed() {
                 
                   double distanceToHub = ShooterUtil.getDistanceToHub(robotPose);
 
-                  if (Math.abs(distanceToHub-prevDistance)>0.05) {
+                  if (Math.abs(distanceToHub-prevDistance)>0.05 && targetRPM != 0) {
                     System.out.println("Updating speed for the distance: " + distanceToHub + " meters from the center of the hub");
                     targetRPM = speedMap.get(distanceToHub);
                     prevDistance = distanceToHub;
+                  }
+                  else if (targetRPM == 0) {
+                    targetRPM = speedMap.get(distanceToHub);
                   }
 
                   this.setFlywheelRPM(targetRPM);
