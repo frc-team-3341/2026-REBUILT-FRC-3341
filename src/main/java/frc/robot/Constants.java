@@ -4,12 +4,24 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.path.PathConstraints;
+
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
-
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
  * numerical or boolean
@@ -52,7 +64,7 @@ public final class Constants {
     // motors on the bottom of the module.
     public static final boolean kFrontLeftDrivingMotorOnBottom = true;
     public static final boolean kRearLeftDrivingMotorOnBottom = false;
-    public static final boolean kFrontRightDrivingMotorOnBottom = true;
+    public static final boolean kFrontRightDrivingMotorOnBottom = false;
     public static final boolean kRearRightDrivingMotorOnBottom = true;
 
     public static final boolean kFrontLeftTurningMotorOnBottom = false;
@@ -72,9 +84,49 @@ public final class Constants {
     public static final int kFrontRightTurningCanId = 4;
     public static final int kRearRightTurningCanId = 8;
 
+
     public static final boolean kGyroReversed = false;
     public static final Rotation2d navxOffset = Rotation2d.fromDegrees(0); //Offsets driving by 90 degrees clockwise
+
+    public static final double kRobotMassKg = 54.43; // TODO: Adjust to your robot's mass
+    public static final double kWheelCOF = 1.2; // TODO: Coefficient of friction (from pathplanner settings)
+
   }
+      public static final class VisionConstants {
+        public static final String intakeCameraName = "Pterodactyl";
+        
+        //set these
+        public static final String batteryCameraName = "Tupandactylus Imperator";
+        public static final String shooterCameraName = "Quetzalcoatlus";
+        
+        private static final double intakeCamPitch = Units.degreesToRadians(0); //TODO: for testing, check what the camera pitch is
+        private static final double batteryCamPitch = Units.degreesToRadians(0); //TODO do ts
+        private static final double shooterCamPitch = Units.degreesToRadians(15.0); //TODO do ts
+
+        private static final double shooterCamYaw = Units.degreesToRadians(180);
+        private static final double batteryCamYaw = Units.degreesToRadians(90);
+        // See https://docs.wpilib.org/en/stable/docs/software/basic-programming/coordinate-system.html#robot-coordinate-system
+        // for why these values the way they are. In short x is positive towards the front, y is positive to left, z is positive to the sky
+        //set these lolxd
+        public static final Transform3d robotToIntakeCam =
+                new Transform3d(new Translation3d(Units.inchesToMeters(11.8), Units.inchesToMeters(7.2), Units.inchesToMeters(25.9)), new Rotation3d(0, intakeCamPitch, 0));
+        
+        public static final Transform3d robotToBatteryCam =
+                new Transform3d(new Translation3d(Units.inchesToMeters(-0.6), Units.inchesToMeters(13.3), Units.inchesToMeters(27.6)), new Rotation3d(0, batteryCamPitch, batteryCamYaw));
+
+        public static final Transform3d robotToShooterCam =
+                new Transform3d(new Translation3d(Units.inchesToMeters(-12.8), Units.inchesToMeters(5.1), Units.inchesToMeters(27.3)), new Rotation3d(0, shooterCamPitch, shooterCamYaw));
+
+        // The layout of the AprilTags on the field
+        public static final AprilTagFieldLayout kTagLayout =
+                AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+
+        // The standard deviations of our vision estimated poses, which affect correction rate
+        // TODO: (Fake values. Experiment and determine estimation noise on an actual robot.)
+        public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(4, 4, 8);
+        public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
+
+    }
 
   public static final class ModuleConstants {
     // The EasySwerve module can only be configured with one pinion gears: 12T.
@@ -111,6 +163,8 @@ public final class Constants {
     public static final double kPYController = 1;
     public static final double kPThetaController = 1;
 
+    public static final PathConstraints PATH_CONSTRAINTS = new PathConstraints(3.0, 3.0, Math.PI, Math.PI);
+
     // Constraint for the motion profiled robot angle controller
     public static final TrapezoidProfile.Constraints kThetaControllerConstraints = new TrapezoidProfile.Constraints(
         kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
@@ -118,5 +172,66 @@ public final class Constants {
 
   public static final class NeoMotorConstants {
     public static final double kFreeSpeedRpm = 5676;
+  }
+
+  public static final class ShooterConstants {
+    public static final int SHOOTER_FLYWHEEL_CAN_ID = 12; 
+    public static final int BOTTOMFEEDER_CAN_ID = 11;
+    public static final int TOPFEEDER_CAN_ID = 14;
+
+    public static final double PASSING_RPM = 3500;
+
+    public static final int shooterCurrentLimit = 80;
+
+    public static final double FEEDING_SPEED = 0.50;
+    public static final double BACKFEED_SPEED = -0.50;
+
+    //PID constants for nonweighted flywheels
+    public static final double kP_nw = 0.00001;
+    public static final double kI_nw = 0.0000001;
+    public static final double kD_nw = 0.01;
+
+    //PID constants for weighted flywheels
+    public static final double kP_w = 0.00001;
+    public static final double kI_w = 0.0000001;
+    public static final double kD_w = 0.0001;
+
+    //from neo vortex vendor website
+    public static final double kV_nw = 0.0016;
+    public static final double kV_w = 0.0009;
+
+    public static InterpolatingDoubleTreeMap speedMap = new InterpolatingDoubleTreeMap();
+
+    static{
+      //              meters      rpm
+      speedMap.put(1.5, 2400.0);
+      speedMap.put(2.0, 2550.0);
+      speedMap.put(2.5, 2700.0);
+      speedMap.put(3.0, 2900.0);
+      speedMap.put(3.5, 3050.0);
+      speedMap.put(4.0, 3300.0);
+      speedMap.put(4.5, 3550.0);
+
+    }
+  }
+
+  public static final class IntakeConstants {
+    public static final int INTAKE_CAN_ID = 9;
+    public static final int LIFT_CAN_ID = 10;
+
+    public static final double INTAKE_SPEED = 0.75;
+    public static final double LIFT_SPEED = 0.67;
+
+    public static final int intakeCurrentLimit = 80;
+  }
+    public static final class FieldConstants {
+    public static final Translation2d blueHubCenterPose = new Translation2d(4.633, 4.035);
+    public static final Translation2d redHubCenterPose = new Translation2d(11.907, 4.035);
+
+    public static final Pose2d blueLeftTowerPose = new Pose2d(1.567, 4.180, Rotation2d.fromDegrees(180));
+    public static final Pose2d blueRightTowerPose = new Pose2d(1.567, 3.298, Rotation2d.fromDegrees(180));
+
+    public static final Pose2d redLeftTowerPose = new Pose2d(14.984, 3.901, Rotation2d.fromDegrees(0));
+    public static final Pose2d redRightTowerPose = new Pose2d(14.984, 4.740, Rotation2d.fromDegrees(0));
   }
 }

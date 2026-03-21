@@ -1,81 +1,171 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot;
 
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.trajectory.Trajectory;
-import edu.wpi.first.math.trajectory.TrajectoryConfig;
-import edu.wpi.first.math.trajectory.TrajectoryGenerator;
-import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.PS4Controller.Button;
-import frc.robot.Constants.AutoConstants;
-import frc.robot.Constants.DriveConstants;
+
+import frc.robot.subsystems.ShooterSubsystem;
+import frc.robot.subsystems.Superstructure;
+import frc.robot.subsystems.Superstructure.FeederState;
+import frc.robot.subsystems.Superstructure.SuperState;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.SwerveTeleop;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.Vision;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
-import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import java.util.List;
-
-/*
- * This class is where the bulk of the robot should be declared.  Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
- * periodic methods (other than the scheduler calls).  Instead, the structure of the robot
- * (including subsystems, commands, and button mappings) should be declared here.
- */
+import frc.robot.subsystems.Intake;
 
 public class RobotContainer {
-  // The robot's subsystems
-  private final DriveSubsystem swerve = new DriveSubsystem();
+  private final Vision vision = new Vision();
+  private final DriveSubsystem swerve = new DriveSubsystem(vision);
+  private Intake intake = new Intake();
 
-  // The driver's controller
+  
   CommandXboxController driver_controller = new CommandXboxController(OIConstants.kDriverControllerPort);
-  CommandJoystick mech_joystick = new CommandJoystick(OIConstants.kMechJoystickPort);
+  private final ShooterSubsystem shooter = new ShooterSubsystem(swerve, vision);
+  private final SwerveTeleop swerveTeleop;
+  private final Superstructure superstructure;
 
-  private final SwerveTeleop swerveTeleop = new SwerveTeleop(swerve, driver_controller);
 
-  /**
-   * The container for the robot. Contains subsystems, OI devices, and commands.
-   */
   public RobotContainer() {
+
     // Configure the button bindings
     configureButtonBindings();
-
-    // Configure default commands
-    swerve.setDefaultCommand(swerveTeleop);
-  }
-
-  /**
-   * Use this method to define your button->command mappings. Buttons can be
-   * created by
-   * instantiating a {@link edu.wpi.first.wpilibj.GenericHID} or one of its
-   * subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then calling
-   * passing it to a
-   * {@link JoystickButton}.
-   */
-  private void configureButtonBindings() {
     
-    //change this based on what the driver wants for reset heading idk man
-    driver_controller.y().onTrue(swerve.zeroHeading());
-    driver_controller.x().whileTrue(swerve.run(()->swerve.drive(1, 0, 0, false))  );
+    swerveTeleop = new SwerveTeleop(swerve, driver_controller, swerve::aimDriveEnabled);
 
+    superstructure = new Superstructure(swerve, shooter, intake);
+
+    swerve.setDefaultCommand(swerveTeleop);
+    
+    // Warmup pathfinding (runs in background)
+    // PathfindingCommand.warmupCommand().schedule();
   }
 
 
+  private void configureButtonBindings() {
+    // Zero Heading
+    driver_controller.start().onTrue(
+        Commands.runOnce(() -> {
+            System.out.println("ZEROING HEADING");
+        }).andThen(swerve.zeroHeading())
+    );
+
+    Command IDLE = Commands.deferredProxy(
+          () -> superstructure.setSuperState(SuperState.IDLE));
+
+    Command INTAKING = Commands.deferredProxy(
+          () -> superstructure.setSuperState(SuperState.INTAKING));
+
+    Command PASSING = Commands.deferredProxy(
+          () -> superstructure.setSuperState(SuperState.PASSING));
+
+    Command SCORING = Commands.deferredProxy(
+          () -> superstructure.setSuperState(SuperState.SCORING));
+
+    Command REVERSE = Commands.deferredProxy(
+          () -> superstructure.setSuperState(SuperState.REVERSE));
+
+    Command ALIGNING_TOWER_LEFT = Commands.deferredProxy(
+          () -> superstructure.setSuperState(SuperState.ALIGNING_TOWER_LEFT));
+
+    Command ALIGNING_TOWER_RIGHT = Commands.deferredProxy(
+          () -> superstructure.setSuperState(SuperState.ALIGNING_TOWER_RIGHT));
+
+    Command PREVIOUS = Commands.deferredProxy(
+          () -> superstructure.setSuperState(superstructure.getPreviousSuperState()));
+
+    Command PREVIOUS_REVERSE = Commands.deferredProxy(
+          () -> superstructure.setSuperState(superstructure.getPreviousSuperState()));
+
+    Command FEED = Commands.deferredProxy(
+          () -> superstructure.setFeederState(FeederState.FEED));
+
+    Command BACKFEED = Commands.deferredProxy(
+          () -> superstructure.setFeederState(FeederState.BACKFEED));
+
+    Command STOP_FEED = Commands.deferredProxy(
+          () -> superstructure.setFeederState(FeederState.IDLE));
+
+    Command STOP_FEED_2 = Commands.deferredProxy(
+          () -> superstructure.setFeederState(FeederState.IDLE));
+        
+    driver_controller.a().onTrue(PASSING);
+        
+    driver_controller.b().onTrue(IDLE);
+
+    driver_controller.x().onTrue(SCORING);
+
+    driver_controller.rightBumper().onTrue(INTAKING).onFalse(PREVIOUS);
+
+    driver_controller.leftBumper().onTrue(REVERSE).onFalse(PREVIOUS_REVERSE);
+
+    driver_controller.povLeft().onTrue(ALIGNING_TOWER_LEFT);
+
+    driver_controller.povRight().onTrue(ALIGNING_TOWER_RIGHT);
+
+    driver_controller.rightTrigger().onTrue(FEED).onFalse(STOP_FEED);
+
+    driver_controller.leftTrigger().onTrue(BACKFEED).onFalse(STOP_FEED_2);
+       
+    driver_controller.y().onTrue(shooter.backupShooting());
+
+
+
+    // driver_controller.rightBumper().onTrue(Commands.runOnce(() -> intake.intake())).onFalse(Commands.runOnce(() -> intake.stopIntake()));
+    // driver_controller.leftBumper().onTrue(Commands.runOnce(() -> intake.reverseIntake())).onFalse(Commands.runOnce(() -> intake.stopIntake()));
+
+    // driver_controller.x().onTrue(shooter.score());
+    // driver_controller.rightTrigger().onTrue(Commands.runOnce(() -> shooter.feed())).onFalse(Commands.runOnce(() -> shooter.stopFeed()));
+    // driver_controller.y().onTrue(Commands.runOnce(() -> shooter.stopFlywheel()).alongWith(Commands.runOnce(() -> shooter.stopTopFeed())));
+    // driver_controller.leftTrigger().onTrue(Commands.runOnce(() -> shooter.backfeed())).onFalse(Commands.runOnce(() -> shooter.stopFeed()));
+    // driver_controller.b().onTrue(shooter.incrementRPM());
+    // driver_controller.a().onTrue(shooter.decrementRPM());
+
+//     driver_controller.rightBumper().onTrue(shooter.incrementRPM());
+//     driver_controller.leftBumper().onTrue(shooter.decrementRPM());
+
+    // --------------------------------------------------------------------
+    //         AUTO TESTING BINDINGS (uncomment when testing auto)
+    // --------------------------------------------------------------------------
+    
+    // // Emergency Cancel all commands - press B
+    // driver_controller.b().onTrue(
+    //     Commands.runOnce(() -> {
+    //         System.out.println("EMERGENCY CANCEL");
+    //         CommandScheduler.getInstance().cancelAll();
+    //         swerve.stopMotors();
+    //     })
+    // );
+    
+    // // Pathfinding test - press A
+    // driver_controller.a().onTrue(
+    //     AutoBuilder.pathfindToPose(
+    //         new Pose2d(1.5, 1.0, Rotation2d.fromDegrees(0)),
+    //         new PathConstraints(
+    //             0.3,  // max velocity
+    //             0.0,  // max acceleration
+    //             Units.degreesToRadians(90.0),
+    //             Units.degreesToRadians(90.0)
+    //         ),
+    //         0.0  // end velocity
+    //     )
+    // );
+    
+    // // Reset Odoemtry to (0, 0) - Press Left Bumper
+    // driver_controller.leftBumper().onTrue(
+    //     swerve.resetOdo()
+    // );
+  }
+    
   public Command getAutonomousCommand() {
-    return null;
+    // return Commands.sequence(
+    //     AutoBuilder.pathfindToPose(
+    //         new Pose2d(2.0, 2.0, Rotation2d.fromDegrees(0)),
+    //         new PathConstraints(0.5, 0.5, 
+    //             Units.degreesToRadians(360.0), Units.degreesToRadians(360.0)),
+    //         0.0
+    //     )
+    // );
+    return swerve.getAutonomousCommand();
   }
 }
