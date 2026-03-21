@@ -102,6 +102,9 @@ public final class Constants {
         private static final double intakeCamPitch = Units.degreesToRadians(0); //TODO: for testing, check what the camera pitch is
         private static final double batteryCamPitch = Units.degreesToRadians(0); //TODO do ts
         private static final double shooterCamPitch = Units.degreesToRadians(15.0); //TODO do ts
+
+        private static final double shooterCamYaw = Units.degreesToRadians(180);
+        private static final double batteryCamYaw = Units.degreesToRadians(90);
         // See https://docs.wpilib.org/en/stable/docs/software/basic-programming/coordinate-system.html#robot-coordinate-system
         // for why these values the way they are. In short x is positive towards the front, y is positive to left, z is positive to the sky
         //set these lolxd
@@ -109,10 +112,10 @@ public final class Constants {
                 new Transform3d(new Translation3d(Units.inchesToMeters(11.8), Units.inchesToMeters(7.2), Units.inchesToMeters(25.9)), new Rotation3d(0, intakeCamPitch, 0));
         
         public static final Transform3d robotToBatteryCam =
-                new Transform3d(new Translation3d(Units.inchesToMeters(-0.6), Units.inchesToMeters(13.3), Units.inchesToMeters(27.6)), new Rotation3d(0, batteryCamPitch, 0));
+                new Transform3d(new Translation3d(Units.inchesToMeters(-0.6), Units.inchesToMeters(13.3), Units.inchesToMeters(27.6)), new Rotation3d(0, batteryCamPitch, batteryCamYaw));
 
         public static final Transform3d robotToShooterCam =
-                new Transform3d(new Translation3d(Units.inchesToMeters(-12.8), Units.inchesToMeters(5.1), Units.inchesToMeters(27.3)), new Rotation3d(0, shooterCamPitch, 0));
+                new Transform3d(new Translation3d(Units.inchesToMeters(-12.8), Units.inchesToMeters(5.1), Units.inchesToMeters(27.3)), new Rotation3d(0, shooterCamPitch, shooterCamYaw));
 
         // The layout of the AprilTags on the field
         public static final AprilTagFieldLayout kTagLayout =

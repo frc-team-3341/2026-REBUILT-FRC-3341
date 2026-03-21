@@ -62,12 +62,12 @@ public class Vision {
         batteryPhotonPoseEstimator = new PhotonPoseEstimator(
             kTagLayout, 
             PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-            robotToIntakeCam
+            robotToBatteryCam
         );
         shooterPhotonPoseEstimator = new PhotonPoseEstimator(
             kTagLayout, 
             PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-            robotToIntakeCam
+            robotToShooterCam
         );
     
         // Set fallback strategy
