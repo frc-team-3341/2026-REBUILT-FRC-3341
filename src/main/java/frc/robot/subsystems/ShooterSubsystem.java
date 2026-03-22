@@ -213,9 +213,9 @@ public boolean readyToShoot(){
                 return Commands.runOnce(() -> this.stopFeed());
 
             case FEED:
-                if (!readyToShoot) {
-                  return handleFeederTransition(FeederState.IDLE);
-                }
+                // if (!readyToShoot) {
+                //   return handleFeederTransition(FeederState.IDLE);
+                // }
                 return Commands.runOnce(() -> this.feed());
 
             case BACKFEED:
