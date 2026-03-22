@@ -6,11 +6,16 @@ import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.Superstructure.FeederState;
 import frc.robot.subsystems.Superstructure.SuperState;
 import frc.robot.Constants.OIConstants;
+import frc.robot.commands.ShootAuto;
 import frc.robot.commands.SwerveTeleop;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.Vision;
+
+import com.pathplanner.lib.events.EventTrigger;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.Intake;
 
@@ -22,20 +27,24 @@ public class RobotContainer {
   
   CommandXboxController driver_controller = new CommandXboxController(OIConstants.kDriverControllerPort);
   private final ShooterSubsystem shooter = new ShooterSubsystem(swerve, vision);
+
   private final SwerveTeleop swerveTeleop;
   private final Superstructure superstructure;
+  ShootAuto shootAuto;
 
 
   public RobotContainer() {
 
-    // Configure the button bindings
-    configureButtonBindings();
     
     swerveTeleop = new SwerveTeleop(swerve, driver_controller, swerve::aimDriveEnabled);
 
     superstructure = new Superstructure(swerve, shooter, intake);
 
     swerve.setDefaultCommand(swerveTeleop);
+
+    shootAuto = new ShootAuto(shooter);
+
+    configureButtonBindings();
     
     // Warmup pathfinding (runs in background)
     // PathfindingCommand.warmupCommand().schedule();
@@ -99,16 +108,21 @@ public class RobotContainer {
 
     driver_controller.leftBumper().onTrue(REVERSE).onFalse(PREVIOUS_REVERSE);
 
-    driver_controller.povLeft().onTrue(ALIGNING_TOWER_LEFT);
+//     driver_controller.povLeft().onTrue(ALIGNING_TOWER_LEFT);
 
-    driver_controller.povRight().onTrue(ALIGNING_TOWER_RIGHT);
+//     driver_controller.povRight().onTrue(ALIGNING_TOWER_RIGHT);
 
-    driver_controller.rightTrigger().onTrue(FEED).onFalse(STOP_FEED);
+    driver_controller.rightTrigger().whileTrue(FEED).onFalse(STOP_FEED);
 
     driver_controller.leftTrigger().onTrue(BACKFEED).onFalse(STOP_FEED_2);
        
     driver_controller.y().onTrue(shooter.backupShooting());
 
+    
+
+    new EventTrigger("ShootFromHere").onTrue(shootAuto);
+    new EventTrigger("Wait").onTrue(new WaitCommand(5));
+    new EventTrigger("Lift").onTrue(intake.startLift());
 
 
     // driver_controller.rightBumper().onTrue(Commands.runOnce(() -> intake.intake())).onFalse(Commands.runOnce(() -> intake.stopIntake()));
@@ -166,6 +180,10 @@ public class RobotContainer {
     //         0.0
     //     )
     // );
-    return swerve.getAutonomousCommand();
+    return shootAuto;
+  }
+
+  public Superstructure getSuperstructure() {
+    return superstructure;
   }
 }

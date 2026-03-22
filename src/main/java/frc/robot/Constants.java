@@ -62,7 +62,7 @@ public final class Constants {
     // The EasySwerve module allows installation of the motors either on top or bottom of the module.
     // These constants configure the location of the motors. The default configuration is with both
     // motors on the bottom of the module.
-    public static final boolean kFrontLeftDrivingMotorOnBottom = true;
+    public static final boolean kFrontLeftDrivingMotorOnBottom = false;
     public static final boolean kRearLeftDrivingMotorOnBottom = false;
     public static final boolean kFrontRightDrivingMotorOnBottom = false;
     public static final boolean kRearRightDrivingMotorOnBottom = true;
@@ -115,7 +115,7 @@ public final class Constants {
                 new Transform3d(new Translation3d(Units.inchesToMeters(-0.6), Units.inchesToMeters(13.3), Units.inchesToMeters(27.6)), new Rotation3d(0, batteryCamPitch, batteryCamYaw));
 
         public static final Transform3d robotToShooterCam =
-                new Transform3d(new Translation3d(Units.inchesToMeters(-12.8), Units.inchesToMeters(5.1), Units.inchesToMeters(27.3)), new Rotation3d(0, shooterCamPitch, shooterCamYaw));
+                new Transform3d(new Translation3d(Units.inchesToMeters(-32.8), Units.inchesToMeters(5.1), Units.inchesToMeters(27.3)), new Rotation3d(0, shooterCamPitch, shooterCamYaw));
 
         // The layout of the AprilTags on the field
         public static final AprilTagFieldLayout kTagLayout =
@@ -220,7 +220,7 @@ public final class Constants {
     public static final int LIFT_CAN_ID = 10;
 
     public static final double INTAKE_SPEED = 0.75;
-    public static final double LIFT_SPEED = 0.67;
+    // public static final double LIFT_SPEED = 0.67;
 
     public static final int intakeCurrentLimit = 80;
   }
@@ -233,5 +233,13 @@ public final class Constants {
 
     public static final Pose2d redLeftTowerPose = new Pose2d(14.984, 3.901, Rotation2d.fromDegrees(0));
     public static final Pose2d redRightTowerPose = new Pose2d(14.984, 4.740, Rotation2d.fromDegrees(0));
+  }
+
+  public static class ClimberConstants {
+    public static final double SERVO_ENGAGED_ANGLE = 90.0;
+    public static final double SERVO_RELEASED_ANGLE = 0.0;
+    public static final double SPEED = 0.2;
+    public static final double SOFT_LIMIT_TOP = 95.0; // need to test the values for soft limits top and bottom
+    public static final double SOFT_LIMIT_BOTTOM = 2.0; 
   }
 }
