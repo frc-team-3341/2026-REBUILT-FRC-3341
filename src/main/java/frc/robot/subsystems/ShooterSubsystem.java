@@ -55,6 +55,8 @@ public class ShooterSubsystem extends SubsystemBase {
   private DriveSubsystem driveSubsystem;
   private Vision visionSubsystem;
 
+  boolean readyToShoot;
+
 
   public ShooterSubsystem(DriveSubsystem drive, Vision vision) {
 
@@ -67,15 +69,18 @@ public class ShooterSubsystem extends SubsystemBase {
 
     closedLoopController = shooter.getClosedLoopController();
 
-
     shooter.configure(Configs.Shooter.FLYWHEEL_CONFIG, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     bottomFeeder.configure(Configs.Shooter.FEEDER_CONFIG, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     topFeeder.configure(Configs.Shooter.FEEDER_CONFIG, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     // Init drive subsystem
     driveSubsystem = drive;
     robotPose = driveSubsystem.getOdometryPose();
+
+
     // Vision subsystem
-    visionSubsystem = vision;    
+    visionSubsystem = vision;   
+    
+    readyToShoot = false;
   }
 
 
@@ -92,6 +97,8 @@ public class ShooterSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Topfeed RPM", topEncoder.getVelocity());
 
     SmartDashboard.putNumber("motor output", topFeeder.getAppliedOutput());
+
+    readyToShoot = relativeEncoder.getVelocity() >= targetRPM*0.98;
 
   }
 
@@ -160,6 +167,19 @@ public void stopTopFeed() {
   topFeeder.set(0);
 }
 
+public double getShooterRPM(){
+ return relativeEncoder.getVelocity();
+}
+
+public void score(){
+  topFeeder.set(FEEDING_SPEED);
+  setFlywheelRPM(speedMap.get(getHubDistance()));
+}
+
+public boolean readyToShoot(){ 
+  return readyToShoot;
+}
+
   public Command decrementRPM() {
     return this.runOnce(() -> {
         targetRPM -= 50;
@@ -180,12 +200,12 @@ public void stopTopFeed() {
     });
   }
 
-  public Command score() {
-    return this.runOnce(() -> {
-      topFeeder.set(FEEDING_SPEED);
-      setFlywheelRPM(speedMap.get(getHubDistance()));
-    });
-  }
+  // public Command score() {
+  //   return this.runOnce(() -> {
+  //     topFeeder.set(FEEDING_SPEED);
+  //     setFlywheelRPM(speedMap.get(getHubDistance()));
+  //   });
+  // }
 
   public Command handleFeederTransition(FeederState desiredState) {
         switch (desiredState) {
@@ -193,6 +213,9 @@ public void stopTopFeed() {
                 return Commands.runOnce(() -> this.stopFeed());
 
             case FEED:
+                // if (!readyToShoot) {
+                //   return handleFeederTransition(FeederState.IDLE);
+                // }
                 return Commands.runOnce(() -> this.feed());
 
             case BACKFEED:
@@ -217,16 +240,17 @@ public void stopTopFeed() {
                 
                   double distanceToHub = ShooterUtil.getDistanceToHub(robotPose);
 
-                  if (Math.abs(distanceToHub-prevDistance)>0.05 && targetRPM != 0) {
-                    System.out.println("Updating speed for the distance: " + distanceToHub + " meters from the center of the hub");
+                  // if (Math.abs(distanceToHub-prevDistance)>0.05 && targetRPM != 0) {
+                    // System.out.println("Updati/;//;/mbbbb            ng speed for the distance: " + distanceToHub + " meters from the center of the hub");
                     targetRPM = speedMap.get(distanceToHub);
                     prevDistance = distanceToHub;
-                  }
-                  else if (targetRPM == 0) {
-                    targetRPM = speedMap.get(distanceToHub);
-                  }
-
+                  // }
+                  // else if (targetRPM == 0) {
+                    // targetRPM = speedMap.get(distanceToHub);
+                  // }
+                  
                   this.setFlywheelRPM(targetRPM);
+                  
                 })
                   .alongWith(Commands.runOnce(() -> topFeeder.set(FEEDING_SPEED)));
                 

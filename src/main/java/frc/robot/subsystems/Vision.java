@@ -300,7 +300,7 @@ public class Vision {
             
             // Increase std devs based on (average) distance
             // If single tag and far away, reject the measurement
-            if (numTags == 1 && avgDist > 4) {
+            if (numTags == 1 && avgDist > 2.5) {
                 estStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
                 SmartDashboard.putString("Vision/StdDevs", "Rejected - Too Far");
             } else {

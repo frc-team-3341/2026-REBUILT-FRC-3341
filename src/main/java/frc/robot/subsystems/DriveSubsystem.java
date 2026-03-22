@@ -82,7 +82,8 @@ public class DriveSubsystem extends SubsystemBase {
       DriveConstants.kRearRightTurningMotorOnBottom);
 
   private EasySwerveModule[] modules;
-  private final StructArrayPublisher<SwerveModuleState> statePublisher;
+  private final StructArrayPublisher<SwerveModuleState> desiredStatePublisher;
+  private final StructArrayPublisher<SwerveModuleState> actualStatePublisher;
   private final StructPublisher<Pose2d> poseEstimatorPublisher;
   private final StructPublisher<Pose2d> odometryPublisher;
 
@@ -155,7 +156,9 @@ private void createSimulationSwerve(Pose2d startingPose) {
     modules[2] = m_rearLeft;
     modules[3] = m_rearRight;
 
-    statePublisher = NetworkTableInstance.getDefault()
+    desiredStatePublisher = NetworkTableInstance.getDefault()
+        .getStructArrayTopic("/SwerveStates", SwerveModuleState.struct).publish();
+    actualStatePublisher = NetworkTableInstance.getDefault() 
         .getStructArrayTopic("/SwerveStates", SwerveModuleState.struct).publish();
     poseEstimatorPublisher = NetworkTableInstance.getDefault()
         .getStructTopic("/PoseEstimator/EstimatedPose", Pose2d.struct).publish();
@@ -217,6 +220,7 @@ private void createSimulationSwerve(Pose2d startingPose) {
 
                 var alliance = DriverStation.getAlliance();
                 if (alliance.isPresent()) {
+                  System.out.println("alliance is present and value is " + (alliance.get() == DriverStation.Alliance.Red));
                   return alliance.get() == DriverStation.Alliance.Red;
                 }
                 return false;
@@ -224,7 +228,7 @@ private void createSimulationSwerve(Pose2d startingPose) {
               this); // Reference to this subsystem to set requirements        
           
           // Put in the name of the auto here
-          autoChooser = AutoBuilder.buildAutoChooser("testIntakeAuto"); //TODO: put name of auto - use as parameter (String)
+          autoChooser = AutoBuilder.buildAutoChooser("Shoot Depot Side"); //TODO: put name of auto - use as parameter (String)
           SmartDashboard.putData(autoChooser);
         } catch (Exception e) {
           //If an exception is thrown here we are really in trouble
@@ -298,6 +302,8 @@ private void createSimulationSwerve(Pose2d startingPose) {
             m_rearLeft.getPosition(),
             m_rearRight.getPosition()
         });
+
+    
 
     // Update the pose estimator with wheel odometry
     poseEstimator.update(

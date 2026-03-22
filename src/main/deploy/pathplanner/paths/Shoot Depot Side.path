@@ -1,0 +1,85 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 3.8317180094786725,
+        "y": 7.301919431279621
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 3.0955864928909955,
+        "y": 7.129976303317535
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 2.6549822274881514,
+        "y": 5.496516587677725
+      },
+      "prevControl": {
+        "x": 2.6549822274881514,
+        "y": 6.700118483412322
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [
+    {
+      "name": "ShootFromHere",
+      "waypointRelativePos": 0.801063829787239,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "sequential",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "Wait"
+              }
+            },
+            {
+              "type": "named",
+              "data": {
+                "name": "Lift"
+              }
+            },
+            {
+              "type": "named",
+              "data": {
+                "name": "ShootFromHere"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 2.0,
+    "maxAcceleration": 2.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 143.34389158403303
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 89.34893961977038
+  },
+  "useDefaultConstraints": true
+}
