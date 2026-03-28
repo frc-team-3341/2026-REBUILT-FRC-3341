@@ -34,9 +34,27 @@
   "eventMarkers": [
     {
       "name": "ShootFromHere",
-      "waypointRelativePos": 0.48992576882289973,
+      "waypointRelativePos": 0.4393617021276503,
       "endWaypointRelativePos": null,
-      "command": null
+      "command": {
+        "type": "parallel",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "Lift"
+              }
+            },
+            {
+              "type": "named",
+              "data": {
+                "name": "ShootFromHere"
+              }
+            }
+          ]
+        }
+      }
     }
   ],
   "globalConstraints": {

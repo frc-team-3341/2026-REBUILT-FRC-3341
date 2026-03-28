@@ -34,31 +34,12 @@
   "eventMarkers": [
     {
       "name": "ShootFromHere",
-      "waypointRelativePos": 0.801063829787239,
+      "waypointRelativePos": 0.44,
       "endWaypointRelativePos": null,
       "command": {
-        "type": "sequential",
+        "type": "parallel",
         "data": {
-          "commands": [
-            {
-              "type": "named",
-              "data": {
-                "name": "Wait"
-              }
-            },
-            {
-              "type": "named",
-              "data": {
-                "name": "Lift"
-              }
-            },
-            {
-              "type": "named",
-              "data": {
-                "name": "ShootFromHere"
-              }
-            }
-          ]
+          "commands": []
         }
       }
     }

@@ -157,9 +157,9 @@ private void createSimulationSwerve(Pose2d startingPose) {
     modules[3] = m_rearRight;
 
     desiredStatePublisher = NetworkTableInstance.getDefault()
-        .getStructArrayTopic("/SwerveStates", SwerveModuleState.struct).publish();
+        .getStructArrayTopic("/SwerveStates_Desired", SwerveModuleState.struct).publish();
     actualStatePublisher = NetworkTableInstance.getDefault() 
-        .getStructArrayTopic("/SwerveStates", SwerveModuleState.struct).publish();
+        .getStructArrayTopic("/SwerveStates_Actual", SwerveModuleState.struct).publish();
     poseEstimatorPublisher = NetworkTableInstance.getDefault()
         .getStructTopic("/PoseEstimator/EstimatedPose", Pose2d.struct).publish();
     odometryPublisher = NetworkTableInstance.getDefault()
