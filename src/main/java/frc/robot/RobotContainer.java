@@ -134,7 +134,7 @@ public class RobotContainer {
     
   public Command getAutonomousCommand() {
 //     return shootAuto.andThen(intake.startLift()).andThen(new ShootAuto(shooter));
-      return swerve.getAutonomousCommand().andThen(new WaitCommand(4)).andThen(intake.startLift()).andThen(new ShootAuto(shooter));
+      return swerve.getAutonomousCommand();
   }
 
   public Superstructure getSuperstructure() {
