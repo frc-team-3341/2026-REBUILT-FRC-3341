@@ -183,8 +183,8 @@ public final class Constants {
 
     public static final int shooterCurrentLimit = 80;
 
-    public static final double FEEDING_SPEED = 0.50;
-    public static final double BACKFEED_SPEED = -0.50;
+    public static final double FEEDING_SPEED = 0.90;
+    public static final double BACKFEED_SPEED = -0.80;
 
     //PID constants for nonweighted flywheels
     public static final double kP_nw = 0.00001;
@@ -238,7 +238,7 @@ public final class Constants {
   public static class ClimberConstants {
     public static final double SERVO_ENGAGED_ANGLE = 90.0;
     public static final double SERVO_RELEASED_ANGLE = 0.0;
-    public static final double SPEED = 0.2;
+    public static final double SPEED = 0.5;
     public static final double SOFT_LIMIT_TOP = 95.0; // need to test the values for soft limits top and bottom
     public static final double SOFT_LIMIT_BOTTOM = 2.0; 
   }

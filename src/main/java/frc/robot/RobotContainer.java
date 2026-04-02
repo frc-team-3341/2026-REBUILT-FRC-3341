@@ -8,6 +8,7 @@ import frc.robot.subsystems.Superstructure.SuperState;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.ShootAuto;
 import frc.robot.commands.SwerveTeleop;
+import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.Vision;
 
@@ -25,6 +26,7 @@ public class RobotContainer {
   private final Vision vision = new Vision();
   private final DriveSubsystem swerve = new DriveSubsystem(vision);
   private Intake intake = new Intake();
+  Climber climber = new Climber();
 
   
   CommandXboxController driver_controller = new CommandXboxController(OIConstants.kDriverControllerPort);
@@ -120,8 +122,14 @@ public class RobotContainer {
 
     driver_controller.rightTrigger().onTrue(FEED).onFalse(Commands.runOnce(() -> CommandScheduler.getInstance().cancel(FEED)).alongWith(STOP_FEED));
 //     driver_controller.rightTrigger().onTrue(FEED).onFalse(STOP_FEED);
+//     driver_controller.rightTrigger().onTrue(FEED).onFalse(STOP_FEED);
 
     driver_controller.leftTrigger().onTrue(BACKFEED).onFalse(STOP_FEED_2);
+
+    driver_controller.povUp().onTrue(climber.leadscrewUp()).onFalse(climber.leadscrewStop());
+    driver_controller.povDown().onTrue(climber.leadscrewDown()).onFalse(climber.leadscrewStop());
+    
+    driver_controller.back().onTrue(climber.retract());
        
     driver_controller.y().onTrue(shooter.backupShooting());
 

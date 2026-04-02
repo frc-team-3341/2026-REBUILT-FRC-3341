@@ -27,14 +27,14 @@ public class Climber extends SubsystemBase {
     private final SparkLimitSwitch bottomLimitSwitch;
     private final PWM pwm;
 
-    int pulseTime = 2500;
+    int pulseTime = 2000;
 
     public Climber() {
         pwm = new PWM(0);
         // servo.setAngle(0);
 
         SparkFlexConfig config = new SparkFlexConfig();
-        config.idleMode(IdleMode.kBrake);
+        config.idleMode(IdleMode.kCoast);
         // config.softLimit
             // .forwardSoftLimit(SOFT_LIMIT_TOP)
             // .forwardSoftLimitEnabled(true)
@@ -43,6 +43,9 @@ public class Climber extends SubsystemBase {
         config.limitSwitch
             .forwardLimitSwitchType(Type.kNormallyClosed)
             .reverseLimitSwitchType(Type.kNormallyClosed);
+        
+        //Needs to be inverted because the limit switches are inverted electrically
+        config.inverted(true);
 
         leadscrewMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
         encoder = leadscrewMotor.getEncoder();
@@ -56,14 +59,16 @@ public class Climber extends SubsystemBase {
     }
 
     // Leadscrew movement
-    public Command leadscrewUp() {
+    public Command leadscrewDown() {
         return this.runOnce(() -> {
+            System.out.println("Going Down!");
             leadscrewMotor.set(SPEED);
         }).alongWith(deploy());
     }
 
-    public Command leadscrewDown() {
+    public Command leadscrewUp() {
         return this.runOnce(() -> {
+            System.out.println("Going Up!");
             leadscrewMotor.set(-SPEED);
             
         }).alongWith(deploy());
@@ -94,7 +99,7 @@ public class Climber extends SubsystemBase {
     }
 
     public Command deploy() {
-        return Commands.runOnce(() ->pwm.setPulseTimeMicroseconds(2000));
+        return Commands.runOnce(() ->pwm.setPulseTimeMicroseconds(2050));
     }
 
     public Command retract() {
