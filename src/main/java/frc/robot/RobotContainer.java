@@ -6,6 +6,7 @@ import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.Superstructure.FeederState;
 import frc.robot.subsystems.Superstructure.SuperState;
 import frc.robot.Constants.OIConstants;
+import frc.robot.commands.ClimbAuto;
 import frc.robot.commands.ShootAuto;
 import frc.robot.commands.SwerveTeleop;
 import frc.robot.subsystems.Climber;
@@ -135,6 +136,8 @@ public class RobotContainer {
 
 
     new EventTrigger("ShootFromHere").onTrue(shootAuto);
+    new EventTrigger("Deploy").onTrue(climber.deploy());
+    new EventTrigger("Climb").onTrue(new ClimbAuto(climber));
 //     new EventTrigger("Wait").onTrue(new WaitCommand(5));
 //     new EventTrigger("Lift").onTrue(intake.startLift());
     

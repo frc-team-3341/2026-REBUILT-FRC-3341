@@ -74,6 +74,14 @@ public class Climber extends SubsystemBase {
         }).alongWith(deploy());
     }
 
+    public void climb() {
+        leadscrewMotor.set(SPEED);
+    }
+
+    public void stop() {
+        leadscrewMotor.set(0);
+    }
+
     public Command leadscrewStop() {
         return this.runOnce(() -> leadscrewMotor.set(0.0));
     }
@@ -99,7 +107,7 @@ public class Climber extends SubsystemBase {
     }
 
     public Command deploy() {
-        return Commands.runOnce(() ->pwm.setPulseTimeMicroseconds(2050));
+        return Commands.runOnce(() -> pwm.setPulseTimeMicroseconds(2050));
     }
 
     public Command retract() {

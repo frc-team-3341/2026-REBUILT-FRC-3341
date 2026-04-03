@@ -249,7 +249,6 @@ private void createSimulationSwerve(Pose2d startingPose) {
 
             case TRACKING_HUB:
                 return Commands.runOnce(() -> aimDriveEnabled = true);
-
             case ALIGNING_TOWER_LEFT:
                 return getTowerPoses() != null ? AutoBuilder.pathfindToPose(
                     getTowerPoses()[0], AutoConstants.PATH_CONSTRAINTS, 0)
