@@ -102,16 +102,12 @@ public class Climber extends SubsystemBase {
         });
     }
 
-    public void setAngle(double angle) {
-        pwm.setPulseTimeMicroseconds((int) ((1000)+angle*5.55));
-    }
-
     public Command deploy() {
-        return Commands.runOnce(() -> pwm.setPulseTimeMicroseconds(2050));
+        return Commands.runOnce(() -> pwm.setPulseTimeMicroseconds(SERVO_ENGAGED_PULSE));
     }
 
     public Command retract() {
-        return Commands.runOnce(() -> pwm.setPulseTimeMicroseconds(1400));
+        return Commands.runOnce(() -> pwm.setPulseTimeMicroseconds(SERVO_RELEASED_PULSE));
     }
 
     @Override

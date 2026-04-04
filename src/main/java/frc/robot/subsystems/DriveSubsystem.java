@@ -252,12 +252,14 @@ private void createSimulationSwerve(Pose2d startingPose) {
             case ALIGNING_TOWER_LEFT:
                 return getTowerPoses() != null ? AutoBuilder.pathfindToPose(
                     getTowerPoses()[0], AutoConstants.PATH_CONSTRAINTS, 0)
+                        .andThen(handleSwerveTransitions(SwerveState.MANUAL))
                     : Commands.print("No alliance selected, cannot run alignment command!")
                     .alongWith(handleSwerveTransitions(SwerveState.MANUAL));
 
             case ALIGNING_TOWER_RIGHT:
                 return getTowerPoses() != null ? AutoBuilder.pathfindToPose(
                     getTowerPoses()[1], AutoConstants.PATH_CONSTRAINTS, 0)
+                        .andThen(handleSwerveTransitions(SwerveState.MANUAL)) 
                     : Commands.print("No alliance selected, cannot run alignment command!")
                     .alongWith(handleSwerveTransitions(SwerveState.MANUAL));
 

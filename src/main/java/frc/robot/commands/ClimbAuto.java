@@ -31,6 +31,6 @@ public class ClimbAuto extends Command{
 
     @Override
     public boolean isFinished() {
-        return counter >= 150;
+        return counter >= 250;
     }
 }

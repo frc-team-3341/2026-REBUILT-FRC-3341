@@ -117,9 +117,11 @@ public class RobotContainer {
 
     driver_controller.leftBumper().onTrue(REVERSE).onFalse(PREVIOUS_REVERSE);
 
-//     driver_controller.povLeft().onTrue(ALIGNING_TOWER_LEFT);
+    driver_controller.povLeft().onTrue(climber.deploy().andThen(ALIGNING_TOWER_LEFT));
 
-//     driver_controller.povRight().onTrue(ALIGNING_TOWER_RIGHT);
+    driver_controller.povRight().onTrue(climber.deploy().andThen(ALIGNING_TOWER_RIGHT));
+
+//     driver_controller.povLeft().onTrue(climber.setPulseTime());
 
     driver_controller.rightTrigger().onTrue(FEED).onFalse(Commands.runOnce(() -> CommandScheduler.getInstance().cancel(FEED)).alongWith(STOP_FEED));
 //     driver_controller.rightTrigger().onTrue(FEED).onFalse(STOP_FEED);
@@ -145,7 +147,7 @@ public class RobotContainer {
     
   public Command getAutonomousCommand() {
 //     return shootAuto.andThen(intake.startLift()).andThen(new ShootAuto(shooter));
-      return swerve.getAutonomousCommand();
+      return swerve.getAutonomousCommand();  
   }
 
   public Superstructure getSuperstructure() {
