@@ -98,7 +98,8 @@ public class ShooterSubsystem extends SubsystemBase {
 
     SmartDashboard.putNumber("motor output", topFeeder.getAppliedOutput());
 
-    readyToShoot = relativeEncoder.getVelocity() >= targetRPM*0.98;
+    // readyToShoot = relativeEncoder.getVelocity() >= targetRPM*0.98;
+    readyToShoot = Math.abs(relativeEncoder.getVelocity()-targetRPM) < 150;
 
   }
 
@@ -213,10 +214,26 @@ public boolean readyToShoot(){
                 return Commands.runOnce(() -> this.stopFeed());
 
             case FEED:
+              return Commands.run(() -> {
+                if (readyToShoot) {
+                  this.feed();
+                }
+                else {
+                  this.stopFeed();
+                }
+              });
+                // return Commands.runOnce(() -> this.feed());
+                // return Commands.runOnce(() -> this.feed());
+                // return Commands.runOnce(() -> this.feed());
                 // if (!readyToShoot) {
                 //   return handleFeederTransition(FeederState.IDLE);
                 // }
-                return Commands.runOnce(() -> this.feed());
+                // if (readyToShoot){
+                //   return Commands.runOnce(() -> this.feed());
+                // }
+                // else {
+
+                // }
 
             case BACKFEED:
                 return Commands.runOnce(() -> this.backfeed());

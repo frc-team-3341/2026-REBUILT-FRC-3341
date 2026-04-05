@@ -6,14 +6,18 @@ import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.Superstructure.FeederState;
 import frc.robot.subsystems.Superstructure.SuperState;
 import frc.robot.Constants.OIConstants;
+import frc.robot.commands.ClimbAuto;
 import frc.robot.commands.ShootAuto;
 import frc.robot.commands.SwerveTeleop;
+import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.Vision;
 
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.events.EventTrigger;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -23,6 +27,7 @@ public class RobotContainer {
   private final Vision vision = new Vision();
   private final DriveSubsystem swerve = new DriveSubsystem(vision);
   private Intake intake = new Intake();
+  Climber climber = new Climber();
 
   
   CommandXboxController driver_controller = new CommandXboxController(OIConstants.kDriverControllerPort);
@@ -35,14 +40,18 @@ public class RobotContainer {
 
   public RobotContainer() {
 
-    
+    shootAuto = new ShootAuto(shooter);
+
+    NamedCommands.registerCommand("Shoot", shootAuto);
+    NamedCommands.registerCommand("Start Lift", intake.startLift());
+
     swerveTeleop = new SwerveTeleop(swerve, driver_controller, swerve::aimDriveEnabled);
 
     superstructure = new Superstructure(swerve, shooter, intake);
 
     swerve.setDefaultCommand(swerveTeleop);
 
-    shootAuto = new ShootAuto(shooter);
+//     NamedCommands.registerCommand("Wait", new WaitCommand(5));
 
     configureButtonBindings();
     
@@ -108,79 +117,37 @@ public class RobotContainer {
 
     driver_controller.leftBumper().onTrue(REVERSE).onFalse(PREVIOUS_REVERSE);
 
-//     driver_controller.povLeft().onTrue(ALIGNING_TOWER_LEFT);
+    driver_controller.povLeft().onTrue(climber.deploy().andThen(ALIGNING_TOWER_LEFT));
 
-//     driver_controller.povRight().onTrue(ALIGNING_TOWER_RIGHT);
+    driver_controller.povRight().onTrue(climber.deploy().andThen(ALIGNING_TOWER_RIGHT));
 
-    driver_controller.rightTrigger().whileTrue(FEED).onFalse(STOP_FEED);
+//     driver_controller.povLeft().onTrue(climber.setPulseTime());
+
+    driver_controller.rightTrigger().onTrue(FEED).onFalse(Commands.runOnce(() -> CommandScheduler.getInstance().cancel(FEED)).alongWith(STOP_FEED));
+//     driver_controller.rightTrigger().onTrue(FEED).onFalse(STOP_FEED);
+//     driver_controller.rightTrigger().onTrue(FEED).onFalse(STOP_FEED);
 
     driver_controller.leftTrigger().onTrue(BACKFEED).onFalse(STOP_FEED_2);
+
+    driver_controller.povUp().onTrue(climber.leadscrewUp()).onFalse(climber.leadscrewStop());
+    driver_controller.povDown().onTrue(climber.leadscrewDown()).onFalse(climber.leadscrewStop());
+    
+    driver_controller.back().onTrue(climber.retract());
        
     driver_controller.y().onTrue(shooter.backupShooting());
 
-    
 
     new EventTrigger("ShootFromHere").onTrue(shootAuto);
-    new EventTrigger("Wait").onTrue(new WaitCommand(5));
-    new EventTrigger("Lift").onTrue(intake.startLift());
-
-
-    // driver_controller.rightBumper().onTrue(Commands.runOnce(() -> intake.intake())).onFalse(Commands.runOnce(() -> intake.stopIntake()));
-    // driver_controller.leftBumper().onTrue(Commands.runOnce(() -> intake.reverseIntake())).onFalse(Commands.runOnce(() -> intake.stopIntake()));
-
-    // driver_controller.x().onTrue(shooter.score());
-    // driver_controller.rightTrigger().onTrue(Commands.runOnce(() -> shooter.feed())).onFalse(Commands.runOnce(() -> shooter.stopFeed()));
-    // driver_controller.y().onTrue(Commands.runOnce(() -> shooter.stopFlywheel()).alongWith(Commands.runOnce(() -> shooter.stopTopFeed())));
-    // driver_controller.leftTrigger().onTrue(Commands.runOnce(() -> shooter.backfeed())).onFalse(Commands.runOnce(() -> shooter.stopFeed()));
-    // driver_controller.b().onTrue(shooter.incrementRPM());
-    // driver_controller.a().onTrue(shooter.decrementRPM());
-
-//     driver_controller.rightBumper().onTrue(shooter.incrementRPM());
-//     driver_controller.leftBumper().onTrue(shooter.decrementRPM());
-
-    // --------------------------------------------------------------------
-    //         AUTO TESTING BINDINGS (uncomment when testing auto)
-    // --------------------------------------------------------------------------
+    new EventTrigger("Deploy").onTrue(climber.deploy());
+    new EventTrigger("Climb").onTrue(new ClimbAuto(climber));
+//     new EventTrigger("Wait").onTrue(new WaitCommand(5));
+//     new EventTrigger("Lift").onTrue(intake.startLift());
     
-    // // Emergency Cancel all commands - press B
-    // driver_controller.b().onTrue(
-    //     Commands.runOnce(() -> {
-    //         System.out.println("EMERGENCY CANCEL");
-    //         CommandScheduler.getInstance().cancelAll();
-    //         swerve.stopMotors();
-    //     })
-    // );
-    
-    // // Pathfinding test - press A
-    // driver_controller.a().onTrue(
-    //     AutoBuilder.pathfindToPose(
-    //         new Pose2d(1.5, 1.0, Rotation2d.fromDegrees(0)),
-    //         new PathConstraints(
-    //             0.3,  // max velocity
-    //             0.0,  // max acceleration
-    //             Units.degreesToRadians(90.0),
-    //             Units.degreesToRadians(90.0)
-    //         ),
-    //         0.0  // end velocity
-    //     )
-    // );
-    
-    // // Reset Odoemtry to (0, 0) - Press Left Bumper
-    // driver_controller.leftBumper().onTrue(
-    //     swerve.resetOdo()
-    // );
   }
     
   public Command getAutonomousCommand() {
-    // return Commands.sequence(
-    //     AutoBuilder.pathfindToPose(
-    //         new Pose2d(2.0, 2.0, Rotation2d.fromDegrees(0)),
-    //         new PathConstraints(0.5, 0.5, 
-    //             Units.degreesToRadians(360.0), Units.degreesToRadians(360.0)),
-    //         0.0
-    //     )
-    // );
-    return shootAuto;
+//     return shootAuto.andThen(intake.startLift()).andThen(new ShootAuto(shooter));
+      return swerve.getAutonomousCommand();  
   }
 
   public Superstructure getSuperstructure() {
