@@ -64,7 +64,7 @@ public final class Constants {
     // motors on the bottom of the module.
     public static final boolean kFrontLeftDrivingMotorOnBottom = false;
     public static final boolean kRearLeftDrivingMotorOnBottom = false;
-    public static final boolean kFrontRightDrivingMotorOnBottom = false;
+    public static final boolean kFrontRightDrivingMotorOnBottom = true;
     public static final boolean kRearRightDrivingMotorOnBottom = true;
 
     public static final boolean kFrontLeftTurningMotorOnBottom = false;
@@ -112,7 +112,7 @@ public final class Constants {
                 new Transform3d(new Translation3d(Units.inchesToMeters(11.8), Units.inchesToMeters(7.2), Units.inchesToMeters(25.9)), new Rotation3d(0, intakeCamPitch, 0));
         
         public static final Transform3d robotToBatteryCam =
-                new Transform3d(new Translation3d(Units.inchesToMeters(-0.6), Units.inchesToMeters(13.3), Units.inchesToMeters(27.6)), new Rotation3d(0, batteryCamPitch, batteryCamYaw));
+                new Transform3d(new Translation3d(Units.inchesToMeters(-0.6), Units.inchesToMeters(13.0), Units.inchesToMeters(27.6)), new Rotation3d(0, batteryCamPitch, batteryCamYaw));
 
         public static final Transform3d robotToShooterCam =
                 new Transform3d(new Translation3d(Units.inchesToMeters(-32.8), Units.inchesToMeters(5.1), Units.inchesToMeters(27.3)), new Rotation3d(0, shooterCamPitch, shooterCamYaw));
@@ -238,7 +238,7 @@ public final class Constants {
   }
 
   public static class ClimberConstants {
-    public static final int SERVO_ENGAGED_PULSE = 2050;
+    public static final int SERVO_ENGAGED_PULSE = 2100;
     public static final int SERVO_RELEASED_PULSE = 1350;
     public static final double SPEED = 0.5;
     public static final double SOFT_LIMIT_TOP = 95.0; // need to test the values for soft limits top and bottom
