@@ -88,7 +88,7 @@ public final class Configs {
 
       FEEDER_CONFIG
         .idleMode(IdleMode.kBrake)
-        .smartCurrentLimit(shooterCurrentLimit);
+        .smartCurrentLimit(feederCurrentLimit);
 
     }
   }

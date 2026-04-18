@@ -64,7 +64,7 @@ public final class Constants {
     // motors on the bottom of the module.
     public static final boolean kFrontLeftDrivingMotorOnBottom = false;
     public static final boolean kRearLeftDrivingMotorOnBottom = false;
-    public static final boolean kFrontRightDrivingMotorOnBottom = false;
+    public static final boolean kFrontRightDrivingMotorOnBottom = true;
     public static final boolean kRearRightDrivingMotorOnBottom = true;
 
     public static final boolean kFrontLeftTurningMotorOnBottom = false;
@@ -112,7 +112,7 @@ public final class Constants {
                 new Transform3d(new Translation3d(Units.inchesToMeters(11.8), Units.inchesToMeters(7.2), Units.inchesToMeters(25.9)), new Rotation3d(0, intakeCamPitch, 0));
         
         public static final Transform3d robotToBatteryCam =
-                new Transform3d(new Translation3d(Units.inchesToMeters(-0.6), Units.inchesToMeters(13.3), Units.inchesToMeters(27.6)), new Rotation3d(0, batteryCamPitch, batteryCamYaw));
+                new Transform3d(new Translation3d(Units.inchesToMeters(-0.6), Units.inchesToMeters(13.0), Units.inchesToMeters(27.6)), new Rotation3d(0, batteryCamPitch, batteryCamYaw));
 
         public static final Transform3d robotToShooterCam =
                 new Transform3d(new Translation3d(Units.inchesToMeters(-32.8), Units.inchesToMeters(5.1), Units.inchesToMeters(27.3)), new Rotation3d(0, shooterCamPitch, shooterCamYaw));
@@ -154,7 +154,7 @@ public final class Constants {
   }
 
   public static final class AutoConstants {
-    public static final double kMaxSpeedMetersPerSecond = 3;
+    public static final double kMaxSpeedMetersPerSecond = 0.7;
     public static final double kMaxAccelerationMetersPerSecondSquared = 3;
     public static final double kMaxAngularSpeedRadiansPerSecond = Math.PI;
     public static final double kMaxAngularSpeedRadiansPerSecondSquared = Math.PI;
@@ -183,8 +183,10 @@ public final class Constants {
 
     public static final int shooterCurrentLimit = 80;
 
-    public static final double FEEDING_SPEED = 0.50;
-    public static final double BACKFEED_SPEED = -0.50;
+    public static final int feederCurrentLimit = 100;
+
+    public static final double FEEDING_SPEED = 1.0;
+    public static final double BACKFEED_SPEED = -0.80;
 
     //PID constants for nonweighted flywheels
     public static final double kP_nw = 0.00001;
@@ -228,17 +230,17 @@ public final class Constants {
     public static final Translation2d blueHubCenterPose = new Translation2d(4.633, 4.035);
     public static final Translation2d redHubCenterPose = new Translation2d(11.907, 4.035);
 
-    public static final Pose2d blueLeftTowerPose = new Pose2d(1.567, 4.180, Rotation2d.fromDegrees(180));
-    public static final Pose2d blueRightTowerPose = new Pose2d(1.567, 3.298, Rotation2d.fromDegrees(180));
+    public static final Pose2d blueLeftTowerPose = new Pose2d(1.567, 4.180, Rotation2d.fromDegrees(-90));
+    public static final Pose2d blueRightTowerPose = new Pose2d(1.567, 3.298, Rotation2d.fromDegrees(-90));
 
-    public static final Pose2d redLeftTowerPose = new Pose2d(14.984, 3.901, Rotation2d.fromDegrees(0));
-    public static final Pose2d redRightTowerPose = new Pose2d(14.984, 4.740, Rotation2d.fromDegrees(0));
+    public static final Pose2d redLeftTowerPose = new Pose2d(14.984, 3.901, Rotation2d.fromDegrees(90));
+    public static final Pose2d redRightTowerPose = new Pose2d(14.984, 4.740, Rotation2d.fromDegrees(90));
   }
 
   public static class ClimberConstants {
-    public static final double SERVO_ENGAGED_ANGLE = 90.0;
-    public static final double SERVO_RELEASED_ANGLE = 0.0;
-    public static final double SPEED = 0.2;
+    public static final int SERVO_ENGAGED_PULSE = 2100;
+    public static final int SERVO_RELEASED_PULSE = 1350;
+    public static final double SPEED = 0.5;
     public static final double SOFT_LIMIT_TOP = 95.0; // need to test the values for soft limits top and bottom
     public static final double SOFT_LIMIT_BOTTOM = 2.0; 
   }
